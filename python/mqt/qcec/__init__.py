@@ -31,12 +31,29 @@ if sys.platform == "win32":
     _dll_patch()
     del _dll_patch
 
+from mqt.qcec.application_scheme import ApplicationScheme
+from mqt.qcec.configuration import Configuration
+from mqt.qcec.configuration_options import augment_config_from_kwargs
+from mqt.qcec.equivalence_checking_manager import EquivalenceCheckingManager
+from mqt.qcec.equivalence_criterion import EquivalenceCriterion
+from mqt.qcec.state_type import StateType
+from mqt.qcec.verify import verify
+from mqt.qcec.verify_compilation_flow import verify_compilation
+
 from ._version import version as __version__
-from .verify import verify
-from .verify_compilation_flow import verify_compilation
 
 __all__ = [
+    "ApplicationScheme",
+    "Configuration",
+    "EquivalenceCheckingManager",
+    "EquivalenceCriterion",
+    "StateType",
     "__version__",
+    "augment_config_from_kwargs",
     "verify",
     "verify_compilation",
 ]
+
+
+def __dir__() -> list[str]:
+    return __all__

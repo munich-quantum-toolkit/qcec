@@ -14,21 +14,23 @@ import warnings
 from typing import TYPE_CHECKING
 
 from mqt.core import load
+from mqt.qcec.application_scheme import ApplicationScheme
+from mqt.qcec.compilation_flow_profiles import AncillaMode, generate_profile_name
+from mqt.qcec.configuration import Configuration
+from mqt.qcec.configuration_options import augment_config_from_kwargs
+from mqt.qcec.verify import verify
 
 from ._compat.importlib import resources
-from .compilation_flow_profiles import AncillaMode, generate_profile_name
-from .configuration import augment_config_from_kwargs
-from .pyqcec import ApplicationScheme, Configuration, EquivalenceCheckingManager
-from .verify import verify
 
 if TYPE_CHECKING:
     import os
 
     from mqt.core.ir import QuantumComputation
+    from mqt.qcec.configuration_options import ConfigurationOptions
+    from mqt.qcec.equivalence_checking_manager import EquivalenceCheckingManager
     from qiskit.circuit import QuantumCircuit
 
     from ._compat.typing import Unpack
-    from .configuration import ConfigurationOptions
 
 __all__ = ["verify_compilation"]
 

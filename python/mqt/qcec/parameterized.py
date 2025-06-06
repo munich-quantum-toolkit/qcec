@@ -16,13 +16,14 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 from mqt.core.ir.symbolic import Expression
-
-from .pyqcec import Configuration, EquivalenceCheckingManager, EquivalenceCriterion
+from mqt.qcec.equivalence_checking_manager import EquivalenceCheckingManager
+from mqt.qcec.equivalence_criterion import EquivalenceCriterion
 
 if TYPE_CHECKING:
     from mqt.core.ir import QuantumComputation
     from mqt.core.ir.operations import SymbolicOperation
     from mqt.core.ir.symbolic import Variable
+    from mqt.qcec.configuration import Configuration
     from numpy.typing import NDArray
 
 __all__ = [

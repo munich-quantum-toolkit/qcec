@@ -11,9 +11,7 @@
 from __future__ import annotations
 
 import pytest
-from mqt.qcec import verify_compilation
-from mqt.qcec.compilation_flow_profiles import AncillaMode
-from mqt.qcec.pyqcec import EquivalenceCriterion
+from mqt.qcec import EquivalenceCriterion, verify_compilation
 from qiskit import QuantumCircuit, transpile
 
 
