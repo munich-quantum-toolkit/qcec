@@ -10,18 +10,8 @@
 
 #include "Configuration.hpp"
 
-#include "dd/RealNumber.hpp"
-#include "ir/QuantumComputation.hpp"
-
-#include <algorithm>
-#include <exception>
-#include <memory>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include <pybind11_json/pybind11_json.hpp>
-#include <stdexcept>
-#include <string>
-#include <thread>
+#include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 
 namespace py = pybind11;
 using namespace pybind11::literals;
