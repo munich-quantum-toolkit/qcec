@@ -60,6 +60,10 @@ set(MQT_QCEC_INCLUDE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 # add main library code
 add_subdirectory(src)
 
+if(BUILD_MQT_QCEC_BINDINGS)
+  add_subdirectory(bindings)
+endif()
+
 # add test code
 if(BUILD_MQT_QCEC_TESTS)
   enable_testing()

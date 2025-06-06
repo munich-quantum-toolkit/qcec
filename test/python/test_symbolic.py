@@ -11,12 +11,11 @@
 from __future__ import annotations
 
 import pytest
-from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import Parameter
-
 from mqt.qcec import verify, verify_compilation
 from mqt.qcec.compilation_flow_profiles import AncillaMode
 from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
+from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import Parameter
 
 alpha = Parameter("alpha")
 beta = Parameter("beta")

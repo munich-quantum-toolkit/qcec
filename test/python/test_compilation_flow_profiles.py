@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
-
 from mqt.qcec._compat.importlib import resources
 from mqt.qcec._compat.optional import HAS_QISKIT
 from mqt.qcec.compilation_flow_profiles import AncillaMode, generate_profile, generate_profile_name

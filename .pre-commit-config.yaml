@@ -106,7 +106,7 @@ repos:
     rev: v1.16.0
     hooks:
       - id: mypy
-        files: ^(src/mqt|test/python|noxfile.py)
+        files: ^(python/|test/python|noxfile.py)
         args: []
         additional_dependencies:
           - importlib_resources
