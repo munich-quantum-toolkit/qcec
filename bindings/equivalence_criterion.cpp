@@ -18,32 +18,29 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
 PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
-  py::enum_<EquivalenceCriterion>(m, "EquivalenceCriterion")
-      .value("no_information", EquivalenceCriterion::NoInformation)
-      .value("not_equivalent", EquivalenceCriterion::NotEquivalent)
-      .value("equivalent", EquivalenceCriterion::Equivalent)
+  py::enum_<ec::EquivalenceCriterion>(m, "EquivalenceCriterion")
+      .value("no_information", ec::EquivalenceCriterion::NoInformation)
+      .value("not_equivalent", ec::EquivalenceCriterion::NotEquivalent)
+      .value("equivalent", ec::EquivalenceCriterion::Equivalent)
       .value("equivalent_up_to_phase",
-             EquivalenceCriterion::EquivalentUpToPhase)
+             ec::EquivalenceCriterion::EquivalentUpToPhase)
       .value("equivalent_up_to_global_phase",
-             EquivalenceCriterion::EquivalentUpToGlobalPhase)
-      .value("probably_equivalent", EquivalenceCriterion::ProbablyEquivalent)
+             ec::EquivalenceCriterion::EquivalentUpToGlobalPhase)
+      .value("probably_equivalent",
+             ec::EquivalenceCriterion::ProbablyEquivalent)
       .value("probably_not_equivalent",
-             EquivalenceCriterion::ProbablyNotEquivalent)
+             ec::EquivalenceCriterion::ProbablyNotEquivalent)
       // allow construction from a string
-      .def(py::init([](const std::string& str) -> EquivalenceCriterion {
-             return fromString(str);
+      .def(py::init([](const std::string& str) -> ec::EquivalenceCriterion {
+             return ec::fromString(str);
            }),
            "criterion"_a)
       // provide a string representation of the enum
       .def(
           "__str__",
-          [](const EquivalenceCriterion crit) { return toString(crit); },
+          [](const ec::EquivalenceCriterion crit) { return toString(crit); },
           py::prepend());
   // allow implicit conversion from string to EquivalenceCriterion
-  py::implicitly_convertible<std::string, EquivalenceCriterion>();
+  py::implicitly_convertible<std::string, ec::EquivalenceCriterion>();
 }
-
-} // namespace ec

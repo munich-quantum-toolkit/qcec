@@ -18,24 +18,20 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
 PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
-  py::enum_<StateType>(m, "StateType")
-      .value("computational_basis", StateType::ComputationalBasis)
-      .value("random_1Q_basis", StateType::Random1QBasis)
-      .value("stabilizer", StateType::Stabilizer)
+  py::enum_<ec::StateType>(m, "StateType")
+      .value("computational_basis", ec::StateType::ComputationalBasis)
+      .value("random_1Q_basis", ec::StateType::Random1QBasis)
+      .value("stabilizer", ec::StateType::Stabilizer)
       // allow construction from a string
-      .def(py::init([](const std::string& str) -> StateType {
-             return stateTypeFromString(str);
+      .def(py::init([](const std::string& str) -> ec::StateType {
+             return ec::stateTypeFromString(str);
            }),
            "state_type"_a)
       // provide a string representation of the enum
       .def(
-          "__str__", [](const StateType type) { return toString(type); },
+          "__str__", [](const ec::StateType type) { return toString(type); },
           py::prepend());
   // allow implicit conversion from string to StateType
-  py::implicitly_convertible<std::string, StateType>();
+  py::implicitly_convertible<std::string, ec::StateType>();
 }
-
-} // namespace ec
