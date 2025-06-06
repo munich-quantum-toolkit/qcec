@@ -1,3 +1,5 @@
+<!-- Entries in each category are sorted by merge time, with the latest PRs appearing first. -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -7,8 +9,14 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Add a new CMake function `add_mqt_qcec_binding` to add a Python binding library ([#618]) ([**@denialhaag**])
+
 ### Changed
 
+- ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
+- ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
 - **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
 
 ### Deprecated
