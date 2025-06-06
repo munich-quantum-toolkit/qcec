@@ -10,9 +10,6 @@
 
 #include "Configuration.hpp"
 
-
-
-
 #include "dd/RealNumber.hpp"
 #include "ir/QuantumComputation.hpp"
 

@@ -8,11 +8,7 @@
  * Licensed under the MIT License
  */
 
-
 #include "EquivalenceCheckingManager.hpp"
-
-
-
 #include "dd/RealNumber.hpp"
 #include "ir/QuantumComputation.hpp"
 

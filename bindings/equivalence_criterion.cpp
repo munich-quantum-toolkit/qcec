@@ -8,8 +8,6 @@
  * Licensed under the MIT License
  */
 
-
-
 #include "EquivalenceCriterion.hpp"
 #include "dd/RealNumber.hpp"
 #include "ir/QuantumComputation.hpp"

@@ -8,9 +8,7 @@
  * Licensed under the MIT License
  */
 
-
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
-
 #include "dd/RealNumber.hpp"
 #include "ir/QuantumComputation.hpp"
 
@@ -54,6 +52,6 @@ PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
           py::prepend());
   // allow implicit conversion from string to ApplicationSchemeType
   py::implicitly_convertible<std::string, ApplicationSchemeType>();
-  }
+}
 
 } // namespace ec
