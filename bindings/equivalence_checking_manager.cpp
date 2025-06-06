@@ -10,6 +10,7 @@
 
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
+#include "EquivalenceCriterion.hpp"
 #include "ir/QuantumComputation.hpp"
 
 #include <pybind11/cast.h>
@@ -62,7 +63,6 @@ PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
            "scheme"_a = "proportional")
       .def("set_gate_cost_profile",
            &EquivalenceCheckingManager::setGateCostProfile, "profile"_a = "")
-
       .def("__repr__", [](const EquivalenceCheckingManager& manager) {
         return "<EquivalenceCheckingManager: " +
                toString(manager.equivalence()) + ">";
