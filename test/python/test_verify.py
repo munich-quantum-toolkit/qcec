@@ -11,7 +11,10 @@
 from __future__ import annotations
 
 import pytest
-from mqt.qcec import ApplicationScheme, Configuration, EquivalenceCriterion, verify
+from mqt.qcec import verify
+from mqt.qcec.application_scheme import ApplicationScheme
+from mqt.qcec.configuration import Configuration
+from mqt.qcec.equivalence_criterion import EquivalenceCriterion
 from qiskit import QuantumCircuit, transpile
 
 

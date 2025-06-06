@@ -13,19 +13,20 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mqt.core import load
-from mqt.qcec.configuration import Configuration
-from mqt.qcec.configuration_options import augment_config_from_kwargs
-from mqt.qcec.equivalence_checking_manager import EquivalenceCheckingManager
-from mqt.qcec.parameterized import check_parameterized
+
+from .configuration import Configuration
+from .configuration_options import augment_config_from_kwargs
+from .equivalence_checking_manager import EquivalenceCheckingManager
+from .parameterized import check_parameterized
 
 if TYPE_CHECKING:
     import os
 
     from mqt.core.ir import QuantumComputation
-    from mqt.qcec.configuration_options import ConfigurationOptions
     from qiskit.circuit import QuantumCircuit
 
     from ._compat.typing import Unpack
+    from .configuration_options import ConfigurationOptions
 
 __all__ = ["verify"]
 
