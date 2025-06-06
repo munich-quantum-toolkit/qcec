@@ -1,3 +1,5 @@
+<!-- Entries in each category are sorted by merge time, with the latest PRs appearing first. -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -6,6 +8,15 @@ The format is based on a mixture of [Keep a Changelog] and [Common Changelog].
 This project adheres to [Semantic Versioning], with the exception that minor releases may include breaking changes.
 
 ## [Unreleased]
+
+### Added
+
+- ✨ Add a new CMake function `add_mqt_qcec_binding` to add a Python binding library ([#618]) ([**@denialhaag**])
+
+### Changed
+
+- ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
+- ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
 
 ## [3.0.0] - 2025-05-05
 
