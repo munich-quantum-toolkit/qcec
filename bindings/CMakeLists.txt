@@ -91,6 +91,11 @@ add_mqt_qcec_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-# # install the Python stub files in editable mode for better IDE support if(SKBUILD_STATE STREQUAL
-# "editable") file(GLOB PYI_FILES ${PROJECT_SOURCE_DIR}/python/mqt/qcec/*.pyi) install( FILES
-# ${PYI_FILES} DESTINATION . COMPONENT ${MQT_QCEC_TARGET_NAME}_Python) endif()
+# install the Python stub files in editable mode for better IDE support
+if(SKBUILD_STATE STREQUAL "editable")
+  file(GLOB PYI_FILES ${PROJECT_SOURCE_DIR}/python/mqt/qcec/*.pyi)
+  install(
+    FILES ${PYI_FILES}
+    DESTINATION .
+    COMPONENT ${MQT_QCEC_TARGET_NAME}_Python)
+endif()

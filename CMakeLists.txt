@@ -59,7 +59,7 @@ include(AddMQTQCECBinding)
 # set the include directory for the build tree
 set(MQT_QCEC_INCLUDE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# set prefix for all MQT QMAP targets
+# set prefix for all MQT QCEC targets
 set(MQT_QCEC_TARGET_NAME mqt-qcec)
 
 # add main library code

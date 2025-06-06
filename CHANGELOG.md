@@ -62,6 +62,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#626]: https://github.com/munich-quantum-toolkit/qcec/pulls/626
+[#618]: https://github.com/munich-quantum-toolkit/qcec/pull/618
 [#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566

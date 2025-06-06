@@ -4,8 +4,6 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
-# [Unreleased]
-
 Even tough this is not a breaking change, it is worth mentioning to developers of MQT QCEC that all Python code (except tests) has been moved to the top-level `python` directory.
 Furthermore, the C++ code for the Python bindings has been moved to the top-level `bindings` directory.
 
