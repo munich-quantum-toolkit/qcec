@@ -10,8 +10,7 @@
 
 from __future__ import annotations
 
-from mqt.qcec import verify
-from mqt.qcec.pyqcec import EquivalenceCriterion
+from mqt.qcec import EquivalenceCriterion, verify
 from qiskit import QuantumCircuit
 
 

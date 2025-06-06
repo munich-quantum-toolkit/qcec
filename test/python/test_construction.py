@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 from mqt.core.ir import QuantumComputation
-from mqt.qcec.pyqcec import Configuration, EquivalenceCheckingManager
+from mqt.qcec import Configuration, EquivalenceCheckingManager
 
 
 @pytest.fixture
