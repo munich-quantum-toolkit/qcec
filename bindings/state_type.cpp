@@ -8,7 +8,6 @@
  * Licensed under the MIT License
  */
 
-
 #include "checker/dd/simulation/StateType.hpp"
 #include "dd/RealNumber.hpp"
 #include "ir/QuantumComputation.hpp"
