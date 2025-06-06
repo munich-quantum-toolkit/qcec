@@ -248,7 +248,6 @@ ignore = [
     "S101",    # Use of assert detected
 ]
 typing-modules = ["mqt.qcec._compat.typing"]
-isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Callable".msg = "Use collections.abc.Callable instead."
@@ -258,6 +257,10 @@ isort.required-imports = ["from __future__ import annotations"]
 "typing.Set".msg = "Use collections.abc.Set instead."
 "importlib.resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
 "importlib_resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
+
+[tool.ruff.lint.isort]
+known-first-party = ["mqt.qcec"]
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 "test/python/**" = [

@@ -10,9 +10,10 @@
 
 from __future__ import annotations
 
+from qiskit import QuantumCircuit
+
 from mqt.qcec import verify
 from mqt.qcec.equivalence_criterion import EquivalenceCriterion
-from qiskit import QuantumCircuit
 
 
 def test_regression1() -> None:

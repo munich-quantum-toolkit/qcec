@@ -10,9 +10,10 @@
 
 from __future__ import annotations
 
-from mqt.qcec import verify_compilation
 from qiskit import QuantumCircuit, transpile
 from qiskit.providers.fake_provider import GenericBackendV2
+
+from mqt.qcec import verify_compilation
 
 if __name__ == "__main__":
     circ = QuantumCircuit(3)
