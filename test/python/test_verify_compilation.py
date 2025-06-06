@@ -11,11 +11,10 @@
 from __future__ import annotations
 
 import pytest
-from qiskit import QuantumCircuit, transpile
-
 from mqt.qcec import verify_compilation
 from mqt.qcec.compilation_flow_profiles import AncillaMode
 from mqt.qcec.pyqcec import EquivalenceCriterion
+from qiskit import QuantumCircuit, transpile
 
 
 @pytest.fixture
