@@ -137,9 +137,9 @@ jobs:
       build-project: true
       clang-version: 20
       cmake-args: -DBUILD_MQT_QCEC_BINDINGS=ON
+      files-changed-only: false
       install-pkgs: "pybind11==2.13.6"
       setup-python: true
-      files-changed-only: false
 
   # run extensive Python tests whenever this is on a PR and the PR has the `extensive-python-ci` label
   python-tests:
