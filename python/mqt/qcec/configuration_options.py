@@ -13,9 +13,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from mqt.qcec.application_scheme import ApplicationScheme
-    from mqt.qcec.configuration import Configuration
-    from mqt.qcec.state_type import StateType
+    from .application_scheme import ApplicationScheme
+    from .configuration import Configuration
+    from .state_type import StateType
 
 
 __all__ = ["ConfigurationOptions", "augment_config_from_kwargs"]

@@ -10,8 +10,8 @@
 
 from typing import Any
 
-from mqt.qcec.application_scheme import ApplicationScheme
-from mqt.qcec.state_type import StateType
+from .application_scheme import ApplicationScheme
+from .state_type import StateType
 
 class Configuration:
     """Provides all the means to configure QCEC.

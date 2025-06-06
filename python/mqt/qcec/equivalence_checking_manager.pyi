@@ -12,9 +12,10 @@ from typing import Any
 
 from mqt.core.dd import VectorDD
 from mqt.core.ir import QuantumComputation
-from mqt.qcec.application_scheme import ApplicationScheme
-from mqt.qcec.configuration import Configuration
-from mqt.qcec.equivalence_criterion import EquivalenceCriterion
+
+from .application_scheme import ApplicationScheme
+from .configuration import Configuration
+from .equivalence_criterion import EquivalenceCriterion
 
 class EquivalenceCheckingManager:
     """The main class of QCEC.
