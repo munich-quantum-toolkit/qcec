@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import pytest
 
-from mqt.qcec.pyqcec import ApplicationScheme, Configuration, StateType
+from mqt.qcec.application_scheme import ApplicationScheme
+from mqt.qcec.configuration import Configuration
+from mqt.qcec.state_type import StateType
 
 
 @pytest.mark.parametrize(
