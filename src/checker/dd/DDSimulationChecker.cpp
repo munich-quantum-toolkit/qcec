@@ -16,6 +16,7 @@
 #include "checker/dd/DDPackageConfigs.hpp"
 #include "checker/dd/TaskManager.hpp"
 #include "checker/dd/simulation/StateGenerator.hpp"
+#include "dd/StateGeneration.hpp"
 #include "ir/QuantumComputation.hpp"
 
 #include <nlohmann/json.hpp>
@@ -27,7 +28,7 @@ DDSimulationChecker::DDSimulationChecker(const qc::QuantumComputation& circ1,
                                          Configuration config)
     : DDEquivalenceChecker(circ1, circ2, std::move(config),
                            SimulationDDPackageConfig{}) {
-  initialState = dd->makeZeroState(nqubits);
+  initialState = dd::makeZeroState(nqubits, *dd);
   initializeApplicationScheme(configuration.application.simulationScheme);
 }
 

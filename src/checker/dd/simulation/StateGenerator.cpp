@@ -15,6 +15,7 @@
 #include "dd/DDDefinitions.hpp"
 #include "dd/Package.hpp"
 #include "dd/Simulation.hpp"
+#include "dd/StateGeneration.hpp"
 #include "ir/Definitions.hpp"
 
 #include <algorithm>
@@ -92,7 +93,7 @@ dd::VectorDD StateGenerator::generateRandomComputationalBasisState(
   }
 
   // return the appropriate decision diagram
-  return dd.makeBasisState(totalQubits, stimulusBits);
+  return dd::makeBasisState(totalQubits, stimulusBits, dd);
 }
 
 dd::VectorDD
@@ -131,7 +132,7 @@ StateGenerator::generateRandom1QBasisState(dd::Package& dd,
   }
 
   // return the appropriate decision diagram
-  return dd.makeBasisState(totalQubits, randomBasisState);
+  return dd::makeBasisState(totalQubits, randomBasisState, dd);
 }
 
 dd::VectorDD StateGenerator::generateRandomStabilizerState(
@@ -147,7 +148,8 @@ dd::VectorDD StateGenerator::generateRandomStabilizerState(
 
   // generate the associated stabilizer state by simulating the Clifford
   // circuit
-  const auto stabilizer = simulate(rcs, dd.makeZeroState(randomQubits), dd);
+  const auto stabilizer =
+      simulate(rcs, dd::makeZeroState(randomQubits, dd), dd);
 
   // add |0> edges for all the ancillary qubits
   auto initial = stabilizer;
