@@ -183,6 +183,13 @@ class Configuration:
         Defaults to :code:`2e-13` and should only be changed by users who know what they are doing.
         """
 
+        set_all_ancillae_garbage: bool = False
+        """
+        Set whether all ancillae should be treated as garbage qubits.
+
+        Defaults to :code:`False` but the ZX-calculus checker will not be able to handle circuits with non-garbage ancillae.
+        """
+
         def __init__(self) -> None: ...
 
     class Optimizations:
