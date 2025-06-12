@@ -39,7 +39,7 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#300)._
 
 ## [2.8.2] - 2025-02-18
 
-_📚 Refer to the [GitHub Release Notes](https://github.com/munich-quantum-toolkit/qcec/releases) for previous changelogs._
+_📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
@@ -63,5 +63,5 @@ _📚 Refer to the [GitHub Release Notes](https://github.com/munich-quantum-tool
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Common Changelog]: https://common-changelog.org
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
-[GitHub Release Notes]: https://github.com/munich-quantum-toolkit/core/releases
+[GitHub Release Notes]: https://github.com/munich-quantum-toolkit/qcec/releases
 [munich-quantum-toolkit]: https://github.com/munich-quantum-toolkit

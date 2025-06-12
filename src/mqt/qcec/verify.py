@@ -21,9 +21,8 @@ from .pyqcec import Configuration, EquivalenceCheckingManager
 if TYPE_CHECKING:
     import os
 
-    from qiskit.circuit import QuantumCircuit
-
     from mqt.core.ir import QuantumComputation
+    from qiskit.circuit import QuantumCircuit
 
     from ._compat.typing import Unpack
     from .configuration import ConfigurationOptions
