@@ -9,10 +9,6 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
-### Added
-
-- ✨ Add a new CMake function `add_mqt_qcec_binding` to add a Python binding library ([#618]) ([**@denialhaag**])
-
 ### Changed
 
 - ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
