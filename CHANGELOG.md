@@ -1,3 +1,5 @@
+<!-- Entries in each category are sorted by merge time, with the latest PRs appearing first. -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -6,6 +8,11 @@ The format is based on a mixture of [Keep a Changelog] and [Common Changelog].
 This project adheres to [Semantic Versioning], with the exception that minor releases may include breaking changes.
 
 ## [Unreleased]
+
+### Changed
+
+- ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
+- ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
 
 ## [3.0.0] - 2025-05-05
 
@@ -41,6 +48,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#618]: https://github.com/munich-quantum-toolkit/qcec/pull/618
 [#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566
@@ -49,6 +57,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- Contributor -->
 
 [**@burgholzer**]: https://github.com/burgholzer
+[**@denialhaag**]: https://github.com/denialhaag
 
 <!-- General links -->
 

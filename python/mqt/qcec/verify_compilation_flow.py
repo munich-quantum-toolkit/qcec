@@ -16,9 +16,10 @@ from typing import TYPE_CHECKING
 from mqt.core import load
 
 from ._compat.importlib import resources
+from .application_scheme import ApplicationScheme
 from .compilation_flow_profiles import AncillaMode, generate_profile_name
-from .configuration import augment_config_from_kwargs
-from .pyqcec import ApplicationScheme, Configuration, EquivalenceCheckingManager
+from .configuration import Configuration
+from .configuration_options import augment_config_from_kwargs
 from .verify import verify
 
 if TYPE_CHECKING:
@@ -28,7 +29,8 @@ if TYPE_CHECKING:
     from qiskit.circuit import QuantumCircuit
 
     from ._compat.typing import Unpack
-    from .configuration import ConfigurationOptions
+    from .configuration_options import ConfigurationOptions
+    from .equivalence_checking_manager import EquivalenceCheckingManager
 
 __all__ = ["verify_compilation"]
 
