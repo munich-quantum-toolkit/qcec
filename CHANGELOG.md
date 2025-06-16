@@ -25,6 +25,7 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#300)._
 
 ### Changed
 
+- 🗑️ Deprecate the `mode` argument of `generate_profile()` and the `ancilla_mode` argument of `verify_compilation()` ([#626]) ([**@denialhaag**])
 - **Breaking**: 🚚 Move MQT QCEC to the [munich-quantum-toolkit] GitHub organization
 - **Breaking**: ♻️ Use the `mqt-core` Python package for handling circuits ([#432]) ([**@burgholzer**])
 - **Breaking**: ♻️ Return counterexamples as decision diagrams instead of dense arrays ([#566]) ([**@burgholzer**])
@@ -49,6 +50,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#626]: https://github.com/munich-quantum-toolkit/qcec/pulls/626
 [#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566
@@ -59,6 +61,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 [**@burgholzer**]: https://github.com/burgholzer
 [**@pehamTom**]: https://github.com/pehamTom
+[**@denialhaag**]: https://github.com/denialhaag
 
 <!-- General links -->
 
