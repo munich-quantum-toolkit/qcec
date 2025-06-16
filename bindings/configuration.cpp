@@ -58,8 +58,8 @@ PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
       .def_readwrite("run_zx_checker", &Configuration::Execution::runZXChecker)
       .def_readwrite("numerical_tolerance",
                      &Configuration::Execution::numericalTolerance)
-    .def_readwrite("set_all_ancillae_garbage",
-                    &Configuration::Execution::setAllAncillaeGarbage);
+      .def_readwrite("set_all_ancillae_garbage",
+                     &Configuration::Execution::setAllAncillaeGarbage);
 
   // optimization options
   optimizations.def(py::init<>())
