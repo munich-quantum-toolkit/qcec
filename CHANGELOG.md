@@ -11,6 +11,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 - **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
 
+### Deprecated
+
+- 🗑️ Deprecate the `mode` argument of `generate_profile()` and the `ancilla_mode` argument of `verify_compilation()` ([#626]) ([**@denialhaag**])
+
 ### Fixed
 
 - Fixed bug in ZX-calculus checker for circuits without data qubits ([#512]) ([**@pehamTom**])
@@ -25,7 +29,6 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#300)._
 
 ### Changed
 
-- 🗑️ Deprecate the `mode` argument of `generate_profile()` and the `ancilla_mode` argument of `verify_compilation()` ([#626]) ([**@denialhaag**])
 - **Breaking**: 🚚 Move MQT QCEC to the [munich-quantum-toolkit] GitHub organization
 - **Breaking**: ♻️ Use the `mqt-core` Python package for handling circuits ([#432]) ([**@burgholzer**])
 - **Breaking**: ♻️ Return counterexamples as decision diagrams instead of dense arrays ([#566]) ([**@burgholzer**])
