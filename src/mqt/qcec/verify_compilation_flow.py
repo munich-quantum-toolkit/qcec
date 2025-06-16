@@ -90,7 +90,21 @@ def verify_compilation(
 
     Returns:
         The results of the equivalence checking process.
+
+    .. warning::
+        Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1.
+        In accordance with this, ``mqt.qcec`` has deprecated the ``ancilla_mode`` argument as well.
+        The argument will be removed in a future release.
     """
+    if ancilla_mode!= AncillaMode.NO_ANCILLA:
+        warnings.warn(
+            "Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` method with version 2.1. "
+            "In accordance with this, ``mqt.qcec`` has deprecated the ``ancilla_mode`` argument of ``verify_compilation()`` as well. "
+            "The argument will be removed in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
     if configuration is None:
         configuration = Configuration()
 

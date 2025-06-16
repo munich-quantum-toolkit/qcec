@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+import warnings
 
 from ._compat.optional import HAS_QISKIT
 
@@ -418,7 +419,23 @@ def generate_profile(
         filepath:
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
+    
+    .. warning::
+        Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1.
+        In accordance with this, ``mqt.qcec`` has deprecated the ``mode`` argument as well.
+        The argument will be removed in a future release.
     """
+
+
+    if mode!= AncillaMode.NO_ANCILLA:
+        warnings.warn(
+            "Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1. "
+            "In accordance with this, ``mqt.qcec`` has deprecated the ``mode`` argument of ``generate_profile`` as well. "
+            "The argument will be removed in a future release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
     if filepath is None:
         filepath = default_profile_path
 
