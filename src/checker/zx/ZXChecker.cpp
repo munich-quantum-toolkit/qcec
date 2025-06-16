@@ -43,23 +43,47 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
   const auto& p1 = invertPermutations(*qc1);
   const auto& p2 = invertPermutations(*qc2);
 
-  // fix ancillaries to |0>
-  const auto nQubitsWithoutAncillae =
-      static_cast<zx::Qubit>(qc1->getNqubitsWithoutAncillae());
-  for (auto anc = static_cast<zx::Qubit>(qc1->getNqubits() - 1U);
-       anc >= nQubitsWithoutAncillae; --anc) {
-    miter.makeAncilla(
-        anc, static_cast<zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
+  /*
+   * The ZX diagram is built with the assumption that all ancilla qubits are
+   * garbage. Garbage ancilla qubits are initialized and post-selected to |0>.
+   * Consequently, if there are no data qubits, the ZX-diagram is equivalent to
+   * the empty diagram.
+   */
+  if (qc1->getNqubitsWithoutAncillae() == 0) {
+    this->miter = zx::ZXDiagram();
+  } else {
+    const auto numQubits1 = static_cast<zx::Qubit>(qc1->getNqubits());
+    for (zx::Qubit i = 0; i < static_cast<zx::Qubit>(qc1->getNancillae());
+         ++i) {
+      const auto anc = numQubits1 - i - 1;
+      miter.makeAncilla(
+          anc, static_cast<zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
+    }
+    miter.invert();
+  }
+
+  if (qc2->getNqubitsWithoutAncillae() == 0) {
+    return;
+  }
+  const auto numQubits2 = static_cast<zx::Qubit>(qc2->getNqubits());
+  for (zx::Qubit i = 0; i < static_cast<zx::Qubit>(qc2->getNancillae()); ++i) {
+    const auto anc = numQubits2 - i - 1;
     dPrime.makeAncilla(
         anc, static_cast<zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
   }
-  miter.invert();
   miter.concat(dPrime);
 }
 
 EquivalenceCriterion ZXEquivalenceChecker::run() {
   const auto start = std::chrono::steady_clock::now();
-
+  if (miter.getNQubits() == 0) {
+    if (miter.globalPhaseIsZero()) {
+      equivalence = EquivalenceCriterion::Equivalent;
+    } else {
+      equivalence = EquivalenceCriterion::EquivalentUpToGlobalPhase;
+    }
+    return equivalence;
+  }
   fullReduceApproximate();
 
   bool equivalent = true;
@@ -257,4 +281,14 @@ bool ZXEquivalenceChecker::cliffordSimp() {
   return simplified;
 }
 
+bool ZXEquivalenceChecker::canHandle(const qc::QuantumComputation& qc1,
+                                     const qc::QuantumComputation& qc2) {
+  // no non-garbage ancillas allowed
+  if (qc1.getNancillae() - qc1.getNgarbageQubits() != 0U ||
+      qc2.getNancillae() - qc2.getNgarbageQubits() != 0U) {
+    return false;
+  }
+  return zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+         zx::FunctionalityConstruction::transformableToZX(&qc2);
+}
 } // namespace ec

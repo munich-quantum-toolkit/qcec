@@ -192,6 +192,8 @@ TEST_F(ZXTest, Ancilla) {
   qc2.cx(1, 0);
   qc2.setLogicalQubitAncillary(1);
 
+  config.execution.setAllAncillaeGarbage = true;
+
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
   ecm->run();
 
@@ -208,6 +210,8 @@ TEST_F(ZXTest, ZXWrongAncilla) {
   qc1.x(0);
   qc2.cx(1_nc, 0);
   qc2.setLogicalQubitAncillary(1);
+
+  config.execution.setAllAncillaeGarbage = true;
 
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
   ecm->run();
@@ -398,6 +402,54 @@ TEST_F(ZXTest, TwoQubitRotations) {
   qc2.cx(0, 1);
   qc2.rx(-qc::PI_2, 0);
   qc2.rx(-qc::PI_2, 1);
+  config.execution.runZXChecker = true;
+  config.execution.parallel = false;
+  config.execution.runSimulationChecker = false;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runConstructionChecker = false;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::Equivalent);
+}
+
+TEST_F(ZXTest, EmptyCircuitWithAncillas) {
+  auto qc1 = qc::QuantumComputation(0U);
+  qc1.addAncillaryRegister(1);
+  qc1.x(0);
+
+  auto qc2 = qc::QuantumComputation(0U);
+  qc2.addAncillaryRegister(1);
+
+  config.execution.runZXChecker = true;
+  config.execution.parallel = false;
+  config.execution.runSimulationChecker = false;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runConstructionChecker = false;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::NoInformation);
+
+  config.execution.setAllAncillaeGarbage = true;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::Equivalent);
+}
+
+TEST_F(ZXTest, EmptyCircuitWithAncillasAndGarbage) {
+  auto qc1 = qc::QuantumComputation(1U);
+  qc1.addAncillaryRegister(1);
+  qc1.setLogicalQubitGarbage(1);
+  qc1.h(1);
+
+  auto qc2 = qc::QuantumComputation(1U);
+  qc2.addAncillaryRegister(1);
+  qc2.setLogicalQubitGarbage(1);
+
   config.execution.runZXChecker = true;
   config.execution.parallel = false;
   config.execution.runSimulationChecker = false;

@@ -7,6 +7,14 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
+
+### Fixed
+
+- Fixed bug in ZX-calculus checker for circuits without data qubits ([#512]) ([**@pehamTom**])
+
 ## [3.0.0] - 2025-05-05
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#300)._
@@ -44,11 +52,13 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566
+[#512]: https://github.com/munich-quantum-toolkit/qcec/pulls/512
 [#432]: https://github.com/munich-quantum-toolkit/qcec/pulls/432
 
 <!-- Contributor -->
 
 [**@burgholzer**]: https://github.com/burgholzer
+[**@pehamTom**]: https://github.com/pehamTom
 
 <!-- General links -->
 
