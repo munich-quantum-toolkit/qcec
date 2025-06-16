@@ -11,7 +11,6 @@
 #include "EquivalenceCriterion.hpp"
 
 #include <pybind11/cast.h>
-#include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 #include <string>
@@ -21,6 +20,7 @@ using namespace pybind11::literals;
 
 namespace ec {
 
+// NOLINTNEXTLINE(misc-include-cleaner)
 PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
   py::enum_<EquivalenceCriterion>(m, "EquivalenceCriterion")
       .value("no_information", EquivalenceCriterion::NoInformation)

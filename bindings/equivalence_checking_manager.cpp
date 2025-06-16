@@ -14,7 +14,6 @@
 #include "ir/QuantumComputation.hpp"
 
 #include <pybind11/cast.h>
-#include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 
@@ -23,6 +22,7 @@ using namespace pybind11::literals;
 
 namespace ec {
 
+// NOLINTNEXTLINE(misc-include-cleaner)
 PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
   // Class definitions
   py::class_<EquivalenceCheckingManager> ecm(m, "EquivalenceCheckingManager");
