@@ -14,6 +14,7 @@ import pytest
 from qiskit import QuantumCircuit, transpile
 
 from mqt.qcec import verify_compilation
+from mqt.qcec.compilation_flow_profiles import AncillaMode
 from mqt.qcec.pyqcec import EquivalenceCriterion
 
 
@@ -53,3 +54,9 @@ def test_warning_on_missing_measurements() -> None:
     with pytest.warns(UserWarning, match=r"One of the circuits does not contain any measurements."):
         result = verify_compilation(qc, qc)
     assert result.equivalence == EquivalenceCriterion.equivalent
+
+
+def test_deprecation_warning(original_circuit: QuantumCircuit) -> None:
+    """Tests that a deprecation warning is raised when the ``ancilla_mode`` argument is passed."""
+    with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``ancilla_mode`` argument"):
+        verify_compilation(original_circuit, original_circuit, ancilla_mode=AncillaMode.V_CHAIN)

@@ -92,6 +92,12 @@ def test_generated_profiles_are_still_valid(optimization_level: int, ancilla_mod
         )
 
 
+def test_deprecation_warning() -> None:
+    """Tests that a deprecation warning is raised when the ``mode`` argument is passed."""
+    with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``mode`` argument"):
+        generate_profile(0, mode=AncillaMode.V_CHAIN, filepath=Path())
+
+
 def test_compilation_flow_profile_generation_fails_without_qiskit() -> None:
     """Test that profile generation fails if Qiskit is not available."""
     with HAS_QISKIT.disable_locally(), pytest.raises(ImportError, match=r"The 'qiskit' library is required to .*"):
