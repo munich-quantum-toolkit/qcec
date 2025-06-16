@@ -56,7 +56,7 @@ def test_warning_on_missing_measurements() -> None:
     assert result.equivalence == EquivalenceCriterion.equivalent
 
 
-def test_deprectaion_warning(original_circuit: QuantumCircuit) -> None:
-    """Tests that a depracation warning is raised when the ``ancilla_mode`` argument is passed."""
+def test_deprecation_warning(original_circuit: QuantumCircuit) -> None:
+    """Tests that a deprecation warning is raised when the ``ancilla_mode`` argument is passed."""
     with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``ancilla_mode`` argument"):
         verify_compilation(original_circuit, original_circuit, ancilla_mode=AncillaMode.V_CHAIN)

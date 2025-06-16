@@ -92,8 +92,8 @@ def test_generated_profiles_are_still_valid(optimization_level: int, ancilla_mod
         )
 
 
-def test_deprectaion_warning() -> None:
-    """Tests that a depracation warning is raised when the ``mode`` argument is passed."""
+def test_deprecation_warning() -> None:
+    """Tests that a deprecation warning is raised when the ``mode`` argument is passed."""
     with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``mode`` argument"):
         generate_profile(0, mode=AncillaMode.V_CHAIN, filepath=Path())
 
