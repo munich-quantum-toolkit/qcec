@@ -144,6 +144,7 @@ filterwarnings = [
   # Qiskit 2.1 deprecations
   "ignore:.*``qiskit.circuit.quantumcircuit.QuantumCircuit.mcx.*``'s argument ``mode`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXGate.get_num_ancilla_qubits.*`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXVChain.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   # mqt.qcec deprecations
   "ignore:.*``mqt.qcec`` has deprecated the ``mode`` argument of ``generate_profile``*:DeprecationWarning:",
   "ignore:.*``mqt.qcec`` has deprecated the ``ancilla_mode`` argument of ``verify_compilation``*:DeprecationWarning:",
