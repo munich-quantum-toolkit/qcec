@@ -23,7 +23,6 @@ if(BUILD_MQT_QCEC_BINDINGS)
   if(mqt-core_DIR)
     list(APPEND CMAKE_PREFIX_PATH "${mqt-core_DIR}")
     message(STATUS "Found mqt-core package: ${mqt-core_DIR}")
-    include(${mqt-core_DIR}/AddMQTPythonBinding.cmake)
   endif()
 
   if(NOT SKBUILD)
@@ -44,7 +43,7 @@ endif()
 # cmake-format: off
 set(MQT_CORE_VERSION 3.0.3
     CACHE STRING "MQT Core version")
-set(MQT_CORE_REV "94cceedb52674a7656041ce68a9b3f21f5d5ba05"
+set(MQT_CORE_REV "8fca0cbc2da1bf711481a1a41e92c1733dc1aae7"
     CACHE STRING "MQT Core identifier (tag, branch or commit hash)")
 set(MQT_CORE_REPO_OWNER "munich-quantum-toolkit"
 	  CACHE STRING "MQT Core repository owner (change when using a fork)")

@@ -81,7 +81,7 @@ add_mqt_python_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-add_mqt_pyhton_binding(
+add_mqt_python_binding(
   QCEC
   ${MQT_QCEC_TARGET_NAME}-state_type-bindings
   state_type.cpp
