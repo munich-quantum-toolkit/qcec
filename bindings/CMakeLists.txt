@@ -25,7 +25,8 @@ list(
   ${BASEPOINT}/../../core/lib
   ${BASEPOINT}/../../core/lib64)
 
-add_mqt_qcec_binding(
+add_mqt_python_binding(
+  QCEC
   ${MQT_QCEC_TARGET_NAME}-application_scheme-bindings
   application_scheme.cpp
   MODULE_NAME
@@ -38,7 +39,8 @@ add_mqt_qcec_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-add_mqt_qcec_binding(
+add_mqt_python_binding(
+  QCEC
   ${MQT_QCEC_TARGET_NAME}-configuration-bindings
   configuration.cpp
   MODULE_NAME
@@ -51,7 +53,8 @@ add_mqt_qcec_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-add_mqt_qcec_binding(
+add_mqt_python_binding(
+  QCEC
   ${MQT_QCEC_TARGET_NAME}-equivalence_checking_manager-bindings
   equivalence_checking_manager.cpp
   MODULE_NAME
@@ -64,7 +67,8 @@ add_mqt_qcec_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-add_mqt_qcec_binding(
+add_mqt_python_binding(
+  QCEC
   ${MQT_QCEC_TARGET_NAME}-equivalence_criterion-bindings
   equivalence_criterion.cpp
   MODULE_NAME
@@ -77,7 +81,8 @@ add_mqt_qcec_binding(
   MQT::ProjectOptions
   MQT::ProjectWarnings)
 
-add_mqt_qcec_binding(
+add_mqt_pyhton_binding(
+  QCEC
   ${MQT_QCEC_TARGET_NAME}-state_type-bindings
   state_type.cpp
   MODULE_NAME

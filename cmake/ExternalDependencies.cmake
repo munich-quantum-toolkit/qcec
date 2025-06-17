@@ -23,6 +23,7 @@ if(BUILD_MQT_QCEC_BINDINGS)
   if(mqt-core_DIR)
     list(APPEND CMAKE_PREFIX_PATH "${mqt-core_DIR}")
     message(STATUS "Found mqt-core package: ${mqt-core_DIR}")
+    include(${mqt-core_DIR}/AddMQTPythonBinding.cmake)
   endif()
 
   if(NOT SKBUILD)

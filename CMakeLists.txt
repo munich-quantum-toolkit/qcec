@@ -53,7 +53,6 @@ endif()
 option(BUILD_MQT_QCEC_TESTS "Also build tests for the MQT QCEC project" ${MQT_QCEC_MASTER_PROJECT})
 
 include(cmake/ExternalDependencies.cmake)
-include(cmake/AddMQTQCECBinding.cmake)
 
 # set the include directory for the build tree
 set(MQT_QCEC_INCLUDE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
