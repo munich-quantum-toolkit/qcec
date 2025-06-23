@@ -20,6 +20,7 @@ namespace ec {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerEquivalenceCriterion(const py::module& mod) {
   py::enum_<EquivalenceCriterion>(mod, "EquivalenceCriterion")
       .value("no_information", EquivalenceCriterion::NoInformation)

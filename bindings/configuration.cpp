@@ -18,6 +18,7 @@ namespace ec {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerConfiguration(const py::module& mod) {
   // Class definitions
   auto configuration = py::class_<Configuration>(mod, "Configuration");

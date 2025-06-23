@@ -23,6 +23,8 @@ void registerEquivalenceCheckingManager(const py::module& mod);
 void registerEquivalenceCriterion(const py::module& mod);
 void registerStateType(const py::module& mod);
 
+
+// NOLINTNEXTLINE(misc-include-cleaner)
 PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, mod, py::mod_gil_not_used()) {
   registerApplicationSchema(mod);
   registerConfiguration(mod);

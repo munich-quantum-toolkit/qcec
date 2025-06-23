@@ -22,6 +22,7 @@ namespace ec {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerEquivalenceCheckingManager(const py::module& mod) {
   // Class definitions
   auto ecm =

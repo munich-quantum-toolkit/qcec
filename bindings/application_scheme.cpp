@@ -20,6 +20,7 @@ namespace ec {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerApplicationSchema(const py::module& mod) {
   py::enum_<ApplicationSchemeType>(mod, "ApplicationScheme")
       .value("sequential", ApplicationSchemeType::Sequential)

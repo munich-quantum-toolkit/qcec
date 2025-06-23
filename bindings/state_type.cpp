@@ -20,6 +20,7 @@ namespace ec {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+// NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerStateType(const py::module& mod) {
   py::enum_<StateType>(mod, "StateType")
       .value("computational_basis", StateType::ComputationalBasis)
