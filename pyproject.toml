@@ -146,6 +146,7 @@ filterwarnings = [
   # Qiskit 2.1 deprecations
   "ignore:.*``qiskit.circuit.quantumcircuit.QuantumCircuit.mcx.*``'s argument ``mode`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXGate.get_num_ancilla_qubits.*`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXRecursive.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXVChain.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   # Qiskit 2.1 starts to warn about the upcoming Python 3.9 removal in Qiskit 2.3.
   # We will drop 3.9 support around the same time, at which point this warning filter can be removed

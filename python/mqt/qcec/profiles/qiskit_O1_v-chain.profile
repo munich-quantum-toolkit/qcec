@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # qiskit_O1_v-chain.profile, Qiskit version: 2.1.0
+=======
+# qiskit_O1_v-chain.profile, Qiskit version: 2.0.2
+>>>>>>> 7e61655 (Update profiles?)
 x 0 1
 y 0 2
 z 0 1
