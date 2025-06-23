@@ -25,82 +25,24 @@ list(
   ${BASEPOINT}/../../core/lib
   ${BASEPOINT}/../../core/lib64)
 
-add_mqt_python_binding(
-  QCEC
-  ${MQT_QCEC_TARGET_NAME}-application_scheme-bindings
-  application_scheme.cpp
-  MODULE_NAME
-  application_scheme
-  INSTALL_DIR
-  .
-  LINK_LIBS
-  MQT::QCEC
-  pybind11_json
-  MQT::ProjectOptions
-  MQT::ProjectWarnings)
+file(GLOB_RECURSE QCEC_SOURCES **.cpp)
 
 add_mqt_python_binding(
   QCEC
-  ${MQT_QCEC_TARGET_NAME}-configuration-bindings
-  configuration.cpp
+  ${MQT_QCEC_TARGET_NAME}-bindings
+  ${QCEC_SOURCES}
   MODULE_NAME
-  configuration
+  pyqcec
   INSTALL_DIR
   .
   LINK_LIBS
   MQT::QCEC
-  pybind11_json
-  MQT::ProjectOptions
-  MQT::ProjectWarnings)
-
-add_mqt_python_binding(
-  QCEC
-  ${MQT_QCEC_TARGET_NAME}-equivalence_checking_manager-bindings
-  equivalence_checking_manager.cpp
-  MODULE_NAME
-  equivalence_checking_manager
-  INSTALL_DIR
-  .
-  LINK_LIBS
-  MQT::QCEC
-  pybind11_json
-  MQT::ProjectOptions
-  MQT::ProjectWarnings)
-
-add_mqt_python_binding(
-  QCEC
-  ${MQT_QCEC_TARGET_NAME}-equivalence_criterion-bindings
-  equivalence_criterion.cpp
-  MODULE_NAME
-  equivalence_criterion
-  INSTALL_DIR
-  .
-  LINK_LIBS
-  MQT::QCEC
-  pybind11_json
-  MQT::ProjectOptions
-  MQT::ProjectWarnings)
-
-add_mqt_python_binding(
-  QCEC
-  ${MQT_QCEC_TARGET_NAME}-state_type-bindings
-  state_type.cpp
-  MODULE_NAME
-  state_type
-  INSTALL_DIR
-  .
-  INSTALL_DIR
-  LINK_LIBS
-  MQT::QCEC
-  pybind11_json
-  MQT::ProjectOptions
-  MQT::ProjectWarnings)
+  pybind11_json)
 
 # install the Python stub files in editable mode for better IDE support
 if(SKBUILD_STATE STREQUAL "editable")
-  file(GLOB PYI_FILES ${PROJECT_SOURCE_DIR}/python/mqt/qcec/*.pyi)
   install(
-    FILES ${PYI_FILES}
+    FILES ${PROJECT_SOURCE_DIR}/python/mqt/qcec/pyqcec.pyi
     DESTINATION .
     COMPONENT ${MQT_QCEC_TARGET_NAME}_Python)
 endif()

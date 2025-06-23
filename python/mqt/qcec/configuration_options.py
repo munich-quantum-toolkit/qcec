@@ -13,9 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
-    from .application_scheme import ApplicationScheme
-    from .configuration import Configuration
-    from .state_type import StateType
+    from .pyqcec import ApplicationScheme, Configuration, StateType
 
 
 __all__ = ["ConfigurationOptions", "augment_config_from_kwargs"]

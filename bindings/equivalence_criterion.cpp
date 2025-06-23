@@ -15,14 +15,13 @@
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 #include <string>
 
+namespace ec {
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
-// NOLINTNEXTLINE(misc-include-cleaner)
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
-  py::enum_<EquivalenceCriterion>(m, "EquivalenceCriterion")
+void registerEquivalenceCriterion(const py::module& mod) {
+  py::enum_<EquivalenceCriterion>(mod, "EquivalenceCriterion")
       .value("no_information", EquivalenceCriterion::NoInformation)
       .value("not_equivalent", EquivalenceCriterion::NotEquivalent)
       .value("equivalent", EquivalenceCriterion::Equivalent)

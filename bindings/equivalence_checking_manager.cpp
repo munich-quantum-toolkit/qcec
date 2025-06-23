@@ -17,16 +17,17 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 
+namespace ec {
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
-// NOLINTNEXTLINE(misc-include-cleaner)
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
+void registerEquivalenceCheckingManager(const py::module& mod) {
   // Class definitions
-  py::class_<EquivalenceCheckingManager> ecm(m, "EquivalenceCheckingManager");
-  py::class_<EquivalenceCheckingManager::Results> results(ecm, "Results");
+  auto ecm =
+      py::class_<EquivalenceCheckingManager>(mod, "EquivalenceCheckingManager");
+  auto results =
+      py::class_<EquivalenceCheckingManager::Results>(ecm, "Results");
 
   // Constructors
   ecm.def(py::init<const qc::QuantumComputation&, const qc::QuantumComputation&,

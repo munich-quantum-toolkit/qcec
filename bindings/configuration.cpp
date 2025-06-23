@@ -13,25 +13,26 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 
+namespace ec {
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
-// NOLINTNEXTLINE(misc-include-cleaner)
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
+void registerConfiguration(const py::module& mod) {
   // Class definitions
-  py::class_<Configuration> configuration(m, "Configuration");
-  py::class_<Configuration::Execution> execution(configuration, "Execution");
-  py::class_<Configuration::Optimizations> optimizations(configuration,
-                                                         "Optimizations");
-  py::class_<Configuration::Application> application(configuration,
-                                                     "Application");
-  py::class_<Configuration::Functionality> functionality(configuration,
-                                                         "Functionality");
-  py::class_<Configuration::Simulation> simulation(configuration, "Simulation");
-  py::class_<Configuration::Parameterized> parameterized(configuration,
-                                                         "Parameterized");
+  auto configuration = py::class_<Configuration>(mod, "Configuration");
+  auto execution =
+      py::class_<Configuration::Execution>(configuration, "Execution");
+  auto optimizations =
+      py::class_<Configuration::Optimizations>(configuration, "Optimizations");
+  auto application =
+      py::class_<Configuration::Application>(configuration, "Application");
+  auto functionality =
+      py::class_<Configuration::Functionality>(configuration, "Functionality");
+  auto simulation =
+      py::class_<Configuration::Simulation>(configuration, "Simulation");
+  auto parameterized =
+      py::class_<Configuration::Parameterized>(configuration, "Parameterized");
 
   // Configuration
   configuration.def(py::init<>())

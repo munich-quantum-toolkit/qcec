@@ -17,8 +17,7 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 from mqt.core.ir.symbolic import Expression
 
-from .equivalence_checking_manager import EquivalenceCheckingManager
-from .equivalence_criterion import EquivalenceCriterion
+from .pyqcec import EquivalenceCheckingManager, EquivalenceCriterion
 
 if TYPE_CHECKING:
     from mqt.core.ir import QuantumComputation
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
     from mqt.core.ir.symbolic import Variable
     from numpy.typing import NDArray
 
-    from .configuration import Configuration
+    from .pyqcec import Configuration
 
 __all__ = [
     "check_instantiated",

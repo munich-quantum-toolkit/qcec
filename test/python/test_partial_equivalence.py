@@ -14,8 +14,7 @@ import pytest
 from qiskit import QuantumCircuit
 
 from mqt.qcec import verify
-from mqt.qcec.configuration import Configuration
-from mqt.qcec.equivalence_criterion import EquivalenceCriterion
+from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 
 @pytest.fixture

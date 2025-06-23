@@ -16,8 +16,7 @@ from qiskit.circuit import Parameter
 
 from mqt.qcec import verify, verify_compilation
 from mqt.qcec.compilation_flow_profiles import AncillaMode
-from mqt.qcec.configuration import Configuration
-from mqt.qcec.equivalence_criterion import EquivalenceCriterion
+from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 alpha = Parameter("alpha")
 beta = Parameter("beta")

@@ -14,10 +14,9 @@ from typing import TYPE_CHECKING
 
 from mqt.core import load
 
-from .configuration import Configuration
 from .configuration_options import augment_config_from_kwargs
-from .equivalence_checking_manager import EquivalenceCheckingManager
 from .parameterized import check_parameterized
+from .pyqcec import Configuration, EquivalenceCheckingManager
 
 if TYPE_CHECKING:
     import os

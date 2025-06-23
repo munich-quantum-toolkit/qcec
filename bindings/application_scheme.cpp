@@ -15,14 +15,13 @@
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 #include <string>
 
+namespace ec {
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
-// NOLINTNEXTLINE(misc-include-cleaner)
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
-  py::enum_<ApplicationSchemeType>(m, "ApplicationScheme")
+void registerApplicationSchema(const py::module& mod) {
+  py::enum_<ApplicationSchemeType>(mod, "ApplicationScheme")
       .value("sequential", ApplicationSchemeType::Sequential)
       .value("one_to_one", ApplicationSchemeType::OneToOne)
       .value("proportional", ApplicationSchemeType::Proportional)

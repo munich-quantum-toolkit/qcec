@@ -86,11 +86,7 @@ build-dir = "build/{wheel_tag}/{build_type}"
 
 # Only build the Python bindings target
 build.targets = [
-  "mqt-qcec-application_scheme-bindings",
-  "mqt-qcec-configuration-bindings",
-  "mqt-qcec-equivalence_checking_manager-bindings",
-  "mqt-qcec-equivalence_criterion-bindings",
-  "mqt-qcec-state_type-bindings",
+  "mqt-qcec-bindings",
 ]
 
 # Only install the Python package component

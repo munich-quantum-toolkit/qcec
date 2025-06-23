@@ -15,14 +15,13 @@
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
 #include <string>
 
+namespace ec {
+
 namespace py = pybind11;
 using namespace pybind11::literals;
 
-namespace ec {
-
-// NOLINTNEXTLINE(misc-include-cleaner)
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, m, py::mod_gil_not_used()) {
-  py::enum_<StateType>(m, "StateType")
+void registerStateType(const py::module& mod) {
+  py::enum_<StateType>(mod, "StateType")
       .value("computational_basis", StateType::ComputationalBasis)
       .value("random_1Q_basis", StateType::Random1QBasis)
       .value("stabilizer", StateType::Stabilizer)

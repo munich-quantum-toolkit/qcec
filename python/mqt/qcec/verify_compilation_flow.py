@@ -16,10 +16,9 @@ from typing import TYPE_CHECKING
 from mqt.core import load
 
 from ._compat.importlib import resources
-from .application_scheme import ApplicationScheme
 from .compilation_flow_profiles import AncillaMode, generate_profile_name
-from .configuration import Configuration
 from .configuration_options import augment_config_from_kwargs
+from .pyqcec import ApplicationScheme, Configuration
 from .verify import verify
 
 if TYPE_CHECKING:
@@ -30,7 +29,7 @@ if TYPE_CHECKING:
 
     from ._compat.typing import Unpack
     from .configuration_options import ConfigurationOptions
-    from .equivalence_checking_manager import EquivalenceCheckingManager
+    from .pyqcec import EquivalenceCheckingManager
 
 __all__ = ["verify_compilation"]
 
