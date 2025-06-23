@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # qiskit_O2_noancilla.profile, Qiskit version: 2.1.0
 =======
 # qiskit_O2_noancilla.profile, Qiskit version: 2.0.2
 >>>>>>> 7e61655 (Update profiles?)
+=======
+# qiskit_O2_noancilla.profile, Qiskit version: 2.1.0
+>>>>>>> efea564 (Successfully update profiles)
 x 0 1
 y 0 2
 z 0 1
