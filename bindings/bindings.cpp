@@ -8,14 +8,8 @@
  * Licensed under the MIT License
  */
 
-
-
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
-
-
-
 
 namespace ec {
 
@@ -29,13 +23,12 @@ void registerEquivalenceCheckingManager(const py::module& mod);
 void registerEquivalenceCriterion(const py::module& mod);
 void registerStateType(const py::module& mod);
 
-
-PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, mod, py::mod_gil_not_used()) {    
-    registerApplicationSchema(mod);
-    registerConfiguration(mod);
-    registerEquivalenceCheckingManager(mod);
-    registerEquivalenceCriterion(mod);
-    registerStateType(mod);
+PYBIND11_MODULE(MQT_QCEC_MODULE_NAME, mod, py::mod_gil_not_used()) {
+  registerApplicationSchema(mod);
+  registerConfiguration(mod);
+  registerEquivalenceCheckingManager(mod);
+  registerEquivalenceCriterion(mod);
+  registerStateType(mod);
 }
 
 } // namespace ec
