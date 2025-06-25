@@ -1,4 +1,4 @@
-# qiskit_O0_v-chain.profile, Qiskit version: 2.0.0
+# qiskit_O0_v-chain.profile, Qiskit version: 2.1.0
 x 0 1
 y 0 2
 z 0 1
@@ -19,7 +19,7 @@ iswap 0 10
 dcx 0 2
 ecr 0 4
 rxx 0 15
-ryy 0 19
+ryy 0 15
 rzz 0 3
 rzx 0 9
 x 1 1
