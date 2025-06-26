@@ -134,7 +134,13 @@ write_to = "python/mqt/qcec/_version.py"
 [tool.pytest.ini_options]
 minversion = "7.2"
 testpaths = ["test/python"]
-addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
+addopts = [
+  "-ra",
+  "--strict-markers",
+  "--strict-config",
+  "--showlocals",
+  "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
+]
 log_cli_level = "INFO"
 xfail_strict = true
 filterwarnings = [
@@ -160,14 +166,16 @@ filterwarnings = [
 run.source = ["mqt.qcec"]
 run.omit = ["python/mqt/qcec/_compat/typing.py"]
 report.exclude_also = [
-    '\.\.\.',
-    'if TYPE_CHECKING:',
-    'raise AssertionError',
-    'raise NotImplementedError',
-    'def __dir__()',  # Ignore __dir__ method that exists mainly for better IDE support
-    '@overload'  # Overloads are only for static typing
+  '\.\.\.',
+  'if TYPE_CHECKING:',
+  'raise AssertionError',
+  'raise NotImplementedError',
+  'def __dir__()',  # Ignore __dir__ method that exists mainly for better IDE support
+  '@overload',  # Overloads are only for static typing
 ]
-
+run.disable_warnings = [
+  "no-sysmon",
+]
 
 [tool.mypy]
 files = ["python/mqt", "test/python", "noxfile.py"]
@@ -375,6 +383,8 @@ docs = [
 test = [
   "pytest>=8.3.5",
   "pytest-cov>=6",
+  "pytest-sugar>=1.0.0",
+  "pytest-xdist>=3.7.0",
   "qiskit[qasm3-import]>=1.0.0",
 ]
 dev = [
