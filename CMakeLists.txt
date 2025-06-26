@@ -57,8 +57,15 @@ include(cmake/ExternalDependencies.cmake)
 # set the include directory for the build tree
 set(MQT_QCEC_INCLUDE_BUILD_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
+# set prefix for all MQT QCEC targets
+set(MQT_QCEC_TARGET_NAME mqt-qcec)
+
 # add main library code
 add_subdirectory(src)
+
+if(BUILD_MQT_QCEC_BINDINGS)
+  add_subdirectory(bindings)
+endif()
 
 # add test code
 if(BUILD_MQT_QCEC_TESTS)

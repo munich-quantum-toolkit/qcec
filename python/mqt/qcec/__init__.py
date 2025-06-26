@@ -31,6 +31,7 @@ if sys.platform == "win32":
     _dll_patch()
     del _dll_patch
 
+
 from ._version import version as __version__
 from .verify import verify
 from .verify_compilation_flow import verify_compilation

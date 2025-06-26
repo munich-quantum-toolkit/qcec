@@ -25,19 +25,24 @@ list(
   ${BASEPOINT}/../../core/lib
   ${BASEPOINT}/../../core/lib64)
 
-pybind11_add_module(
-  pyqcec
-  # Prefer thin LTO if available
-  THIN_LTO
-  # Optimize the bindings for size
-  OPT_SIZE
-  # Source code goes here
-  bindings.cpp)
-target_link_libraries(pyqcec PRIVATE MQT::QCEC pybind11_json MQT::ProjectOptions
-                                     MQT::ProjectWarnings)
+file(GLOB_RECURSE QCEC_SOURCES **.cpp)
 
-# Install directive for scikit-build-core
-install(
-  TARGETS pyqcec
-  DESTINATION .
-  COMPONENT mqt-qcec_Python)
+add_mqt_python_binding(
+  QCEC
+  ${MQT_QCEC_TARGET_NAME}-bindings
+  ${QCEC_SOURCES}
+  MODULE_NAME
+  pyqcec
+  INSTALL_DIR
+  .
+  LINK_LIBS
+  MQT::QCEC
+  pybind11_json)
+
+# install the Python stub files in editable mode for better IDE support
+if(SKBUILD_STATE STREQUAL "editable")
+  install(
+    FILES ${PROJECT_SOURCE_DIR}/python/mqt/qcec/pyqcec.pyi
+    DESTINATION .
+    COMPONENT ${MQT_QCEC_TARGET_NAME}_Python)
+endif()

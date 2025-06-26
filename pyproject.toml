@@ -11,7 +11,7 @@ requires = [
   "scikit-build-core>=0.11.0",
   "setuptools-scm>=8.1",
   "pybind11>=2.13.6",
-  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@08e61d14",
+  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -48,7 +48,7 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@08e61d14",
+    "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
     "importlib_resources>=5.0; python_version < '3.10'",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
     "numpy>=2.1; python_version >= '3.13'",
@@ -76,7 +76,7 @@ minimum-version = "build-system.requires"
 wheel.install-dir = "mqt/qcec"
 
 # Explicitly set the package directory
-wheel.packages = ["src/mqt"]
+wheel.packages = ["python/mqt"]
 
 # Set required Ninja version
 ninja.version = ">=1.10"
@@ -85,21 +85,23 @@ ninja.version = ">=1.10"
 build-dir = "build/{wheel_tag}/{build_type}"
 
 # Only build the Python bindings target
-build.targets = ["pyqcec"]
+build.targets = [
+  "mqt-qcec-bindings",
+]
 
 # Only install the Python package component
 install.components = ["mqt-qcec_Python"]
 
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
-sdist.include = ["src/mqt/qcec/_version.py"]
+sdist.include = ["python/mqt/qcec/_version.py"]
 sdist.exclude = [
-    "**/.github",
-    "**/doc",
-    "**/docs",
-    "**/meta",
-    "**/plots",
-    "**/test",
-    "**/tests",
+  "**/.github",
+  "**/doc",
+  "**/docs",
+  "**/meta",
+  "**/plots",
+  "**/test",
+  "**/tests",
 ]
 
 [tool.scikit-build.cmake.define]
@@ -116,17 +118,17 @@ cmake.define.DISABLE_GIL = "1"
 
 
 [tool.check-sdist]
-sdist-only = ["src/mqt/qcec/_version.py"]
+sdist-only = ["python/mqt/qcec/_version.py"]
 git-only = [
-    "docs/*",
-    "extern/*",
-    "test/*",
-    ".idea/*",
+  "docs/*",
+  "extern/*",
+  "test/*",
+  ".idea/*",
 ]
 
 
 [tool.setuptools_scm]
-write_to = "src/mqt/qcec/_version.py"
+write_to = "python/mqt/qcec/_version.py"
 
 
 [tool.pytest.ini_options]
@@ -150,6 +152,7 @@ filterwarnings = [
   # Qiskit 2.1 deprecations
   "ignore:.*``qiskit.circuit.quantumcircuit.QuantumCircuit.mcx.*``'s argument ``mode`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXGate.get_num_ancilla_qubits.*`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXRecursive.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXVChain.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
   # Qiskit 2.1 starts to warn about the upcoming Python 3.9 removal in Qiskit 2.3.
   # We will drop 3.9 support around the same time, at which point this warning filter can be removed
@@ -161,7 +164,7 @@ filterwarnings = [
 
 [tool.coverage]
 run.source = ["mqt.qcec"]
-run.omit = ["src/mqt/qcec/_compat/typing.py"]
+run.omit = ["python/mqt/qcec/_compat/typing.py"]
 report.exclude_also = [
   '\.\.\.',
   'if TYPE_CHECKING:',
@@ -175,8 +178,8 @@ run.disable_warnings = [
 ]
 
 [tool.mypy]
-files = ["src/mqt", "test/python", "noxfile.py"]
-mypy_path = ["$MYPY_CONFIG_FILE_DIR/src"]
+files = ["python/mqt", "test/python", "noxfile.py"]
+mypy_path = ["$MYPY_CONFIG_FILE_DIR/python"]
 python_version = "3.9"
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -250,7 +253,6 @@ ignore = [
     "S101",    # Use of assert detected
 ]
 typing-modules = ["mqt.qcec._compat.typing"]
-isort.required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Callable".msg = "Use collections.abc.Callable instead."
@@ -261,6 +263,10 @@ isort.required-imports = ["from __future__ import annotations"]
 "importlib.resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
 "importlib_resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
 
+[tool.ruff.lint.isort]
+known-first-party = ["mqt.qcec"]
+required-imports = ["from __future__ import annotations"]
+
 [tool.ruff.lint.per-file-ignores]
 "test/python/**" = [
   "T20",  # allow print statements in tests
@@ -268,7 +274,7 @@ isort.required-imports = ["from __future__ import annotations"]
 ]
 "docs/**" = ["T20"]
 "noxfile.py" = ["T20", "TID251"]
-"src/mqt/qcec/_compat/**.py" = ["TID251"]
+"python/mqt/qcec/_compat/**.py" = ["TID251"]
 "*.pyi" = ["D418", "DOC202", "PYI011", "PYI021"]
 "*.ipynb" = [
     "D",    # pydocstyle
@@ -357,7 +363,7 @@ build = [
   "pybind11>=2.13.6",
   "scikit-build-core>=0.11.0",
   "setuptools-scm>=8.1",
-  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@08e61d14",
+  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
 ]
 docs = [
   "furo>=2024.8.6",

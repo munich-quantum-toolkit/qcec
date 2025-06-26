@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from mqt.core import load
 
-from .configuration import augment_config_from_kwargs
+from .configuration_options import augment_config_from_kwargs
 from .parameterized import check_parameterized
 from .pyqcec import Configuration, EquivalenceCheckingManager
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from qiskit.circuit import QuantumCircuit
 
     from ._compat.typing import Unpack
-    from .configuration import ConfigurationOptions
+    from .configuration_options import ConfigurationOptions
 
 __all__ = ["verify"]
 

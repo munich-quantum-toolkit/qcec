@@ -1,3 +1,5 @@
+<!-- Entries in each category are sorted by merge time, with the latest PRs appearing first. -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -9,6 +11,8 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
+- ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
 - **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
 
 ### Deprecated
@@ -54,6 +58,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#626]: https://github.com/munich-quantum-toolkit/qcec/pulls/626
+[#618]: https://github.com/munich-quantum-toolkit/qcec/pull/618
 [#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566

@@ -6,105 +6,72 @@
 #
 # Licensed under the MIT License
 
-"""The Python interface for QCEC."""
+"""Python bindings module for QCEC."""
 
 from typing import Any, ClassVar, Literal, overload
 
 from mqt.core.dd import VectorDD
 from mqt.core.ir import QuantumComputation
 
-class EquivalenceCheckingManager:
-    """The main class of QCEC.
+class ApplicationScheme:
+    """Describes the order in which the individual operations of both circuits are applied during the equivalence check.
 
-    Allows checking the equivalence of quantum circuits based on the methods proposed in :cite:p:`burgholzer2021advanced`.
-    It features many configuration options that orchestrate the procedure.
+    In case of the alternating equivalence checker, this is the key component to allow the intermediate decision diagrams to remain close to the identity (as proposed in :cite:p:`burgholzer2021advanced`).
+    See :doc:`/compilation_flow_verification` for more information on the dedicated application scheme for verifying compilation flow results (as proposed in :cite:p:`burgholzer2020verifyingResultsIBM`).
+
+    In case of the other checkers, which consider both circuits individually, using a non-sequential application scheme can significantly boost the operation caching performance in the underlying decision diagram package.
     """
-    def __init__(self, circ1: QuantumComputation, circ2: QuantumComputation, config: Configuration = ...) -> None:
-        """Create an equivalence checking manager for two circuits and configure it with a :class:`.Configuration` object."""
 
+    sequential: ClassVar[ApplicationScheme] = ...
+    """Applies all gates from the first circuit, before proceeding with the second circuit.
+
+     Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
+     """
+
+    one_to_one: ClassVar[ApplicationScheme] = ...
+    """Alternates between applications from the first and the second circuit.
+
+    Referred to as *"naive"* in :cite:p:`burgholzer2021advanced`.
+    """
+
+    proportional: ClassVar[ApplicationScheme] = ...
+    """Alternates between applications from the first and the second circuit, but applies the gates in proportion to the number of gates in each circuit.
+    """
+
+    lookahead: ClassVar[ApplicationScheme] = ...
+    """Looks whether an application from the first circuit or the second circuit yields the smaller decision diagram.
+
+    Only works for the alternating equivalence checker.
+    """
+
+    gate_cost: ClassVar[ApplicationScheme] = ...
+    """
+    Each gate of the first circuit is associated with a corresponding cost according to some cost function *f(...)*.
+    Whenever a gate *g* from the first circuit is applied *f(g)* gates are applied from the second circuit.
+
+    Referred to as *"compilation_flow"* in :cite:p:`burgholzer2020verifyingResultsIBM`.
+    """
+
+    @overload
+    def __init__(self, value: int) -> None: ...
+    @overload
+    def __init__(
+        self, scheme: Literal["sequential", "one_to_one", "proportional", "lookahead", "gate_cost"]
+    ) -> None: ...
+    @overload
+    def __init__(self, scheme: str) -> None: ...
+
+    __members__: ClassVar[dict[ApplicationScheme, int]] = ...  # read-only
+    def name(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __getstate__(self) -> int: ...
+    def __hash__(self) -> int: ...
+    def __index__(self) -> int: ...
+    def __int__(self) -> int: ...
+    def __ne__(self, other: object) -> bool: ...
+    def __setstate__(self, state: int) -> None: ...
     @property
-    def qc1(self) -> QuantumComputation:
-        """The first circuit to be checked."""
-
-    @property
-    def qc2(self) -> QuantumComputation:
-        """The second circuit to be checked."""
-
-    @property
-    def configuration(self) -> Configuration: ...
-    @configuration.setter
-    def configuration(self, config: Configuration) -> None:
-        """The configuration of the equivalence checking manager."""
-
-    def run(self) -> None:
-        """Execute the equivalence check as configured."""
-
-    @property
-    def results(self) -> Results:
-        """The results of the equivalence check."""
-
-    @property
-    def equivalence(self) -> EquivalenceCriterion:
-        """The :class:`.EquivalenceCriterion` determined as the result of the equivalence check."""
-
-    def disable_all_checkers(self) -> None:
-        """Disable all equivalence checkers."""
-
-    def set_application_scheme(self, scheme: ApplicationScheme = ...) -> None:
-        """Set the :class:`.ApplicationScheme` used for all checkers (based on decision diagrams).
-
-        Arguments:
-            scheme: The application scheme. Defaults to :attr:`.ApplicationScheme.proportional`.
-        """
-
-    def set_gate_cost_profile(self, profile: str = "") -> None:
-        """Set the :attr:`profile <.Configuration.Application.profile>` used in the :attr:`Gate Cost <.ApplicationScheme.gate_cost>` application scheme for all checkers (based on decision diagrams).
-
-        Arguments:
-            profile: The path to the profile file.
-        """
-
-    class Results:
-        """Captures the main results and statistics from :meth:`~.EquivalenceCheckingManager.run`."""
-
-        preprocessing_time: float
-        """Time spent during preprocessing (in seconds)."""
-
-        check_time: float
-        """Time spent during equivalence check (in seconds)."""
-
-        equivalence: EquivalenceCriterion
-        """Final result of the equivalence check."""
-
-        started_simulations: int
-        """Number of simulations that have been started."""
-
-        performed_simulations: int
-        """Number of simulations that have been finished."""
-
-        cex_input: VectorDD
-        """DD representation of the initial state that produced a counterexample."""
-
-        cex_output1: VectorDD
-        """DD representation of the first circuit's counterexample output state."""
-
-        cex_output2: VectorDD
-        """DD representation of the second circuit's counterexample output state."""
-
-        performed_instantiations: int
-        """Number of circuit instantiations performed during equivalence checking of parameterized quantum circuits."""
-
-        checker_results: dict[str, Any]
-        """Dictionary of the results of the individual checkers."""
-
-        def __init__(self) -> None:
-            """Initializes the results."""
-
-        def considered_equivalent(self) -> bool:
-            """Convenience function to check whether the result is considered equivalent."""
-
-        def json(self) -> dict[str, Any]:
-            """Returns a JSON-style dictionary of the results."""
+    def value(self) -> int: ...
 
 class Configuration:
     """Provides all the means to configure QCEC.
@@ -356,6 +323,99 @@ class Configuration:
     def json(self) -> dict[str, Any]:
         """Returns a JSON-style dictionary of the configuration."""
 
+class EquivalenceCheckingManager:
+    """The main class of QCEC.
+
+    Allows checking the equivalence of quantum circuits based on the methods proposed in :cite:p:`burgholzer2021advanced`.
+    It features many configuration options that orchestrate the procedure.
+    """
+    def __init__(self, circ1: QuantumComputation, circ2: QuantumComputation, config: Configuration = ...) -> None:
+        """Create an equivalence checking manager for two circuits and configure it with a :class:`.Configuration` object."""
+
+    @property
+    def qc1(self) -> QuantumComputation:
+        """The first circuit to be checked."""
+
+    @property
+    def qc2(self) -> QuantumComputation:
+        """The second circuit to be checked."""
+
+    @property
+    def configuration(self) -> Configuration: ...
+    @configuration.setter
+    def configuration(self, config: Configuration) -> None:
+        """The configuration of the equivalence checking manager."""
+
+    def run(self) -> None:
+        """Execute the equivalence check as configured."""
+
+    @property
+    def results(self) -> Results:
+        """The results of the equivalence check."""
+
+    @property
+    def equivalence(self) -> EquivalenceCriterion:
+        """The :class:`.EquivalenceCriterion` determined as the result of the equivalence check."""
+
+    def disable_all_checkers(self) -> None:
+        """Disable all equivalence checkers."""
+
+    def set_application_scheme(self, scheme: ApplicationScheme = ...) -> None:
+        """Set the :class:`.ApplicationScheme` used for all checkers (based on decision diagrams).
+
+        Arguments:
+            scheme: The application scheme. Defaults to :attr:`.ApplicationScheme.proportional`.
+        """
+
+    def set_gate_cost_profile(self, profile: str = "") -> None:
+        """Set the :attr:`profile <.Configuration.Application.profile>` used in the :attr:`Gate Cost <.ApplicationScheme.gate_cost>` application scheme for all checkers (based on decision diagrams).
+
+        Arguments:
+            profile: The path to the profile file.
+        """
+
+    class Results:
+        """Captures the main results and statistics from :meth:`~.EquivalenceCheckingManager.run`."""
+
+        preprocessing_time: float
+        """Time spent during preprocessing (in seconds)."""
+
+        check_time: float
+        """Time spent during equivalence check (in seconds)."""
+
+        equivalence: EquivalenceCriterion
+        """Final result of the equivalence check."""
+
+        started_simulations: int
+        """Number of simulations that have been started."""
+
+        performed_simulations: int
+        """Number of simulations that have been finished."""
+
+        cex_input: VectorDD
+        """DD representation of the initial state that produced a counterexample."""
+
+        cex_output1: VectorDD
+        """DD representation of the first circuit's counterexample output state."""
+
+        cex_output2: VectorDD
+        """DD representation of the second circuit's counterexample output state."""
+
+        performed_instantiations: int
+        """Number of circuit instantiations performed during equivalence checking of parameterized quantum circuits."""
+
+        checker_results: dict[str, Any]
+        """Dictionary of the results of the individual checkers."""
+
+        def __init__(self) -> None:
+            """Initializes the results."""
+
+        def considered_equivalent(self) -> bool:
+            """Convenience function to check whether the result is considered equivalent."""
+
+        def json(self) -> dict[str, Any]:
+            """Returns a JSON-style dictionary of the results."""
+
 class EquivalenceCriterion:
     """Captures all the different notions of equivalence that can be the result of a :meth:`~.EquivalenceCheckingManager.run`."""
 
@@ -402,66 +462,6 @@ class EquivalenceCriterion:
     ) -> None: ...
     @overload
     def __init__(self, criterion: str) -> None: ...
-    def name(self) -> str: ...
-    def __eq__(self, other: object) -> bool: ...
-    def __getstate__(self) -> int: ...
-    def __hash__(self) -> int: ...
-    def __index__(self) -> int: ...
-    def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
-    def __setstate__(self, state: int) -> None: ...
-    @property
-    def value(self) -> int: ...
-
-class ApplicationScheme:
-    """Describes the order in which the individual operations of both circuits are applied during the equivalence check.
-
-    In case of the alternating equivalence checker, this is the key component to allow the intermediate decision diagrams to remain close to the identity (as proposed in :cite:p:`burgholzer2021advanced`).
-    See :doc:`/compilation_flow_verification` for more information on the dedicated application scheme for verifying compilation flow results (as proposed in :cite:p:`burgholzer2020verifyingResultsIBM`).
-
-    In case of the other checkers, which consider both circuits individually, using a non-sequential application scheme can significantly boost the operation caching performance in the underlying decision diagram package.
-    """
-
-    sequential: ClassVar[ApplicationScheme] = ...
-    """Applies all gates from the first circuit, before proceeding with the second circuit.
-
-     Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
-     """
-
-    one_to_one: ClassVar[ApplicationScheme] = ...
-    """Alternates between applications from the first and the second circuit.
-
-    Referred to as *"naive"* in :cite:p:`burgholzer2021advanced`.
-    """
-
-    proportional: ClassVar[ApplicationScheme] = ...
-    """Alternates between applications from the first and the second circuit, but applies the gates in proportion to the number of gates in each circuit.
-    """
-
-    lookahead: ClassVar[ApplicationScheme] = ...
-    """Looks whether an application from the first circuit or the second circuit yields the smaller decision diagram.
-
-    Only works for the alternating equivalence checker.
-    """
-
-    gate_cost: ClassVar[ApplicationScheme] = ...
-    """
-    Each gate of the first circuit is associated with a corresponding cost according to some cost function *f(...)*.
-    Whenever a gate *g* from the first circuit is applied *f(g)* gates are applied from the second circuit.
-
-    Referred to as *"compilation_flow"* in :cite:p:`burgholzer2020verifyingResultsIBM`.
-    """
-
-    @overload
-    def __init__(self, value: int) -> None: ...
-    @overload
-    def __init__(
-        self, scheme: Literal["sequential", "one_to_one", "proportional", "lookahead", "gate_cost"]
-    ) -> None: ...
-    @overload
-    def __init__(self, scheme: str) -> None: ...
-
-    __members__: ClassVar[dict[ApplicationScheme, int]] = ...  # read-only
     def name(self) -> str: ...
     def __eq__(self, other: object) -> bool: ...
     def __getstate__(self) -> int: ...

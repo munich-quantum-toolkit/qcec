@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, TypedDict
 if TYPE_CHECKING:
     from .pyqcec import ApplicationScheme, Configuration, StateType
 
+
 __all__ = ["ConfigurationOptions", "augment_config_from_kwargs"]
 
 
