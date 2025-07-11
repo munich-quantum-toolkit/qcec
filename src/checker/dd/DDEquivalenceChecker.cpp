@@ -11,7 +11,6 @@
 #include "checker/dd/DDEquivalenceChecker.hpp"
 
 #include "EquivalenceCriterion.hpp"
-#include "checker/EquivalenceChecker.hpp"
 #include "checker/dd/TaskManager.hpp"
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "checker/dd/applicationscheme/GateCostApplicationScheme.hpp"
@@ -22,7 +21,6 @@
 #include "dd/Node.hpp"
 
 #include <chrono>
-#include <nlohmann/json.hpp>
 #include <stdexcept>
 
 namespace ec {
