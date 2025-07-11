@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- **Breaking**: ⬆️ Bump minimum required MQT Core version to `3.1.0` ([#646]) ([**@denialhaag**])
+- **Breaking**: ⬆️ Bump minimum required `pybind11` version to `3.0.0` ([#646]) ([**@denialhaag**])
 - ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
 - ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
 - **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
@@ -57,13 +59,14 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
-[#626]: https://github.com/munich-quantum-toolkit/qcec/pulls/626
+[#646]: https://github.com/munich-quantum-toolkit/qcec/pull/646
+[#626]: https://github.com/munich-quantum-toolkit/qcec/pull/626
 [#618]: https://github.com/munich-quantum-toolkit/qcec/pull/618
-[#582]: https://github.com/munich-quantum-toolkit/qcec/pulls/582
-[#571]: https://github.com/munich-quantum-toolkit/qcec/pulls/571
-[#566]: https://github.com/munich-quantum-toolkit/qcec/pulls/566
-[#512]: https://github.com/munich-quantum-toolkit/qcec/pulls/512
-[#432]: https://github.com/munich-quantum-toolkit/qcec/pulls/432
+[#582]: https://github.com/munich-quantum-toolkit/qcec/pull/582
+[#571]: https://github.com/munich-quantum-toolkit/qcec/pull/571
+[#566]: https://github.com/munich-quantum-toolkit/qcec/pull/566
+[#512]: https://github.com/munich-quantum-toolkit/qcec/pull/512
+[#432]: https://github.com/munich-quantum-toolkit/qcec/pull/432
 
 <!-- Contributor -->
 
