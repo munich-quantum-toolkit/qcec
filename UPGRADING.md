@@ -4,6 +4,8 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
+## [3.1.0]
+
 Even tough this is not a breaking change, it is worth mentioning to developers of MQT QCEC that all Python code (except tests) has been moved to the top-level `python` directory.
 Furthermore, the C++ code for the Python bindings has been moved to the top-level `bindings` directory.
 
@@ -37,6 +39,12 @@ MQT QCEC now requires CMake 3.24 or higher.
 Most modern operating systems should have this version available in their package manager.
 Alternatively, CMake can be conveniently installed from PyPI using the [`cmake`](https://pypi.org/project/cmake/) package.
 
-[MQT SyReC]: https://github.com/cda-tum/mqt-syrec
-[unreleased]: https://github.com/munich-quantum-toolkit/core/compare/v3.0.0...HEAD
+<!-- Version links -->
+
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v2.8.2...v3.0.0
+
+<!-- Other links -->
+
+[MQT SyReC]: https://github.com/cda-tum/mqt-syrec
