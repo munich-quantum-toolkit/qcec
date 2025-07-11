@@ -11,7 +11,7 @@ requires = [
   "scikit-build-core>=0.11.0",
   "setuptools-scm>=8.1",
   "pybind11>=2.13.6",
-  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
+  "mqt.core~=3.1.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -48,7 +48,7 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
+    "mqt.core~=3.1.0",
     "importlib_resources>=5.0; python_version < '3.10'",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
     "numpy>=2.1; python_version >= '3.13'",
@@ -323,12 +323,12 @@ test-skip = [
 environment = { DEPLOY="ON" }
 # The SOVERSION needs to be updated when the shared libraries are updated.
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
---exclude libmqt-core-ir.so.3.0 \
---exclude libmqt-core-qasm.so.3.0 \
---exclude libmqt-core-circuit-optimizer.so.3.0 \
---exclude libmqt-core-algorithms.so.3.0 \
---exclude libmqt-core-dd.so.3.0 \
---exclude libmqt-core-zx.so.3.0"""
+--exclude libmqt-core-ir.so.3.1 \
+--exclude libmqt-core-qasm.so.3.1 \
+--exclude libmqt-core-circuit-optimizer.so.3.1 \
+--exclude libmqt-core-algorithms.so.3.1 \
+--exclude libmqt-core-dd.so.3.1 \
+--exclude libmqt-core-zx.so.3.1"""
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
@@ -360,10 +360,10 @@ mqt-qcec = { workspace = true }
 
 [dependency-groups]
 build = [
-  "pybind11>=2.13.6",
+  "pybind11>=3.0.0",
   "scikit-build-core>=0.11.0",
   "setuptools-scm>=8.1",
-  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core.git@a06d0fd",
+  "mqt.core~=3.1.0",
 ]
 docs = [
   "furo>=2024.8.6",

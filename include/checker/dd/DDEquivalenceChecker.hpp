@@ -38,8 +38,6 @@ public:
 
   EquivalenceCriterion run() override;
 
-  void json(nlohmann::json& j) const noexcept override;
-
 protected:
   std::unique_ptr<dd::Package> dd;
 
@@ -47,8 +45,6 @@ protected:
   TaskManager<DDType> taskManager2;
 
   std::unique_ptr<ApplicationScheme<DDType>> applicationScheme;
-
-  std::size_t maxActiveNodes{};
 
   void initializeApplicationScheme(ApplicationSchemeType scheme);
 
