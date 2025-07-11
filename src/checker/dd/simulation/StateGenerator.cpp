@@ -156,8 +156,9 @@ dd::VectorDD StateGenerator::generateRandomStabilizerState(
   for (std::size_t p = randomQubits; p < totalQubits; ++p) {
     initial = dd.makeDDNode(static_cast<dd::Qubit>(p),
                             std::array{initial, dd::VectorDD::zero()});
-    initial.p->ref = 1;
   }
+  dd.incRef(initial);
+  dd.decRef(stabilizer);
 
   // return the resulting decision diagram
   return initial;
