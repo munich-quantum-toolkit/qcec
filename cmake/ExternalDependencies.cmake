@@ -41,6 +41,8 @@ if(BUILD_MQT_QCEC_BINDINGS)
 endif()
 
 # cmake-format: off
+set(MQT_CORE_MINIMUM_VERSION 3.1.0
+    CACHE STRING "MQT Core minimum version")
 set(MQT_CORE_VERSION 3.1.0
     CACHE STRING "MQT Core version")
 set(MQT_CORE_REV "1f95d92320b116497d6f516a085fbe3bb8693960"
@@ -52,7 +54,7 @@ FetchContent_Declare(
   mqt-core
   GIT_REPOSITORY https://github.com/${MQT_CORE_REPO_OWNER}/core.git
   GIT_TAG ${MQT_CORE_REV}
-  FIND_PACKAGE_ARGS ${MQT_CORE_VERSION})
+  FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
 list(APPEND FETCH_PACKAGES mqt-core)
 
 if(BUILD_MQT_QCEC_TESTS)
