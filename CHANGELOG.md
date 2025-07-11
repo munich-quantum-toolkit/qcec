@@ -9,13 +9,17 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+## [3.1.0] - 2025-07-11
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#310)._
+
 ### Changed
 
 - **Breaking**: ⬆️ Bump minimum required MQT Core version to `3.1.0` ([#646]) ([**@denialhaag**])
 - **Breaking**: ⬆️ Bump minimum required `pybind11` version to `3.0.0` ([#646]) ([**@denialhaag**])
 - ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
 - ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
-- **Breaking**: ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
+- **Breaking**: 💥 ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
 
 ### Deprecated
 
@@ -23,7 +27,7 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Fixed
 
-- Fixed bug in ZX-calculus checker for circuits without data qubits ([#512]) ([**@pehamTom**])
+- 🐛 Fix bug in ZX-calculus checker for circuits without data qubits ([#512]) ([**@pehamTom**])
 
 ## [3.0.0] - 2025-05-05
 
@@ -53,7 +57,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.0.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v2.8.2...v3.0.0
 [2.8.2]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v2.8.2
 
