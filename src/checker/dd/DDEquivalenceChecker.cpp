@@ -128,15 +128,6 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::run() {
   // check the equivalence
   equivalence = checkEquivalence();
 
-  // determine maximum number of nodes used
-  if constexpr (std::is_same_v<DDType, dd::MatrixDD>) {
-    maxActiveNodes = dd->mUniqueTable.getPeakNumActiveEntries();
-  }
-
-  if constexpr (std::is_same_v<DDType, dd::VectorDD>) {
-    maxActiveNodes = dd->vUniqueTable.getPeakNumActiveEntries();
-  }
-
   const auto end = std::chrono::steady_clock::now();
   runtime += std::chrono::duration<double>(end - start).count();
 
@@ -258,13 +249,6 @@ void DDEquivalenceChecker<DDType>::initializeApplicationScheme(
         configuration.optimizations.fuseSingleQubitGates);
     break;
   }
-}
-
-template <class DDType>
-void DDEquivalenceChecker<DDType>::json(
-    nlohmann::basic_json<>& j) const noexcept {
-  EquivalenceChecker::json(j);
-  j["max_nodes"] = maxActiveNodes;
 }
 
 template class DDEquivalenceChecker<dd::VectorDD>;
