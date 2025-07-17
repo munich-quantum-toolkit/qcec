@@ -221,9 +221,9 @@ jobs:
     uses: munich-quantum-toolkit/workflows/.github/workflows/reusable-python-packaging-wheel-cibuildwheel.yml@v1.14
     with:
       runs-on: ${{ matrix.runs-on }}
-  
+
   # this job does nothing and is only used for branch protection
-  required-checks-pass: 
+  required-checks-pass:
     name: 🚦 Check
     if: always()
     needs:
