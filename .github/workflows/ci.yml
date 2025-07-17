@@ -237,6 +237,7 @@ jobs:
       - cpp-coverage
       - cpp-linter
       - python-tests
+      - python-coverage
       - python-tests-extensive
       - python-linter
       - code-ql
