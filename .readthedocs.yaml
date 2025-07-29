@@ -31,9 +31,9 @@ build:
       - asdf plugin add uv
       - asdf install uv latest
       - asdf global uv latest
-      # Set up build time dependencies including a source distribution of mqt-core.
-      - uv sync --only-group build --only-group docs --no-binary-package mqt-core
-      # The default version of CMake on Ubuntu 24.04 is too old, so we need to install a newer version.
+      # Set up build-time dependencies
+      - uv sync --only-group build --only-group docs
+      # Install CMake because the default version on Ubuntu 24.04 is too old
       - uv pip install cmake
     build:
       html:
