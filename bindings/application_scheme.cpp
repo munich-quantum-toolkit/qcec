@@ -26,8 +26,9 @@ void registerApplicationSchema(const py::module& mod) {
       mod, "ApplicationScheme", "enum.Enum",
       "Enumeration describing the application order of operations.")
       .value("sequential", ApplicationSchemeType::Sequential)
+      .value("reference", ApplicationSchemeType::Sequential)
       .value("one_to_one", ApplicationSchemeType::OneToOne)
-      .value("proportional", ApplicationSchemeType::Proportional)
+      .value("naive", ApplicationSchemeType::OneToOne)
       .value("lookahead", ApplicationSchemeType::Lookahead)
       .value(
           "gate_cost", ApplicationSchemeType::GateCost,
@@ -36,6 +37,8 @@ void registerApplicationSchema(const py::module& mod) {
           "from the first circuit is applied *f(g)* gates are applied from the "
           "second circuit. Referred to as *compilation_flow* in "
           ":cite:p:`burgholzer2020verifyingResultsIBM`.")
+      .value("compilation_flow", ApplicationSchemeType::GateCost)
+      .value("proportional", ApplicationSchemeType::Proportional)
       .finalize();
 }
 

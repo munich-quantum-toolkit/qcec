@@ -31,9 +31,9 @@ class ConfigurationOptions(TypedDict, total=False):
     """
 
     # Application
-    alternating_scheme: ApplicationScheme | str
-    construction_scheme: ApplicationScheme | str
-    simulation_scheme: ApplicationScheme | str
+    alternating_scheme: ApplicationScheme
+    construction_scheme: ApplicationScheme
+    simulation_scheme: ApplicationScheme
     profile: str
     # Execution
     nthreads: int
@@ -62,7 +62,7 @@ class ConfigurationOptions(TypedDict, total=False):
     fidelity_threshold: float
     max_sims: int
     seed: int
-    state_type: StateType | str
+    state_type: StateType
 
 
 def augment_config_from_kwargs(config: Configuration, kwargs: ConfigurationOptions) -> None:

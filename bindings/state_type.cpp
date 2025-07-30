@@ -26,8 +26,11 @@ void registerStateType(const py::module& mod) {
       mod, "StateType", "enum.Enum",
       "Enumeration of state types for the simulation checker.")
       .value("computational_basis", StateType::ComputationalBasis)
+      .value("classical", StateType::ComputationalBasis)
       .value("random_1Q_basis", StateType::Random1QBasis)
+      .value("local_quantum", StateType::Random1QBasis)
       .value("stabilizer", StateType::Stabilizer)
+      .value("global_quantum", StateType::Stabilizer)
       .finalize();
 }
 
