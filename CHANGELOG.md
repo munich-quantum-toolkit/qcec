@@ -13,6 +13,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 - ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
 
+### Fixed
+
+- 🚸 Increase binary compatibility between `mqt-qcec` and `mqt-core` ([#662]) ([**@denialhaag**])
+
 ## [3.1.0] - 2025-07-11
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#310)._
@@ -69,6 +73,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#663]: https://github.com/munich-quantum-toolkit/qcec/pull/663
+[#662]: https://github.com/munich-quantum-toolkit/qcec/pull/662
 [#646]: https://github.com/munich-quantum-toolkit/qcec/pull/646
 [#626]: https://github.com/munich-quantum-toolkit/qcec/pull/626
 [#618]: https://github.com/munich-quantum-toolkit/qcec/pull/618
