@@ -5,6 +5,8 @@ This document describes breaking changes and how to upgrade. For a complete list
 ## [Unreleased]
 
 The `ApplicationScheme`, `EquivalenceCriterion`, and `StateType` enums are now exposed via `pybind11`'s new `py::native_enum`, which makes them compatible with Python's `enum.Enum` class (PEP 435).
+As a result, the enums can no longer be initialized using a string.
+Instead of `ApplicationScheme("sequential")`, use `ApplicationScheme.sequential`.
 
 ## [3.1.0]
 
