@@ -26,8 +26,11 @@ class ApplicationScheme(Enum):
     sequential = ...
     """Applies all gates from the first circuit, before proceeding with the second circuit.
 
-     Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
-     """
+    Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
+    """
+
+    reference = ...
+    """Alias for :attr:`~ApplicationScheme.sequential`."""
 
     one_to_one = ...
     """Alternates between applications from the first and the second circuit.
@@ -35,9 +38,8 @@ class ApplicationScheme(Enum):
     Referred to as *"naive"* in :cite:p:`burgholzer2021advanced`.
     """
 
-    proportional = ...
-    """Alternates between applications from the first and the second circuit, but applies the gates in proportion to the number of gates in each circuit.
-    """
+    naive = ...
+    """Alias for :attr:`~ApplicationScheme.one_to_one`."""
 
     lookahead = ...
     """Looks whether an application from the first circuit or the second circuit yields the smaller decision diagram.
@@ -52,6 +54,12 @@ class ApplicationScheme(Enum):
 
     Referred to as *"compilation_flow"* in :cite:p:`burgholzer2020verifyingResultsIBM`.
     """
+
+    compilation_flow = ...
+    """Alias for :attr:`~ApplicationScheme.gate_cost`."""
+
+    proportional = ...
+    """Alternates between applications from the first and the second circuit, but applies the gates in proportion to the number of gates in each circuit."""
 
 class Configuration:
     """Provides all the means to configure QCEC.
@@ -436,10 +444,19 @@ class StateType(Enum):
     """
 
     computational_basis = ...
-    """Randomly choose computational basis states. Also referred to as "*classical*."""
+    """Randomly choose computational basis states. Also referred to as "*classical*"."""
+
+    classical = ...
+    """Alias for :attr:`~StateType.computational_basis`."""
 
     random_1Q_basis = ...  # noqa: N815
-    """Randomly choose a single-qubit basis state for each qubit from the six-tuple *(|0>, |1>, |+>, |->, |L>, |R>)*. Also referred to as *local_random*."""
+    """Randomly choose a single-qubit basis state for each qubit from the six-tuple *(|0>, |1>, |+>, |->, |L>, |R>)*. Also referred to as *"local_random"*."""
+
+    local_quantum = ...
+    """Alias for :attr:`~StateType.random_1Q_basis`."""
 
     stabilizer = ...
-    """Randomly choose a stabilizer state by creating a random Clifford circuit. Also referred to as *global_random*."""
+    """Randomly choose a stabilizer state by creating a random Clifford circuit. Also referred to as *"global_random"*."""
+
+    global_quantum = ...
+    """Alias for :attr:`~StateType.stabilizer`."""
