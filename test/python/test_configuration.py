@@ -30,7 +30,7 @@ from mqt.qcec.pyqcec import ApplicationScheme, Configuration, StateType
 )
 def test_application_scheme(application_scheme_string: str, application_scheme_enum: ApplicationScheme) -> None:
     """Test the application scheme enum."""
-    assert ApplicationScheme(application_scheme_string) == application_scheme_enum
+    assert ApplicationScheme[application_scheme_string] == application_scheme_enum
 
     config = Configuration()
 
@@ -59,7 +59,7 @@ def test_timeout() -> None:
 )
 def test_state_type(state_type_string: str, state_type_enum: StateType) -> None:
     """Test the state type enum."""
-    assert StateType(state_type_string) == state_type_enum
+    assert StateType[state_type_string] == state_type_enum
 
     config = Configuration()
     config.simulation.state_type = state_type_enum

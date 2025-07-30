@@ -10,10 +10,9 @@
 
 #include "checker/dd/simulation/StateType.hpp"
 
-#include <pybind11/cast.h>
+#include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
-#include <string>
 
 namespace ec {
 
@@ -22,21 +21,16 @@ using namespace pybind11::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerStateType(const py::module& mod) {
-  py::enum_<StateType>(mod, "StateType")
+  py::native_enum<StateType>(
+      mod, "StateType", "enum.Enum",
+      "Enumeration of state types for the simulation checker.")
       .value("computational_basis", StateType::ComputationalBasis)
+      .value("classical", StateType::ComputationalBasis)
       .value("random_1Q_basis", StateType::Random1QBasis)
+      .value("local_quantum", StateType::Random1QBasis)
       .value("stabilizer", StateType::Stabilizer)
-      // allow construction from a string
-      .def(py::init([](const std::string& str) -> StateType {
-             return stateTypeFromString(str);
-           }),
-           "state_type"_a)
-      // provide a string representation of the enum
-      .def(
-          "__str__", [](const StateType type) { return toString(type); },
-          py::prepend());
-  // allow implicit conversion from string to StateType
-  py::implicitly_convertible<std::string, StateType>();
+      .value("global_quantum", StateType::Stabilizer)
+      .finalize();
 }
 
 } // namespace ec

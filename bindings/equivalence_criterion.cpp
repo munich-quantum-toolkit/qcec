@@ -10,10 +10,9 @@
 
 #include "EquivalenceCriterion.hpp"
 
-#include <pybind11/cast.h>
+#include <pybind11/native_enum.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
-#include <string>
 
 namespace ec {
 
@@ -22,7 +21,9 @@ using namespace pybind11::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
 void registerEquivalenceCriterion(const py::module& mod) {
-  py::enum_<EquivalenceCriterion>(mod, "EquivalenceCriterion")
+  py::native_enum<EquivalenceCriterion>(
+      mod, "EquivalenceCriterion", "enum.Enum",
+      "Enumeration of notions of equivalence.")
       .value("no_information", EquivalenceCriterion::NoInformation)
       .value("not_equivalent", EquivalenceCriterion::NotEquivalent)
       .value("equivalent", EquivalenceCriterion::Equivalent)
@@ -33,18 +34,7 @@ void registerEquivalenceCriterion(const py::module& mod) {
       .value("probably_equivalent", EquivalenceCriterion::ProbablyEquivalent)
       .value("probably_not_equivalent",
              EquivalenceCriterion::ProbablyNotEquivalent)
-      // allow construction from a string
-      .def(py::init([](const std::string& str) -> EquivalenceCriterion {
-             return fromString(str);
-           }),
-           "criterion"_a)
-      // provide a string representation of the enum
-      .def(
-          "__str__",
-          [](const EquivalenceCriterion crit) { return toString(crit); },
-          py::prepend());
-  // allow implicit conversion from string to EquivalenceCriterion
-  py::implicitly_convertible<std::string, EquivalenceCriterion>();
+      .finalize();
 }
 
 } // namespace ec

@@ -53,7 +53,7 @@ def test_verify_kwargs(original_circuit: QuantumCircuit, alternative_circuit: Qu
     result = verify(
         original_circuit,
         alternative_circuit,
-        alternating_scheme="one_to_one",
+        alternating_scheme=ApplicationScheme.one_to_one,
         timeout=3600,
         trace_threshold=1e-6,
         transform_dynamic_circuit=True,
