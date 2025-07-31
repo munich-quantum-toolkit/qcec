@@ -184,7 +184,7 @@ qc::Permutation complete(const qc::Permutation& p, const std::size_t n) {
     }
 
     for (std::size_t j = 0; j < n; ++j) {
-      if (mappedFrom.find(j) == mappedFrom.end()) {
+      if (!mappedFrom.contains(j)) {
         pComp[static_cast<qc::Qubit>(j)] = static_cast<qc::Qubit>(i);
         mappedTo[i] = true;
         mappedFrom[j] = true;

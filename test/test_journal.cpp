@@ -176,7 +176,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulation) {
       removed.clear();
       for (std::uint16_t j = 0U; j < gatesToRemove; ++j) {
         auto gateToRemove = rng() % qcTranspiled.getNops();
-        while (removed.count(gateToRemove) != 0U) {
+        while (removed.contains(gateToRemove)) {
           gateToRemove = rng() % qcTranspiled.getNops();
         }
         removed.insert(gateToRemove);
@@ -230,7 +230,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
       removed.clear();
       for (std::uint16_t j = 0U; j < gatesToRemove; ++j) {
         auto gateToRemove = rng() % qcTranspiled.getNops();
-        while (removed.count(gateToRemove) != 0U) {
+        while (removed.contains(gateToRemove)) {
           gateToRemove = rng() % qcTranspiled.getNops();
         }
         removed.insert(gateToRemove);
