@@ -90,7 +90,7 @@ protected:
     std::array<std::mt19937_64::result_type, std::mt19937_64::state_size>
         randomData{};
     std::random_device rd;
-    std::generate(begin(randomData), end(randomData), [&]() { return rd(); });
+    std::ranges::generate(randomData, [&]() { return rd(); });
     std::seed_seq seeds(begin(randomData), end(randomData));
     mt.seed(seeds);
     distribution = decltype(distribution)(0U, qcTranspiled.getNops() - 1U);
@@ -149,7 +149,7 @@ INSTANTIATE_TEST_SUITE_P(
     [](const testing::TestParamInfo<JournalTestNonEQ::ParamType>& inf) {
       std::string name = std::get<0>(inf.param);
       const unsigned short gatesToRemove = std::get<1>(inf.param);
-      std::replace(name.begin(), name.end(), '-', '_');
+      std::ranges::replace(name, '-', '_');
       std::stringstream ss{};
       ss << name << "_removed_" << gatesToRemove;
       return ss.str();
@@ -176,7 +176,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulation) {
       removed.clear();
       for (std::uint16_t j = 0U; j < gatesToRemove; ++j) {
         auto gateToRemove = rng() % qcTranspiled.getNops();
-        while (removed.count(gateToRemove) != 0U) {
+        while (removed.contains(gateToRemove)) {
           gateToRemove = rng() % qcTranspiled.getNops();
         }
         removed.insert(gateToRemove);
@@ -230,7 +230,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
       removed.clear();
       for (std::uint16_t j = 0U; j < gatesToRemove; ++j) {
         auto gateToRemove = rng() % qcTranspiled.getNops();
-        while (removed.count(gateToRemove) != 0U) {
+        while (removed.contains(gateToRemove)) {
           gateToRemove = rng() % qcTranspiled.getNops();
         }
         removed.insert(gateToRemove);
@@ -316,7 +316,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ),
     [](const testing::TestParamInfo<JournalTestEQ::ParamType>& inf) {
       std::string name = inf.param;
-      std::replace(name.begin(), name.end(), '-', '_');
+      std::ranges::replace(name, '-', '_');
       std::stringstream ss{};
       ss << name;
       return ss.str();

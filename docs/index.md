@@ -4,7 +4,7 @@
 \begin{abstract}
 ```
 
-MQT QCEC is an open-source C++17 and Python library for {doc}`quantum circuit equivalence checking <equivalence_checking>` developed as part of the _{doc}`Munich Quantum Toolkit (MQT) <mqt:index>`_ [^1].
+MQT QCEC is an open-source C++20 and Python library for {doc}`quantum circuit equivalence checking <equivalence_checking>` developed as part of the _{doc}`Munich Quantum Toolkit (MQT) <mqt:index>`_ [^1].
 
 This documentation provides a comprehensive guide to the MQT QCEC library, including {doc}`installation instructions <installation>`, a {doc}`quickstart guide <quickstart>`, and detailed {doc}`API documentation <api/mqt/qcec/index>`.
 The source code of MQT QCEC is publicly available on GitHub at [munich-quantum-toolkit/qcec](https://github.com/munich-quantum-toolkit/qcec), while pre-built binaries are available via [PyPI](https://pypi.org/project/mqt.qcec/) for all major operating systems and all modern Python versions.

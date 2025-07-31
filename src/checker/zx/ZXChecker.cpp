@@ -53,8 +53,7 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
     this->miter = zx::ZXDiagram();
   } else {
     const auto numQubits1 = static_cast<zx::Qubit>(qc1->getNqubits());
-    for (zx::Qubit i = 0; i < static_cast<zx::Qubit>(qc1->getNancillae());
-         ++i) {
+    for (zx::Qubit i = 0; std::cmp_less(i, qc1->getNancillae()); ++i) {
       const auto anc = numQubits1 - i - 1;
       miter.makeAncilla(
           anc, static_cast<zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
@@ -66,7 +65,7 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
     return;
   }
   const auto numQubits2 = static_cast<zx::Qubit>(qc2->getNqubits());
-  for (zx::Qubit i = 0; i < static_cast<zx::Qubit>(qc2->getNancillae()); ++i) {
+  for (zx::Qubit i = 0; std::cmp_less(i, qc2->getNancillae()); ++i) {
     const auto anc = numQubits2 - i - 1;
     dPrime.makeAncilla(
         anc, static_cast<zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
@@ -184,7 +183,7 @@ qc::Permutation complete(const qc::Permutation& p, const std::size_t n) {
     }
 
     for (std::size_t j = 0; j < n; ++j) {
-      if (mappedFrom.find(j) == mappedFrom.end()) {
+      if (!mappedFrom.contains(j)) {
         pComp[static_cast<qc::Qubit>(j)] = static_cast<qc::Qubit>(i);
         mappedTo[i] = true;
         mappedFrom[j] = true;

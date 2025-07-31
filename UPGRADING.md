@@ -14,6 +14,9 @@ The `ApplicationScheme`, `EquivalenceCriterion`, and `StateType` enums are now e
 As a result, the enums can no longer be initialized using a string.
 Instead of `ApplicationScheme("sequential")` or `"sequential"`, use `ApplicationScheme.sequential`.
 
+Finally, the minimum required C++ version has been raised from C++17 to C++20.
+The default compilers of our test systems support all relevant features of the standard.
+
 ## [3.1.0]
 
 Even tough this is not a breaking change, it is worth mentioning to developers of MQT QCEC that all Python code (except tests) has been moved to the top-level `python` directory.

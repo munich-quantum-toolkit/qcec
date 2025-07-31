@@ -34,6 +34,7 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -62,9 +63,9 @@ void EquivalenceCheckingManager::stripIdleQubits() {
 
   // Iterate over the initialLayout of largerCircuit and remove an idle logical
   // qubit together with the physical qubit it is mapped to
-  for (auto physicalQubitIt = largerCircuitLayoutCopy.rbegin();
-       physicalQubitIt != largerCircuitLayoutCopy.rend(); ++physicalQubitIt) {
-    const auto physicalQubitIndex = physicalQubitIt->first;
+  for (auto& physicalQubitIt :
+       std::ranges::reverse_view(largerCircuitLayoutCopy)) {
+    const auto physicalQubitIndex = physicalQubitIt.first;
 
     if (!largerCircuit.isIdleQubit(physicalQubitIndex)) {
       continue;
@@ -83,11 +84,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
           largerCircuit.outputPermutation.find(physicalQubitIndex) !=
           largerCircuit.outputPermutation.end();
       const bool logicalUsedInOutputPermutation =
-          std::any_of(largerCircuit.outputPermutation.begin(),
-                      largerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(largerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       // a qubit can only be removed if it is not used in the output permutation
       // or if it is used in the output permutation and the logical qubit index
@@ -110,11 +110,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
       // Remove logical qubit that is idle in both circuits
 
       // find the corresponding logical qubit in the smaller circuit
-      const auto it = std::find_if(smallerCircuit.initialLayout.begin(),
-                                   smallerCircuit.initialLayout.end(),
-                                   [logicalQubitIndex](const auto& pair) {
-                                     return pair.second == logicalQubitIndex;
-                                   });
+      const auto it = std::ranges::find_if(
+          smallerCircuit.initialLayout, [logicalQubitIndex](const auto& pair) {
+            return pair.second == logicalQubitIndex;
+          });
       // the logical qubit has to be present in the smaller circuit, otherwise
       // this would indicate a bug in the circuit IO initialization.
       assert(it != smallerCircuit.initialLayout.end());
@@ -131,11 +130,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
            largerCircuit.outputPermutation.end());
 
       const bool logicalLargerUsedInOutputPermutation =
-          std::any_of(largerCircuit.outputPermutation.begin(),
-                      largerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(largerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       const bool safeToRemoveInLargerCircuit =
           (!physicalLargerUsedInOutputPermutation &&
@@ -152,11 +150,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
            smallerCircuit.outputPermutation.end());
 
       const bool logicalSmallerUsedInOutputPermutation =
-          std::any_of(smallerCircuit.outputPermutation.begin(),
-                      smallerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(smallerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       const bool safeToRemoveInSmallerCircuit =
           (!physicalSmallerUsedInOutputPermutation &&
