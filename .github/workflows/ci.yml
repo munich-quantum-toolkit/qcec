@@ -160,7 +160,7 @@ jobs:
       build-project: true
       clang-version: 20
       cmake-args: -DBUILD_MQT_QCEC_BINDINGS=ON
-      files-changed-only: true
+      files-changed-only: false
       install-pkgs: "pybind11==3.0.0"
       setup-python: true
       cpp-linter-extra-args: "-std=c++20"
