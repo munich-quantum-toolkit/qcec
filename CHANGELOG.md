@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Added
+
+- 🐍 Build Python 3.14 wheels ([#665]) ([**@denialhaag**])
+
 ### Changed
 
 - ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
@@ -72,6 +76,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#665]: https://github.com/munich-quantum-toolkit/qcec/pull/663
 [#663]: https://github.com/munich-quantum-toolkit/qcec/pull/663
 [#662]: https://github.com/munich-quantum-toolkit/qcec/pull/662
 [#646]: https://github.com/munich-quantum-toolkit/qcec/pull/646
