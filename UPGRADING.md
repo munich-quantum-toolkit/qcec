@@ -4,9 +4,15 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
+Testing previous versions of the `mqt-qcec` package built via `uv sync` or simple `(uv) pip install .` generally failed due to binary incompatibility of the `mqt-core` compiled extension packages and the `mqt-qcec` one.
+This required building `mqt-core` from source and without build isolation to get a working local setup.
+By using the latest `pybind11` release (`v3`), the binary compatibility between extension modules compiled under different circumstances (such as different compilers) has been greatly increased.
+As such, it is no longer necessary to build `mqt-core` from source and without build isolation when locally working on `mqt-qcec`.
+A simple `uv sync` is enough to successfully run `pytest`.
+
 The `ApplicationScheme`, `EquivalenceCriterion`, and `StateType` enums are now exposed via `pybind11`'s new `py::native_enum`, which makes them compatible with Python's `enum.Enum` class (PEP 435).
 As a result, the enums can no longer be initialized using a string.
-Instead of `ApplicationScheme("sequential")`, use `ApplicationScheme.sequential`.
+Instead of `ApplicationScheme("sequential")` or `"sequential"`, use `ApplicationScheme.sequential`.
 
 ## [3.1.0]
 
