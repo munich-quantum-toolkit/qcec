@@ -15,7 +15,9 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
-- ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
+- **Breaking**: ⬆️ Bump minimum required `mqt-core` version to `3.2.0` ([#667]) ([**@denialhaag**])
+- **Breaking**: ⬆️ Require C++20 ([#667]) ([**@denialhaag**])
+- **Breaking**: ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
 
 ### Fixed
 
@@ -27,7 +29,7 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#310)._
 
 ### Changed
 
-- **Breaking**: ⬆️ Bump minimum required MQT Core version to `3.1.0` ([#646]) ([**@denialhaag**])
+- **Breaking**: ⬆️ Bump minimum required `mqt-core` version to `3.1.0` ([#646]) ([**@denialhaag**])
 - **Breaking**: ⬆️ Bump minimum required `pybind11` version to `3.0.0` ([#646]) ([**@denialhaag**])
 - ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
 - ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
@@ -76,6 +78,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#667]: https://github.com/munich-quantum-toolkit/qcec/pull/667
 [#665]: https://github.com/munich-quantum-toolkit/qcec/pull/663
 [#663]: https://github.com/munich-quantum-toolkit/qcec/pull/663
 [#662]: https://github.com/munich-quantum-toolkit/qcec/pull/662
