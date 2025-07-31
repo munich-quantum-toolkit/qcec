@@ -34,6 +34,7 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -62,9 +63,9 @@ void EquivalenceCheckingManager::stripIdleQubits() {
 
   // Iterate over the initialLayout of largerCircuit and remove an idle logical
   // qubit together with the physical qubit it is mapped to
-  for (auto physicalQubitIt = largerCircuitLayoutCopy.rbegin();
-       physicalQubitIt != largerCircuitLayoutCopy.rend(); ++physicalQubitIt) {
-    const auto physicalQubitIndex = physicalQubitIt->first;
+  for (auto& physicalQubitIt :
+       std::ranges::reverse_view(largerCircuitLayoutCopy)) {
+    const auto physicalQubitIndex = physicalQubitIt.first;
 
     if (!largerCircuit.isIdleQubit(physicalQubitIndex)) {
       continue;
