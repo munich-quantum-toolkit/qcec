@@ -148,7 +148,7 @@ INSTANTIATE_TEST_SUITE_P(
                     "apla_203"),
     [](const testing::TestParamInfo<CompilationFlowTest::ParamType>& inf) {
       auto s = inf.param;
-      std::replace(s.begin(), s.end(), '-', '_');
+      std::ranges::replace(s, '-', '_');
       return s;
     });
 
