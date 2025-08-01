@@ -15,6 +15,7 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ⬆️ Bump minimum required `mqt-core` version to `3.2.1` ([#668]) ([**@denialhaag**])
 - **Breaking**: ⬆️ Bump minimum required `mqt-core` version to `3.2.0` ([#667]) ([**@denialhaag**])
 - **Breaking**: ⬆️ Require C++20 ([#667]) ([**@denialhaag**])
 - **Breaking**: ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
@@ -78,6 +79,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#668]: https://github.com/munich-quantum-toolkit/qcec/pull/668
 [#667]: https://github.com/munich-quantum-toolkit/qcec/pull/667
 [#665]: https://github.com/munich-quantum-toolkit/qcec/pull/663
 [#663]: https://github.com/munich-quantum-toolkit/qcec/pull/663
