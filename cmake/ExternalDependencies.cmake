@@ -41,7 +41,7 @@ if(BUILD_MQT_QCEC_BINDINGS)
 endif()
 
 # cmake-format: off
-set(MQT_CORE_MINIMUM_VERSION 3.2.0
+set(MQT_CORE_MINIMUM_VERSION 3.2.1
     CACHE STRING "MQT Core minimum version")
 set(MQT_CORE_VERSION 3.2.1
     CACHE STRING "MQT Core version")
