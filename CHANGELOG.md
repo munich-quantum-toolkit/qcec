@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+## [3.2.0] - 2025-08-01
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#320)._
+
 ### Added
 
 - 🐍 Build Python 3.14 wheels ([#665]) ([**@denialhaag**])
@@ -72,9 +76,10 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.1.0...HEAD
-[3.1.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.0.0...v3.1.0
-[3.0.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v2.8.2...v3.0.0
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.2.0
+[3.1.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.1.0
+[3.0.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.0.0
 [2.8.2]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v2.8.2
 
 <!-- PR links -->
