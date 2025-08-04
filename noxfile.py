@@ -83,7 +83,6 @@ def _run_tests(
         "--no-dev",  # do not auto-install dev dependencies
         "--no-build-isolation-package",
         "mqt-qcec",  # build the project without isolation
-        "--verbose",
         *install_args,
         "pytest",
         *pytest_run_args,
