@@ -17,7 +17,7 @@
 
 # MQT QCEC - A tool for Quantum Circuit Equivalence Checking
 
-A tool for quantum circuit equivalence checking developed as part of the [_Munich Quantum Toolkit (MQT)_](https://mqt.readthedocs.io) [^1].
+A tool for quantum circuit equivalence checking developed as part of the [_Munich Quantum Toolkit (MQT)_](https://mqt.readthedocs.io).
 It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which forms the backbone of the MQT.
 
 <p align="center">
@@ -26,8 +26,50 @@ It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which
   </a>
 </p>
 
-If you have any questions,
-feel free to create a [discussion](https://github.com/munich-quantum-toolkit/qcec/discussions) or an [issue](https://github.com/munich-quantum-toolkit/qcec/issues) on [GitHub](https://github.com/munich-quantum-toolkit/qcec).
+## Key Features
+
+- Point 1
+- Point 2
+- Point 3
+
+If you have any questions, feel free to create a [discussion](https://github.com/munich-quantum-toolkit/qcec/discussions) or an [issue](https://github.com/munich-quantum-toolkit/qcec/issues) on [GitHub](https://github.com/munich-quantum-toolkit/qcec).
+
+## Contributors and Supporters
+
+The _[Munich Quantum Toolkit (MQT)](https://mqt.readthedocs.io)_ is developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) and supported by the [Munich Quantum Software Company (MQSC)](https://munichquantum.software).
+Among others, it is part of the [Munich Quantum Software Stack (MQSS)](https://www.munich-quantum-valley.de/research/research-areas/mqss) ecosystem, which is being developed as part of the [Munich Quantum Valley (MQV)](https://www.munich-quantum-valley.de) initiative.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/mqt-logo-banner-dark.svg" width="90%">
+    <img src="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/mqt-logo-banner-light.svg" width="90%" alt="MQT Partner Logos">
+  </picture>
+</p>
+
+Thank you to all the contributors who have helped make MQT QCEC a reality!
+
+<p align="center">
+  <a href="https://github.com/munich-quantum-toolkit/qcec/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=munich-quantum-toolkit/qcec" />
+  </a>
+</p>
+
+The MQT will remain free, open-source, and permissively licensed—now and in the future.
+We are firmly committed to keeping it open and actively maintained for the quantum computing community.
+
+To support this endeavor, please consider:
+
+- Sponsoring us on GitHub: https://github.com/sponsors/munich-quantum-toolkit
+- Starring and sharing our repositories: https://github.com/munich-quantum-toolkit
+- Contributing code, documentation, tests, or examples via issues and pull requests
+- Citing the MQT in your publications (see [Cite This](#cite-this))
+- Using the MQT in research and teaching, and sharing feedback and use cases
+
+<p align="center">
+  <a href="https://github.com/sponsors/munich-quantum-toolkit">
+  <img width=20% src="https://img.shields.io/badge/Sponsor-white?style=for-the-badge&logo=githubsponsors&labelColor=black&color=blue" alt="Sponsor the MQT" />
+  </a>
+</p>
 
 ## Getting Started
 
@@ -58,6 +100,12 @@ Please refer to the [documentation](https://mqt.readthedocs.io/projects/qcec) on
 
 Building (and running) is continuously tested under Linux, macOS, and Windows using the [latest available system versions for GitHub Actions](https://github.com/actions/virtual-environments).
 
+## Cite This
+
+If you want to cite MQT QCEC, please use the following BibTeX entry:
+
+TODO.
+
 ## References
 
 QCEC has been developed based on methods proposed in the following papers:
@@ -79,8 +127,6 @@ T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Quantum Circuit
 
 [![a](https://img.shields.io/static/v1?label=arXiv&message=2210.12166&color=inactive&style=flat-square)](https://arxiv.org/abs/2210.12166)
 T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms](https://arxiv.org/abs/2210.12166)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2023
-
-[^1]: The _[Munich Quantum Toolkit (MQT)](https://mqt.readthedocs.io)_ is a collection of software tools for quantum computing developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) as well as the [Munich Quantum Software Company (MQSC)](https://munichquantum.software). Among others, it is part of the [Munich Quantum Software Stack (MQSS)](https://www.munich-quantum-valley.de/research/research-areas/mqss) ecosystem, which is being developed as part of the [Munich Quantum Valley (MQV)](https://www.munich-quantum-valley.de) initiative.
 
 ---
 
