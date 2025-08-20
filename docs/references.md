@@ -7,7 +7,8 @@
 ````{only} html
 # References
 
-*MQT QCEC* is academic software. Thus, many of its built-in algorithms have been published as scientific papers.
+*MQT QCEC* is academic software.
+Thus, many of its built-in algorithms have been published as scientific papers.
 If you use *MQT QCEC* in your work, we would appreciate if you cited {cite:p}`burgholzer2021advanced` (which subsumes {cite:p}`burgholzer2020ImprovedDDbasedEquivalence` and {cite:p}`burgholzer2020PowerSimulationEquivalence`).
 
 *MQT QCEC* is part of the Munich Quantum Toolkit, which is described in {cite:p}`mqt`.
