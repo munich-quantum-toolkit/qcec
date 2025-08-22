@@ -145,23 +145,17 @@ When discussing the overall MQT project or its ecosystem, cite the MQT Handbook:
 
 When citing the underlying methods and research, please reference the most relevant peer-reviewed publications from the list below:
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2004.08420&color=inactive&style=flat-square)](https://arxiv.org/abs/2004.08420)
-L. Burgholzer and R. Wille, "[Advanced Equivalence Checking for Quantum Circuits](https://arxiv.org/abs/2004.08420)," Transactions on CAD of Integrated Circuits and Systems (TCAD), 2021
+[[1]](https://arxiv.org/pdf/2004.08420.pdf) L. Burgholzer and R. Wille. Advanced Equivalence Checking for Quantum Circuits. _IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)_, 2021.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2009.02376&color=inactive&style=flat-square)](https://arxiv.org/abs/2009.02376)
-L. Burgholzer, R. Raymond, and R. Wille, "[Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow](https://arxiv.org/abs/2009.02376)," in IEEE International Conference on Quantum Computing (QCE), 2020
+[[2]](https://arxiv.org/pdf/2009.02376.pdf) L. Burgholzer, R. Raymond, and R. Wille. Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow. In _IEEE International Conference on Quantum Computing and Engineering (QCE)_, 2020.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2011.07288&color=inactive&style=flat-square)](https://arxiv.org/abs/2011.07288)
-L. Burgholzer, R. Kueng, and R. Wille, "[Random Stimuli Generation for the Verification of Quantum Circuits](https://arxiv.org/abs/2011.07288)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2021
+[[3]](https://arxiv.org/pdf/2011.07288.pdf) L. Burgholzer, R. Kueng, and R. Wille. Random Stimuli Generation for the Verification of Quantum Circuits. In _Asia and South Pacific Design Automation Conference (ASP-DAC)_, 2021.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2106.01099&color=inactive&style=flat-square)](https://arxiv.org/abs/2106.01099)
-L. Burgholzer and R. Wille, "[Handling Non-Unitaries in Quantum Circuit Equivalence Checking](https://arxiv.org/abs/2106.01099)," in Design Automation Conference (DAC), 2022
+[[4]](https://arxiv.org/pdf/2106.01099.pdf) L. Burgholzer and R. Wille. Handling Non-Unitaries in Quantum Circuit Equivalence Checking. In _Design Automation Conference (DAC)_, 2022.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2208.12820&color=inactive&style=flat-square)](https://arxiv.org/abs/2208.12820)
-T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Quantum Circuits with the ZX-Calculus](https://arxiv.org/abs/2208.12820)," in Journal of Emerging and Selected Topics in Circuits and Systems (JETCAS), 2022
+[[5]](https://arxiv.org/pdf/2208.12820.pdf) T. Peham, L. Burgholzer, and R. Wille. Equivalence Checking of Quantum Circuits with the ZX-Calculus. _IEEE Journal on Emerging and Selected Topics in Circuits and Systems (JETCAS)_, 2022.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2210.12166&color=inactive&style=flat-square)](https://arxiv.org/abs/2210.12166)
-T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms](https://arxiv.org/abs/2210.12166)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2023
+[[6]](https://arxiv.org/pdf/2210.12166.pdf) T. Peham, L. Burgholzer, and R. Wille. Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms. In _Asia and South Pacific Design Automation Conference (ASP-DAC)_, 2023.
 
 ---
 
