@@ -131,7 +131,7 @@ When discussing the overall MQT project or its ecosystem, cite the MQT Handbook:
 @inproceedings{mqt,
     title        = {The {{MQT}} Handbook: {{A}} Summary of Design Automation Tools and Software for Quantum Computing},
     shorttitle   = {{The MQT Handbook}},
-    author       = {Robert Wille and Lucas Berent and Tobias Forster and Jagatheesan Kunasaikaran and Kevin Mato and Tom Peham and Nils Quetschlich and Damian Rovara and Aaron Sander and Ludwig Schmid and Daniel Schoenberger and Yannick Stade and Lukas Burgholzer},
+    author       = {Wille, Robert and Berent, Lucas and Forster, Tobias and Kunasaikaran, Jagatheesan and Mato, Kevin and Peham, Tom and Quetschlich, Nils and Rovara, Damian and Sander, Aaron and Schmid, Ludwig and Schoenberger, Daniel and Stade, Yannick and Burgholzer, Lukas},
     booktitle    = {IEEE International Conference on Quantum Software (QSW)},
     doi          = {10.1109/QSW62656.2024.00013},
     year         = 2024,
