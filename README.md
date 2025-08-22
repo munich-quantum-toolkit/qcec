@@ -74,7 +74,7 @@ To support this endeavor, please consider:
 
 ## Getting Started
 
-MQT QCEC is available via [PyPI](https://pypi.org/project/mqt.qcec/) for Linux, macOS, and Windows and supports Python 3.9 to 3.13.
+MQT QCEC is available via [PyPI](https://pypi.org/project/mqt.qcec/) for Linux, macOS, and Windows and supports Python 3.9 to 3.14.
 
 ```console
 (venv) $ pip install mqt.qcec
