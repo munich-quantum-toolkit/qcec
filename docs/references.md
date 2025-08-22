@@ -9,6 +9,19 @@
 
 *MQT QCEC* has a strong foundation in peer‑reviewed research.
 Many of its built‑in algorithms are based on methods published in scientific journals and conferences.
+For an overview of *MQT QCEC* and its features, see {cite:p}`burgholzerQCECJKQTool2021`.
+If you want to cite this article, please use the following BibTeX entry:
+
+```bibtex
+@article{burgholzerQCECJKQTool2021,
+    title               = {{{QCEC}}: {{A JKQ}} tool for quantum circuit equivalence checking},
+    author              = {Burgholzer, Lukas and Wille, Robert},
+    year                = {2021},
+    month               = feb,
+    journal             = {Software Impacts},
+    doi                 = {10.1016/j.simpa.2020.100051},
+}
+```
 
 *MQT QCEC* is part of the Munich Quantum Toolkit, which is described in {cite:p}`mqt`.
 If you want to cite the Munich Quantum Toolkit, please use the following BibTeX entry:

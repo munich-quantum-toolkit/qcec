@@ -28,9 +28,12 @@ It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which
 
 ## Key Features
 
-- Point 1
-- Point 2
-- Point 3
+- Comprehensive equivalence checking engines: [Decision-diagram construction](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#construction-equivalence-checker-using-decision-diagrams), [Alternating DD](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#alternating-equivalence-checker-using-decision-diagrams), [Simulation-based falsification](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#simulation-equivalence-checker-using-decision-diagrams), and [ZX-calculus rewriting](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#zx-calculus-equivalence-checker)—coordinated in an automated [equivalence checking flow](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#resulting-equivalence-checking-flow) to prove equivalence or quickly find counterexamples.
+- Compilation flow verification: validate transpiled/compiled circuits incl. layout permutations and measurements. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/compilation_flow_verification.html)
+- Parameterized circuits: prove or refute equivalence with symbolic parameters. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/parametrized_circuits.html)
+- Partial equivalence: compare measured-output distributions, handling ancillary and garbage qubits. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/partial_equivalence.html)
+- Python-first API and Qiskit integration: pass QuantumCircuit or OpenQASM; one-call verify/verify_compilation. [Quickstart](https://mqt.readthedocs.io/projects/qcec/en/latest/quickstart.html) • [API](https://mqt.readthedocs.io/projects/qcec/en/latest/api/mqt/qcec/index.html)
+- Efficient and portable: C++20 core with DD engines and ZX backend, prebuilt wheels for Linux/macOS/Windows via [PyPI](https://pypi.org/project/mqt.qcec/).
 
 If you have any questions, feel free to create a [discussion](https://github.com/munich-quantum-toolkit/qcec/discussions) or an [issue](https://github.com/munich-quantum-toolkit/qcec/issues) on [GitHub](https://github.com/munich-quantum-toolkit/qcec).
 
@@ -50,7 +53,7 @@ Thank you to all the contributors who have helped make MQT QCEC a reality!
 
 <p align="center">
   <a href="https://github.com/munich-quantum-toolkit/qcec/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=munich-quantum-toolkit/qcec" />
+  <img src="https://contrib.rocks/image?repo=munich-quantum-toolkit/qcec" alt="Contributors to munich-quantum-toolkit/qcec" />
   </a>
 </p>
 
@@ -103,7 +106,26 @@ Building (and running) is continuously tested under Linux, macOS, and Windows us
 
 ## Cite This
 
-When citing the software itself or results produced with it, please cite the MQT Handbook:
+Please cite the work that best fits your use case.
+
+### MQT QCEC (the tool)
+
+When citing the software itself or results produced with it, cite the MQT QCEC paper:
+
+```bibtex
+@article{burgholzerQCECJKQTool2021,
+    title               = {{{QCEC}}: {{A JKQ}} tool for quantum circuit equivalence checking},
+    author              = {Burgholzer, Lukas and Wille, Robert},
+    year                = {2021},
+    month               = feb,
+    journal             = {Software Impacts},
+    doi                 = {10.1016/j.simpa.2020.100051},
+}
+```
+
+### The Munich Quantum Toolkit (the project)
+
+When discussing the overall MQT project or its ecosystem, cite the MQT Handbook:
 
 ```bibtex
 @inproceedings{mqt,
@@ -118,6 +140,28 @@ When citing the software itself or results produced with it, please cite the MQT
     addendum     = {A live version of this document is available at \url{https://mqt.readthedocs.io}},
 }
 ```
+
+### Peer-Reviewed Research
+
+When citing the underlying methods and research, please reference the most relevant peer-reviewed publications from the list below:
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2004.08420&color=inactive&style=flat-square)](https://arxiv.org/abs/2004.08420)
+L. Burgholzer and R. Wille, "[Advanced Equivalence Checking for Quantum Circuits](https://arxiv.org/abs/2004.08420)," Transactions on CAD of Integrated Circuits and Systems (TCAD), 2021
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2009.02376&color=inactive&style=flat-square)](https://arxiv.org/abs/2009.02376)
+L. Burgholzer, R. Raymond, and R. Wille, "[Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow](https://arxiv.org/abs/2009.02376)," in IEEE International Conference on Quantum Computing (QCE), 2020
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2011.07288&color=inactive&style=flat-square)](https://arxiv.org/abs/2011.07288)
+L. Burgholzer, R. Kueng, and R. Wille, "[Random Stimuli Generation for the Verification of Quantum Circuits](https://arxiv.org/abs/2011.07288)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2021
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2106.01099&color=inactive&style=flat-square)](https://arxiv.org/abs/2106.01099)
+L. Burgholzer and R. Wille, "[Handling Non-Unitaries in Quantum Circuit Equivalence Checking](https://arxiv.org/abs/2106.01099)," in Design Automation Conference (DAC), 2022
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2208.12820&color=inactive&style=flat-square)](https://arxiv.org/abs/2208.12820)
+T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Quantum Circuits with the ZX-Calculus](https://arxiv.org/abs/2208.12820)," in Journal of Emerging and Selected Topics in Circuits and Systems (JETCAS), 2022
+
+[![a](https://img.shields.io/static/v1?label=arXiv&message=2210.12166&color=inactive&style=flat-square)](https://arxiv.org/abs/2210.12166)
+T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms](https://arxiv.org/abs/2210.12166)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2023
 
 ---
 
