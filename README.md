@@ -17,7 +17,7 @@
 
 # MQT QCEC - A tool for Quantum Circuit Equivalence Checking
 
-A tool for quantum circuit equivalence checking developed as part of the [_Munich Quantum Toolkit (MQT)_](https://mqt.readthedocs.io) [^1].
+A tool for quantum circuit equivalence checking developed as part of the [_Munich Quantum Toolkit (MQT)_](https://mqt.readthedocs.io).
 It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which forms the backbone of the MQT.
 
 <p align="center">
@@ -26,12 +26,58 @@ It builds upon [MQT Core](https://github.com/munich-quantum-toolkit/core), which
   </a>
 </p>
 
-If you have any questions,
-feel free to create a [discussion](https://github.com/munich-quantum-toolkit/qcec/discussions) or an [issue](https://github.com/munich-quantum-toolkit/qcec/issues) on [GitHub](https://github.com/munich-quantum-toolkit/qcec).
+## Key Features
+
+- Comprehensive equivalence checking engines: [Decision-diagram construction](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#construction-equivalence-checker-using-decision-diagrams), [Alternating DD](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#alternating-equivalence-checker-using-decision-diagrams), [Simulation-based falsification](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#simulation-equivalence-checker-using-decision-diagrams), and [ZX-calculus rewriting](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#zx-calculus-equivalence-checker)—coordinated in an automated [equivalence checking flow](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#resulting-equivalence-checking-flow) to prove equivalence or quickly find counterexamples.
+- Compilation flow verification: validate transpiled/compiled circuits incl. layout permutations and measurements. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/compilation_flow_verification.html)
+- Parameterized circuits: prove or refute equivalence with symbolic parameters. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/parametrized_circuits.html)
+- Partial equivalence: compare measured output distributions, handling ancillary and garbage qubits. [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/partial_equivalence.html)
+- Python-first API and Qiskit integration: pass `QuantumCircuit` or OpenQASM; one-call `verify()` or `verify_compilation()`. [Quickstart](https://mqt.readthedocs.io/projects/qcec/en/latest/quickstart.html) • [API](https://mqt.readthedocs.io/projects/qcec/en/latest/api/mqt/qcec/index.html)
+- Efficient and portable: C++20 core with DD engines and ZX backend, prebuilt wheels for Linux/macOS/Windows via [PyPI](https://pypi.org/project/mqt.qcec/).
+
+If you have any questions, feel free to create a [discussion](https://github.com/munich-quantum-toolkit/qcec/discussions) or an [issue](https://github.com/munich-quantum-toolkit/qcec/issues) on [GitHub](https://github.com/munich-quantum-toolkit/qcec).
+
+## Contributors and Supporters
+
+The _[Munich Quantum Toolkit (MQT)](https://mqt.readthedocs.io)_ is developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) and supported by the [Munich Quantum Software Company (MQSC)](https://munichquantum.software).
+Among others, it is part of the [Munich Quantum Software Stack (MQSS)](https://www.munich-quantum-valley.de/research/research-areas/mqss) ecosystem, which is being developed as part of the [Munich Quantum Valley (MQV)](https://www.munich-quantum-valley.de) initiative.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/mqt-logo-banner-dark.svg" width="90%">
+    <img src="https://raw.githubusercontent.com/munich-quantum-toolkit/.github/refs/heads/main/docs/_static/mqt-logo-banner-light.svg" width="90%" alt="MQT Partner Logos">
+  </picture>
+</p>
+
+Thank you to all the contributors who have helped make MQT QCEC a reality!
+
+<p align="center">
+  <a href="https://github.com/munich-quantum-toolkit/qcec/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=munich-quantum-toolkit/qcec" alt="Contributors to munich-quantum-toolkit/qcec" />
+  </a>
+</p>
+
+The MQT will remain free, open-source, and permissively licensed—now and in the future.
+We are firmly committed to keeping it open and actively maintained for the quantum computing community.
+
+To support this endeavor, please consider:
+
+- Starring and sharing our repositories: https://github.com/munich-quantum-toolkit
+- Contributing code, documentation, tests, or examples via issues and pull requests
+- Citing the MQT in your publications (see [Cite This](#cite-this))
+- Citing our research in your publications (see [References](https://mqt.readthedocs.io/projects/qcec/en/latest/references.html))
+- Using the MQT in research and teaching, and sharing feedback and use cases
+- Sponsoring us on GitHub: https://github.com/sponsors/munich-quantum-toolkit
+
+<p align="center">
+  <a href="https://github.com/sponsors/munich-quantum-toolkit">
+  <img width=20% src="https://img.shields.io/badge/Sponsor-white?style=for-the-badge&logo=githubsponsors&labelColor=black&color=blue" alt="Sponsor the MQT" />
+  </a>
+</p>
 
 ## Getting Started
 
-QCEC is available via [PyPI](https://pypi.org/project/mqt.qcec/) for Linux, macOS, and Windows and supports Python 3.9 to 3.13.
+MQT QCEC is available via [PyPI](https://pypi.org/project/mqt.qcec/) for Linux, macOS, and Windows and supports Python 3.9 to 3.14.
 
 ```console
 (venv) $ pip install mqt.qcec
@@ -58,29 +104,58 @@ Please refer to the [documentation](https://mqt.readthedocs.io/projects/qcec) on
 
 Building (and running) is continuously tested under Linux, macOS, and Windows using the [latest available system versions for GitHub Actions](https://github.com/actions/virtual-environments).
 
-## References
+## Cite This
 
-QCEC has been developed based on methods proposed in the following papers:
+Please cite the work that best fits your use case.
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2004.08420&color=inactive&style=flat-square)](https://arxiv.org/abs/2004.08420)
-L. Burgholzer and R. Wille, "[Advanced Equivalence Checking for Quantum Circuits](https://arxiv.org/abs/2004.08420)," Transactions on CAD of Integrated Circuits and Systems (TCAD), 2021
+### MQT QCEC (the tool)
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2009.02376&color=inactive&style=flat-square)](https://arxiv.org/abs/2009.02376)
-L. Burgholzer, R. Raymond, and R. Wille, "[Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow](https://arxiv.org/abs/2009.02376)," in IEEE International Conference on Quantum Computing (QCE), 2020
+When citing the software itself or results produced with it, cite the MQT QCEC paper:
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2011.07288&color=inactive&style=flat-square)](https://arxiv.org/abs/2011.07288)
-L. Burgholzer, R. Kueng, and R. Wille, "[Random Stimuli Generation for the Verification of Quantum Circuits](https://arxiv.org/abs/2011.07288)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2021
+```bibtex
+@article{burgholzerQCECJKQTool2021,
+  title        = {{{QCEC}}: {{A JKQ}} tool for quantum circuit equivalence checking},
+  author       = {Burgholzer, Lukas and Wille, Robert},
+  year         = 2021,
+  month        = feb,
+  journal      = {Software Impacts},
+  doi          = {10.1016/j.simpa.2020.100051}
+}
+```
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2106.01099&color=inactive&style=flat-square)](https://arxiv.org/abs/2106.01099)
-L. Burgholzer and R. Wille, "[Handling Non-Unitaries in Quantum Circuit Equivalence Checking](https://arxiv.org/abs/2106.01099)," in Design Automation Conference (DAC), 2022
+### The Munich Quantum Toolkit (the project)
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2208.12820&color=inactive&style=flat-square)](https://arxiv.org/abs/2208.12820)
-T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Quantum Circuits with the ZX-Calculus](https://arxiv.org/abs/2208.12820)," in Journal of Emerging and Selected Topics in Circuits and Systems (JETCAS), 2022
+When discussing the overall MQT project or its ecosystem, cite the MQT Handbook:
 
-[![a](https://img.shields.io/static/v1?label=arXiv&message=2210.12166&color=inactive&style=flat-square)](https://arxiv.org/abs/2210.12166)
-T. Peham, L. Burgholzer, and R. Wille, "[Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms](https://arxiv.org/abs/2210.12166)," in Asia and South Pacific Design Automation Conference (ASP-DAC), 2023
+```bibtex
+@inproceedings{mqt,
+  title        = {The {{MQT}} Handbook: {{A}} Summary of Design Automation Tools and Software for Quantum Computing},
+  shorttitle   = {{The MQT Handbook}},
+  author       = {Wille, Robert and Berent, Lucas and Forster, Tobias and Kunasaikaran, Jagatheesan and Mato, Kevin and Peham, Tom and Quetschlich, Nils and Rovara, Damian and Sander, Aaron and Schmid, Ludwig and Schoenberger, Daniel and Stade, Yannick and Burgholzer, Lukas},
+  year         = 2024,
+  booktitle    = {IEEE International Conference on Quantum Software (QSW)},
+  doi          = {10.1109/QSW62656.2024.00013},
+  eprint       = {2405.17543},
+  eprinttype   = {arxiv},
+  addendum     = {A live version of this document is available at \url{https://mqt.readthedocs.io}}
+}
+```
 
-[^1]: The _[Munich Quantum Toolkit (MQT)](https://mqt.readthedocs.io)_ is a collection of software tools for quantum computing developed by the [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/) as well as the [Munich Quantum Software Company (MQSC)](https://munichquantum.software). Among others, it is part of the [Munich Quantum Software Stack (MQSS)](https://www.munich-quantum-valley.de/research/research-areas/mqss) ecosystem, which is being developed as part of the [Munich Quantum Valley (MQV)](https://www.munich-quantum-valley.de) initiative.
+### Peer-Reviewed Research
+
+When citing the underlying methods and research, please reference the most relevant peer-reviewed publications from the list below:
+
+[[1]](https://arxiv.org/pdf/2004.08420.pdf) L. Burgholzer and R. Wille. Advanced Equivalence Checking for Quantum Circuits. _IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)_, 2021.
+
+[[2]](https://arxiv.org/pdf/2009.02376.pdf) L. Burgholzer, R. Raymond, and R. Wille. Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow. In _IEEE International Conference on Quantum Computing and Engineering (QCE)_, 2020.
+
+[[3]](https://arxiv.org/pdf/2011.07288.pdf) L. Burgholzer, R. Kueng, and R. Wille. Random Stimuli Generation for the Verification of Quantum Circuits. In _Asia and South Pacific Design Automation Conference (ASP-DAC)_, 2021.
+
+[[4]](https://arxiv.org/pdf/2106.01099.pdf) L. Burgholzer and R. Wille. Handling Non-Unitaries in Quantum Circuit Equivalence Checking. In _Design Automation Conference (DAC)_, 2022.
+
+[[5]](https://arxiv.org/pdf/2208.12820.pdf) T. Peham, L. Burgholzer, and R. Wille. Equivalence Checking of Quantum Circuits with the ZX-Calculus. _IEEE Journal on Emerging and Selected Topics in Circuits and Systems (JETCAS)_, 2022.
+
+[[6]](https://arxiv.org/pdf/2210.12166.pdf) T. Peham, L. Burgholzer, and R. Wille. Equivalence Checking of Parameterized Quantum Circuits: Verifying the Compilation of Variational Quantum Algorithms. In _Asia and South Pacific Design Automation Conference (ASP-DAC)_, 2023.
 
 ---
 
