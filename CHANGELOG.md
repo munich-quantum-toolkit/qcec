@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Changed
+
+- 🔥 Stop testing on and shipping wheels for x86 macOS systems ([#1165]) ([**@denialhaag**])
+
 ## [3.2.0] - 2025-08-01
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#320)._
