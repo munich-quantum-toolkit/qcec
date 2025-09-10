@@ -256,8 +256,6 @@ typing-modules = ["mqt.qcec._compat.typing"]
 "typing.Mapping".msg = "Use collections.abc.Mapping instead."
 "typing.Sequence".msg = "Use collections.abc.Sequence instead."
 "typing.Set".msg = "Use collections.abc.Set instead."
-"importlib.resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
-"importlib_resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
 
 [tool.ruff.lint.isort]
 known-first-party = ["mqt.qcec"]
