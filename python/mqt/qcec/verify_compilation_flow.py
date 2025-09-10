@@ -11,11 +11,11 @@
 from __future__ import annotations
 
 import warnings
+from importlib import resources
 from typing import TYPE_CHECKING
 
 from mqt.core import load
 
-from ._compat.importlib import resources
 from .compilation_flow_profiles import AncillaMode, generate_profile_name
 from .configuration_options import augment_config_from_kwargs
 from .pyqcec import ApplicationScheme, Configuration
