@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Added
+
+- 👷 Enable testing on Python 3.14 ([#730]) ([**@denialhaag**])
+
 ### Removed
 
 - 🔥 Drop support for Python 3.9 ([#704]) ([**@denialhaag**])
@@ -88,6 +92,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#730]: https://github.com/munich-quantum-toolkit/qcec/pull/730
 [#704]: https://github.com/munich-quantum-toolkit/qcec/pull/704
 [#699]: https://github.com/munich-quantum-toolkit/qcec/pull/699
 [#668]: https://github.com/munich-quantum-toolkit/qcec/pull/668
