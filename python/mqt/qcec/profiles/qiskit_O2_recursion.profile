@@ -1,4 +1,4 @@
-# qiskit_O2_recursion.profile, Qiskit version: 2.1.0
+# qiskit_O2_recursion.profile, Qiskit version: 2.2.1
 x 0 1
 y 0 2
 z 0 1
@@ -27,7 +27,7 @@ y 1 3
 z 1 7
 h 1 6
 sx 1 10
-p 1 5
+p 1 10
 rx 1 9
 ry 1 10
 rz 1 4
@@ -160,7 +160,7 @@ p 124 48375
 p 125 48786
 p 126 49197
 p 127 49608
-x 3 34
+x 3 39
 x 4 95
 x 5 124
 x 6 168
@@ -285,10 +285,10 @@ x 124 5513
 x 125 5558
 x 126 5603
 x 127 5648
-s 1 5
-sdg 1 5
-t 1 5
-tdg 1 5
+s 1 10
+sdg 1 10
+t 1 10
+tdg 1 10
 z 2 13
 s 2 13
 sdg 2 13

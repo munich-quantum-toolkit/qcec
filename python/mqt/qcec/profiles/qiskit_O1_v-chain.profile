@@ -1,4 +1,4 @@
-# qiskit_O1_v-chain.profile, Qiskit version: 2.1.0
+# qiskit_O1_v-chain.profile, Qiskit version: 2.2.1
 x 0 1
 y 0 2
 z 0 1
