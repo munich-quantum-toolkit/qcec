@@ -50,10 +50,11 @@ requires-python = ">=3.10"
 dependencies = [
     "mqt.core~=3.2.1",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
-    "numpy>=2.1; python_version >= '3.13'",
-    "numpy>=1.26; python_version >= '3.12'",
-    "numpy>=1.24; python_version >= '3.11'",
     "numpy>=1.22",
+    "numpy>=1.24; python_version >= '3.11'",
+    "numpy>=1.26; python_version >= '3.12'",
+    "numpy>=2.1; python_version >= '3.13'",
+    "numpy>=2.3.2; python_version >= '3.14'",
 ]
 dynamic = ["version"]
 
@@ -300,9 +301,6 @@ enable = ["cpython-freethreading"]
 test-skip = [
   "cp3*t-*", # no freethreading qiskit wheels
   "cp*-win_arm64", # no numpy, qiskit, ... wheels
-  # TODO(denialhaag): Remove when all dependencies support Python 3.14
-  #   https://github.com/munich-quantum-toolkit/qcec/issues/666
-  "cp314-*",
 ]
 
 # The mqt-core shared libraries are provided by the mqt-core Python package.
