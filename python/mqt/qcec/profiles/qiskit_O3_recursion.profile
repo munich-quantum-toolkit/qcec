@@ -1,4 +1,4 @@
-# qiskit_O3_recursion.profile, Qiskit version: 2.1.0
+# qiskit_O3_recursion.profile, Qiskit version: 2.2.1
 x 0 1
 y 0 2
 z 0 1
@@ -160,7 +160,7 @@ p 124 48375
 p 125 48786
 p 126 49197
 p 127 49608
-x 3 34
+x 3 39
 x 4 95
 x 5 124
 x 6 168

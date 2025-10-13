@@ -185,8 +185,7 @@ def __create_general_gate(qubits: int, params: int, controls: int, identifier: s
     qc = QuantumCircuit(required_qubits)
     gate_identifier = "c" * controls + identifier
 
-    rng = np.random.default_rng(seed=12345)
-    parameter_list = [rng.uniform(-np.pi, np.pi) for _ in range(params)]
+    parameter_list = list(range(1, params + 1))
 
     getattr(qc, gate_identifier)(*parameter_list, *range(required_qubits))
     return qc
@@ -219,8 +218,7 @@ def __create_multi_controlled_gate(
     qc = QuantumCircuit(required_qubits)
     gate_identifier = "mc" + identifier
 
-    rng = np.random.default_rng(seed=12345)
-    parameter_list = [rng.uniform(-np.pi, np.pi) for _ in range(params)]
+    parameter_list = list(range(1, params + 1))
 
     if mode is not None:
         getattr(qc, gate_identifier)(
