@@ -17,6 +17,10 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#330)._
 
 - 👷 Enable testing on Python 3.14 ([#730]) ([**@denialhaag**])
 
+### Changed
+
+- ⬆️ Bump minimum required `mqt-core` version to `3.3.1` ([#735]) ([**@denialhaag**])
+
 ### Removed
 
 - 🔥 Drop support for Python 3.9 ([#704]) ([**@denialhaag**])
@@ -97,6 +101,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#735]: https://github.com/munich-quantum-toolkit/qcec/pull/735
 [#730]: https://github.com/munich-quantum-toolkit/qcec/pull/730
 [#704]: https://github.com/munich-quantum-toolkit/qcec/pull/704
 [#699]: https://github.com/munich-quantum-toolkit/qcec/pull/699
