@@ -65,7 +65,7 @@ Alternatively, CMake can be conveniently installed from PyPI using the [`cmake`]
 <!-- Version links -->
 
 [unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.3.0...HEAD
-[3.3.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.1.0...v3.3.0
+[3.3.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.2.0...v3.3.0
 [3.2.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v2.8.2...v3.0.0
