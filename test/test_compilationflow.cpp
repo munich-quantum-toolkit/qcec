@@ -53,12 +53,12 @@ legacyCostFunction(const GateCostLookupTableKeyType& key) noexcept {
     case qc::RX:
     case qc::RY:
     case qc::RZ:
-      // the following are merely placeholders so that the check can advance
+    // the following are merely placeholders so that the check can advance
     case qc::Compound:
     case qc::Measure:
     case qc::Reset:
     case qc::Barrier:
-    case qc::ClassicControlled:
+    case qc::IfElse:
       return 1U;
     default:
       break;
