@@ -4,4 +4,4 @@
 # Contributing
 
 Thank you for your interest in contributing to MQT QCEC!
-An extensive contribution guide is available in our [documentation](https://mqt.readthedocs.io/projects/qcec/en/latest/CONTRIBUTING.html).
+An extensive contribution guide is available in our [documentation](https://mqt.readthedocs.io/projects/qcec/en/latest/contributing.html).
