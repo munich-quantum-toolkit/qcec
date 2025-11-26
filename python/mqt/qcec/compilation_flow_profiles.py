@@ -16,13 +16,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from qiskit import QuantumCircuit, transpile
-from qiskit import __version__ as qiskit_version
 
 from ._compat.optional import HAS_QISKIT
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+    from qiskit import QuantumCircuit
 
 __all__ = [
     "AncillaMode",
@@ -180,6 +179,8 @@ multi_controlled_gates_v_chain = [mcx_v_chain]
 
 def __create_general_gate(qubits: int, params: int, controls: int, identifier: str) -> QuantumCircuit:
     """Create a ``QuantumCircuit`` containing a single gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls``."""
+    from qiskit import QuantumCircuit  # noqa: PLC0415 optional dependency
+
     required_qubits = qubits + controls
     qc = QuantumCircuit(required_qubits)
     gate_identifier = "c" * controls + identifier
@@ -199,6 +200,8 @@ def __create_multi_controlled_gate(
     identifier: str,
 ) -> QuantumCircuit:
     """Create a ``QuantumCircuit`` containing a single multi-controlled gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls`` using ``ancilla_qubits`` ancilla qubits and the given ancilla ``mode``."""
+    from qiskit import QuantumCircuit  # noqa: PLC0415 optional dependency
+
     required_qubits = qubits + controls
 
     # special handling for v-chain mode which is indicated by the ancilla_qubits being None
@@ -236,6 +239,8 @@ def __compute_cost(
     optimization_level: int = 1,
 ) -> int:
     """Compute the cost of a circuit by transpiling the circuit to a given ``basis_gates`` gate set and a certain ``optimization_level``."""
+    from qiskit import transpile  # noqa: PLC0415 optional dependency
+
     transpiled_circuit = transpile(
         qc, basis_gates=basis_gates, optimization_level=optimization_level, seed_transpiler=12345
     )
@@ -316,7 +321,7 @@ def __add_special_case_data(
 
 def __write_profile_data_to_file(profile_data: dict[tuple[str, int], int], filename: Path) -> None:
     """Write the profile data to a file."""
-    HAS_QISKIT.require_now("generate compilation flow profiles")
+    from qiskit import __version__ as qiskit_version  # noqa: PLC0415 optional dependency
 
     with Path(filename).open("w+", encoding="utf-8") as f:
         f.write(f"# {filename}, Qiskit version: {qiskit_version}\n")
@@ -425,6 +430,8 @@ def generate_profile(
             DeprecationWarning,
             stacklevel=2,
         )
+
+    HAS_QISKIT.require_now("generate compilation flow profiles")
 
     if filepath is None:
         filepath = default_profile_path
