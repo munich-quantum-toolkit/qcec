@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import pytest
 from qiskit import QuantumCircuit, transpile
+from qiskit.circuit import AncillaRegister
 
 from mqt.qcec import verify
 from mqt.qcec.pyqcec import ApplicationScheme, Configuration, EquivalenceCriterion
@@ -106,8 +107,6 @@ def test_cpp_exception_propagation_internal() -> None:
 
 def test_zx_ancilla_support() -> None:
     """This is a regression test for the handling of ancilla registers in the ZX checker."""
-    from qiskit.circuit import AncillaRegister
-
     anc = AncillaRegister(1)
 
     qc1 = QuantumCircuit(1, 0)
