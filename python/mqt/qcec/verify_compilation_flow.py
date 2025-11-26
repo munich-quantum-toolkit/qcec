@@ -110,7 +110,7 @@ def verify_compilation(
         configuration = Configuration()
 
     # prepare the configuration
-    augment_config_from_kwargs(configuration, kwargs)
+    augment_config_from_kwargs(configuration, **kwargs)
 
     # load the circuits
     qc1 = load(original_circuit)

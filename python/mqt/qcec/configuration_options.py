@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
+    from ._compat.typing import Unpack
     from .pyqcec import ApplicationScheme, Configuration, StateType
 
 
@@ -65,7 +66,7 @@ class ConfigurationOptions(TypedDict, total=False):
     state_type: StateType
 
 
-def augment_config_from_kwargs(config: Configuration, kwargs: ConfigurationOptions) -> None:
+def augment_config_from_kwargs(config: Configuration, **kwargs: Unpack[ConfigurationOptions]) -> None:
     """Augment an existing :class:`.Configuration` with options from a collection of keyword arguments.
 
     Args:
