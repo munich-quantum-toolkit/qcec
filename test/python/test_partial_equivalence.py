@@ -11,7 +11,7 @@
 from __future__ import annotations
 
 import pytest
-from qiskit import QuantumCircuit
+from qiskit.circuit import QuantumCircuit
 
 from mqt.qcec import verify
 from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion

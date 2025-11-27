@@ -21,7 +21,7 @@ from ._compat.optional import HAS_QISKIT
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
-    from qiskit import QuantumCircuit
+    from qiskit.circuit import QuantumCircuit
 
 __all__ = [
     "AncillaMode",
@@ -179,7 +179,7 @@ multi_controlled_gates_v_chain = [mcx_v_chain]
 
 def __create_general_gate(qubits: int, params: int, controls: int, identifier: str) -> QuantumCircuit:
     """Create a ``QuantumCircuit`` containing a single gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls``."""
-    from qiskit import QuantumCircuit  # noqa: PLC0415 optional dependency
+    from qiskit.circuit import QuantumCircuit  # noqa: PLC0415 optional dependency
 
     required_qubits = qubits + controls
     qc = QuantumCircuit(required_qubits)
@@ -200,7 +200,7 @@ def __create_multi_controlled_gate(
     identifier: str,
 ) -> QuantumCircuit:
     """Create a ``QuantumCircuit`` containing a single multi-controlled gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls`` using ``ancilla_qubits`` ancilla qubits and the given ancilla ``mode``."""
-    from qiskit import QuantumCircuit  # noqa: PLC0415 optional dependency
+    from qiskit.circuit import QuantumCircuit  # noqa: PLC0415 optional dependency
 
     required_qubits = qubits + controls
 

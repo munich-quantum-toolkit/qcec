@@ -10,7 +10,8 @@
 
 from __future__ import annotations
 
-from qiskit import QuantumCircuit, transpile
+from qiskit import transpile
+from qiskit.circuit import QuantumCircuit
 from qiskit.providers.fake_provider import GenericBackendV2
 
 from mqt.qcec import verify_compilation
