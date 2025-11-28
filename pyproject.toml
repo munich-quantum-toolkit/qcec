@@ -190,6 +190,16 @@ module = ["qiskit.*"]
 ignore_missing_imports = true
 
 
+[tool.ty.terminal]
+# Error if ty emits any warning-level diagnostics.
+error-on-warning = true
+
+[tool.ty.src]
+exclude = [
+    "docs/**",
+]
+
+
 [tool.check-wheel-contents]
 ignore = ["W002"]  # Triggers on __init__.py's
 
@@ -379,4 +389,5 @@ dev = [
   {include-group = "build"},
   {include-group = "test"},
   "nox>=2025.11.12",
+  "ty==0.0.1a28",
 ]

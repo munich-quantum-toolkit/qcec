@@ -11,7 +11,7 @@ ci:
   autoupdate_commit_msg: "⬆️🪝 update pre-commit hooks"
   autoupdate_schedule: quarterly
   autofix_commit_msg: "🎨 pre-commit fixes"
-  skip: [mypy]
+  skip: [mypy, ty-check]
 
 repos:
   # Standard hooks
@@ -106,6 +106,16 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
+
+  # Check static types with ty
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        entry: python -c "import subprocess; import sys; subprocess.run(['uv', 'sync', '--no-install-project']); sys.exit(subprocess.run(['uv', 'run', '--no-sync', 'ty', 'check']).returncode)"
+        language: unsupported
+        require_serial: true
+        types_or: [python, pyi, jupyter]
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
