@@ -1532,18 +1532,7 @@ dev = [
     { name = "qiskit", extra = ["qasm3-import"] },
     { name = "scikit-build-core" },
     { name = "setuptools-scm" },
-<<<<<<< HEAD
-=======
-    { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "sphinx-autoapi" },
-    { name = "sphinx-copybutton" },
-    { name = "sphinx-design" },
-    { name = "sphinxcontrib-bibtex" },
-    { name = "sphinxcontrib-svg2pdfconverter" },
-    { name = "sphinxext-opengraph" },
     { name = "ty" },
->>>>>>> 11fd8b0 (Add ty to dev dependencies)
 ]
 docs = [
     { name = "furo" },
@@ -1596,23 +1585,9 @@ dev = [
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "qiskit", extras = ["qasm3-import"], specifier = ">=1.0.0" },
-<<<<<<< HEAD
     { name = "scikit-build-core", specifier = ">=0.11.6" },
     { name = "setuptools-scm", specifier = ">=9.2.2" },
-=======
-    { name = "qiskit", extras = ["qasm3-import", "visualization"], specifier = ">=1.0.0" },
-    { name = "scikit-build-core", specifier = ">=0.11.0" },
-    { name = "setuptools-scm", specifier = ">=8.1" },
-    { name = "sphinx", specifier = ">=8.1.3" },
-    { name = "sphinx", marker = "python_full_version >= '3.11'", specifier = ">=8.2.3" },
-    { name = "sphinx-autoapi", specifier = ">=3.6.0" },
-    { name = "sphinx-copybutton", specifier = ">=0.5.2" },
-    { name = "sphinx-design", specifier = ">=0.6.1" },
-    { name = "sphinxcontrib-bibtex", specifier = ">=2.6.3" },
-    { name = "sphinxcontrib-svg2pdfconverter", specifier = ">=1.3.0" },
-    { name = "sphinxext-opengraph", specifier = ">=0.9.1" },
-    { name = "ty", specifier = ">=0.0.1a27" },
->>>>>>> 11fd8b0 (Add ty to dev dependencies)
+    { name = "ty", specifier = "==0.0.1a28" },
 ]
 docs = [
     { name = "furo", specifier = ">=2025.9.25" },
