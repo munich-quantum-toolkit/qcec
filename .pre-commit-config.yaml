@@ -107,16 +107,6 @@ repos:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
 
-  # Check static types with ty
-  - repo: local
-    hooks:
-      - id: ty-check
-        name: ty check
-        entry: python -c "import subprocess; import sys; subprocess.run(['uv', 'sync', '--no-install-project']); sys.exit(subprocess.run(['uv', 'run', '--no-sync', 'ty', 'check']).returncode)"
-        language: unsupported
-        require_serial: true
-        types_or: [python, pyi, jupyter]
-
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.0
@@ -130,6 +120,17 @@ repos:
           - numpy
           - pytest
           - mqt.core>=3
+
+  # Check static types with ty
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty check
+        entry: python -c "import subprocess; import sys; subprocess.run(['uv', 'sync', '--no-install-project', '--inexact']); sys.exit(subprocess.run(['uv', 'run', '--no-sync', 'ty', 'check']).returncode)"
+        language: unsupported
+        require_serial: true
+        types_or: [python, pyi, jupyter]
+        exclude: ^(docs/)
 
   # Check for spelling
   - repo: https://github.com/crate-ci/typos
