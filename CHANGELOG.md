@@ -9,6 +9,17 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Changed
+
+- 👷 Stop testing on `ubuntu-22.04` and `ubuntu-22.04-arm` runners ([#796]) ([**@denialhaag**])
+- 👷 Stop testing with `clang-19` and start testing with `clang-21` ([#796]) ([**@denialhaag**])
+- 👷 Fix macOS tests with Homebrew Clang via new `munich-quantum-toolkit/workflows` version ([#796]) ([**@denialhaag**])
+- 👷 Re-enable macOS tests with GCC by disabling module scanning ([#796]) ([**@denialhaag**])
+
+### Removed
+
+- 🔥 Remove wheel builds for Python 3.13t ([#796]) ([**@denialhaag**])
+
 ## [3.3.0] - 2025-10-14
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#330)._
@@ -101,6 +112,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#796]: https://github.com/munich-quantum-toolkit/qcec/pull/796
 [#735]: https://github.com/munich-quantum-toolkit/qcec/pull/735
 [#730]: https://github.com/munich-quantum-toolkit/qcec/pull/730
 [#704]: https://github.com/munich-quantum-toolkit/qcec/pull/704
