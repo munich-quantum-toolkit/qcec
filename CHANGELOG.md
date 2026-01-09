@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ♻️ Migrate Python bindings from `pybind11` to `nanobind` ([#817]) ([**@denialhaag**])
+- 📦️ Provide Stable ABI wheels for Python 3.12+ ([#817]) ([**@denialhaag**])
+- ⬆️ Bump minimum required `mqt-core` version to `3.4.0` ([#817]) ([**@denialhaag**])
 - 👷 Stop testing on `ubuntu-22.04` and `ubuntu-22.04-arm` runners ([#796]) ([**@denialhaag**])
 - 👷 Stop testing with `clang-19` and start testing with `clang-21` ([#796]) ([**@denialhaag**])
 - 👷 Fix macOS tests with Homebrew Clang via new `munich-quantum-toolkit/workflows` version ([#796]) ([**@denialhaag**])
@@ -112,6 +115,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#817]: https://github.com/munich-quantum-toolkit/qcec/pull/817
 [#796]: https://github.com/munich-quantum-toolkit/qcec/pull/796
 [#735]: https://github.com/munich-quantum-toolkit/qcec/pull/735
 [#730]: https://github.com/munich-quantum-toolkit/qcec/pull/730
