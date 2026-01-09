@@ -104,5 +104,5 @@ class OptionalDependencyTester:
 
 HAS_QISKIT = OptionalDependencyTester(
     "qiskit",
-    msg="Please install the `mqt.qcec[qiskit]` extra or a compatible version of Qiskit to use functionality related to its functionality.",
+    msg="Please install the `mqt.qcec[qiskit]` extra or a compatible version of Qiskit.",
 )

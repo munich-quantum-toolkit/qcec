@@ -47,7 +47,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
       "configuration", &EquivalenceCheckingManager::getConfiguration,
       [](EquivalenceCheckingManager& manager, const Configuration& config) {
         manager.getConfiguration() = config;
-      });
+      },
+      nb::rv_policy::reference_internal);
 
   // Run
   ecm.def("run", &EquivalenceCheckingManager::run);
@@ -90,7 +91,9 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
       .def_prop_rw(
           "checker_results",
           [](const EquivalenceCheckingManager::Results& results) {
-            return nb::cast(results.checkerResults);
+            nb::module_ json = nb::module_::import_("json");
+            nb::object loads = json.attr("loads");
+            return loads(results.checkerResults.dump());
           },
           [](EquivalenceCheckingManager::Results& results,
              const nb::dict& value) {
@@ -103,7 +106,9 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
            &EquivalenceCheckingManager::Results::consideredEquivalent)
       .def("json",
            [](const EquivalenceCheckingManager::Results& results) {
-             return nb::cast(results.json());
+             nb::module_ json = nb::module_::import_("json");
+             nb::object loads = json.attr("loads");
+             return loads(results.json().dump());
            })
       .def("__str__", &EquivalenceCheckingManager::Results::toString)
       .def("__repr__", [](const EquivalenceCheckingManager::Results& res) {
