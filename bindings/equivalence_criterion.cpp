@@ -10,20 +10,17 @@
 
 #include "EquivalenceCriterion.hpp"
 
-#include <pybind11/native_enum.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
+#include <nanobind/nanobind.h>
 
 namespace ec {
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
-void registerEquivalenceCriterion(const py::module& mod) {
-  py::native_enum<EquivalenceCriterion>(
-      mod, "EquivalenceCriterion", "enum.Enum",
-      "Enumeration of notions of equivalence.")
+void registerEquivalenceCriterion(const nb::module_& m) {
+  nb::enum_<EquivalenceCriterion>(m, "EquivalenceCriterion",
+                                  nb::is_arithmetic())
       .value("no_information", EquivalenceCriterion::NoInformation)
       .value("not_equivalent", EquivalenceCriterion::NotEquivalent)
       .value("equivalent", EquivalenceCriterion::Equivalent)
@@ -33,8 +30,7 @@ void registerEquivalenceCriterion(const py::module& mod) {
              EquivalenceCriterion::EquivalentUpToGlobalPhase)
       .value("probably_equivalent", EquivalenceCriterion::ProbablyEquivalent)
       .value("probably_not_equivalent",
-             EquivalenceCriterion::ProbablyNotEquivalent)
-      .finalize();
+             EquivalenceCriterion::ProbablyNotEquivalent);
 }
 
 } // namespace ec

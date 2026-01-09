@@ -7,7 +7,7 @@
 # Licensed under the MIT License
 
 # set required cmake version
-cmake_minimum_required(VERSION 3.24...4.0)
+cmake_minimum_required(VERSION 3.24...4.2)
 
 project(
   mqt-qcec
@@ -37,10 +37,8 @@ if(BUILD_MQT_QCEC_BINDINGS)
   endif()
 
   # top-level call to find Python
-  find_package(
-    Python 3.10 REQUIRED
-    COMPONENTS Interpreter Development.Module
-    OPTIONAL_COMPONENTS Development.SABIModule)
+  find_package(Python 3.10 REQUIRED COMPONENTS Interpreter Development.Module
+                                               ${SKBUILD_SABI_COMPONENT})
 endif()
 
 # check if this is the master project or used via add_subdirectory

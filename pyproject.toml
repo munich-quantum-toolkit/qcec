@@ -8,10 +8,10 @@
 
 [build-system]
 requires = [
-  "pybind11>=3.0.1",
+  "nanobind>=2.10.2",
   "scikit-build-core>=0.11.6",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.3.1",
+  "mqt.core~=3.4.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -28,12 +28,12 @@ license = "MIT"
 license-files = ["LICENSE.md"]
 
 classifiers = [
-    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
-    "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: C++",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -43,12 +43,12 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Development Status :: 5 - Production/Stable",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
     "Typing :: Typed",
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "mqt.core~=3.3.1",
+    "mqt.core~=3.4.0",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
     "numpy>=1.22",
     "numpy>=1.24; python_version >= '3.11'",
@@ -77,6 +77,9 @@ wheel.install-dir = "mqt/qcec"
 
 # Explicitly set the package directory
 wheel.packages = ["python/mqt"]
+
+# Enable Stable ABI builds for CPython 3.12+
+wheel.py-api = "cp312"
 
 # Set required Ninja version
 ninja.version = ">=1.10"
@@ -329,12 +332,12 @@ test-skip = [
 environment = { DEPLOY="ON" }
 # The SOVERSION needs to be updated when the shared libraries are updated.
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
---exclude libmqt-core-ir.so.3.3 \
---exclude libmqt-core-qasm.so.3.3 \
---exclude libmqt-core-circuit-optimizer.so.3.3 \
---exclude libmqt-core-algorithms.so.3.3 \
---exclude libmqt-core-dd.so.3.3 \
---exclude libmqt-core-zx.so.3.3"""
+--exclude libmqt-core-ir.so.3.4 \
+--exclude libmqt-core-qasm.so.3.4 \
+--exclude libmqt-core-circuit-optimizer.so.3.4 \
+--exclude libmqt-core-algorithms.so.3.4 \
+--exclude libmqt-core-dd.so.3.4 \
+--exclude libmqt-core-zx.so.3.4"""
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
@@ -366,10 +369,10 @@ mqt-qcec = { workspace = true }
 
 [dependency-groups]
 build = [
-  "pybind11>=3.0.1",
+  "nanobind>=2.10.2",
   "scikit-build-core>=0.11.6",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.3.1",
+  "mqt.core~=3.4.0",
 ]
 docs = [
   "furo>=2025.09.25",

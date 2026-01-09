@@ -10,27 +10,22 @@
 
 #include "checker/dd/simulation/StateType.hpp"
 
-#include <pybind11/native_enum.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
+#include <nanobind/nanobind.h>
 
 namespace ec {
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
-void registerStateType(const py::module& mod) {
-  py::native_enum<StateType>(
-      mod, "StateType", "enum.Enum",
-      "Enumeration of state types for the simulation checker.")
+void registerStateType(const nb::module_& m) {
+  nb::enum_<StateType>(m, "StateType", nb::is_arithmetic())
       .value("computational_basis", StateType::ComputationalBasis)
       .value("classical", StateType::ComputationalBasis)
       .value("random_1Q_basis", StateType::Random1QBasis)
       .value("local_quantum", StateType::Random1QBasis)
       .value("stabilizer", StateType::Stabilizer)
-      .value("global_quantum", StateType::Stabilizer)
-      .finalize();
+      .value("global_quantum", StateType::Stabilizer);
 }
 
 } // namespace ec

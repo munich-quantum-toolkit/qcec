@@ -10,20 +10,16 @@
 
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 
-#include <pybind11/native_enum.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h> // NOLINT(misc-include-cleaner)
+#include <nanobind/nanobind.h>
 
 namespace ec {
 
-namespace py = pybind11;
-using namespace pybind11::literals;
+namespace nb = nanobind;
+using namespace nb::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
-void registerApplicationSchema(const py::module& mod) {
-  py::native_enum<ApplicationSchemeType>(
-      mod, "ApplicationScheme", "enum.Enum",
-      "Enumeration describing the application order of operations.")
+void registerApplicationSchema(const nb::module_& m) {
+  nb::enum_<ApplicationSchemeType>(m, "ApplicationScheme", nb::is_arithmetic())
       .value("sequential", ApplicationSchemeType::Sequential)
       .value("reference", ApplicationSchemeType::Sequential)
       .value("one_to_one", ApplicationSchemeType::OneToOne)
@@ -37,8 +33,7 @@ void registerApplicationSchema(const py::module& mod) {
           "second circuit. Referred to as *compilation_flow* in "
           ":cite:p:`burgholzer2020verifyingResultsIBM`.")
       .value("compilation_flow", ApplicationSchemeType::GateCost)
-      .value("proportional", ApplicationSchemeType::Proportional)
-      .finalize();
+      .value("proportional", ApplicationSchemeType::Proportional);
 }
 
 } // namespace ec

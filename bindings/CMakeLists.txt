@@ -27,7 +27,7 @@ list(
 
 file(GLOB_RECURSE QCEC_SOURCES **.cpp)
 
-add_mqt_python_binding(
+add_mqt_python_binding_nanobind(
   QCEC
   ${MQT_QCEC_TARGET_NAME}-bindings
   ${QCEC_SOURCES}
@@ -36,8 +36,7 @@ add_mqt_python_binding(
   INSTALL_DIR
   .
   LINK_LIBS
-  MQT::QCEC
-  pybind11_json)
+  MQT::QCEC)
 
 # install the Python stub files in editable mode for better IDE support
 if(SKBUILD_STATE STREQUAL "editable")
