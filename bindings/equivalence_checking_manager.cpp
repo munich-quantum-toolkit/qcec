@@ -37,8 +37,10 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
           "circ1"_a, "circ2"_a, "config"_a = Configuration());
 
   // Access to circuits
-  ecm.def_prop_ro("qc1", &EquivalenceCheckingManager::getFirstCircuit);
-  ecm.def_prop_ro("qc2", &EquivalenceCheckingManager::getSecondCircuit);
+  ecm.def_prop_ro("qc1", &EquivalenceCheckingManager::getFirstCircuit,
+                  nb::rv_policy::reference_internal);
+  ecm.def_prop_ro("qc2", &EquivalenceCheckingManager::getSecondCircuit,
+                  nb::rv_policy::reference_internal);
 
   // Access to configuration
   ecm.def_prop_rw(
@@ -51,7 +53,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
   ecm.def("run", &EquivalenceCheckingManager::run);
 
   // Results
-  ecm.def_prop_ro("results", &EquivalenceCheckingManager::getResults);
+  ecm.def_prop_ro("results", &EquivalenceCheckingManager::getResults,
+                  nb::rv_policy::reference_internal);
   ecm.def_prop_ro("equivalence", &EquivalenceCheckingManager::equivalence);
 
   // Convenience functions
