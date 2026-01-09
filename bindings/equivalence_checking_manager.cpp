@@ -91,8 +91,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
       .def_prop_rw(
           "checker_results",
           [](const EquivalenceCheckingManager::Results& results) {
-            nb::module_ json = nb::module_::import_("json");
-            nb::object loads = json.attr("loads");
+            const nb::module_ json = nb::module_::import_("json");
+            const nb::object loads = json.attr("loads");
             return loads(results.checkerResults.dump());
           },
           [](EquivalenceCheckingManager::Results& results,
@@ -106,8 +106,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
            &EquivalenceCheckingManager::Results::consideredEquivalent)
       .def("json",
            [](const EquivalenceCheckingManager::Results& results) {
-             nb::module_ json = nb::module_::import_("json");
-             nb::object loads = json.attr("loads");
+             const nb::module_ json = nb::module_::import_("json");
+             const nb::object loads = json.attr("loads");
              return loads(results.json().dump());
            })
       .def("__str__", &EquivalenceCheckingManager::Results::toString)

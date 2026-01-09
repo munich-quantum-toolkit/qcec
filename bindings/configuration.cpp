@@ -45,8 +45,8 @@ void registerConfiguration(const nb::module_& m) {
       .def_rw("parameterized", &Configuration::parameterized)
       .def("json",
            [](const Configuration& config) {
-             nb::module_ json = nb::module_::import_("json");
-             nb::object loads = json.attr("loads");
+             const nb::module_ json = nb::module_::import_("json");
+             const nb::object loads = json.attr("loads");
              return loads(config.json().dump());
            })
       .def("__repr__", &Configuration::toString);
