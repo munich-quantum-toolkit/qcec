@@ -16,6 +16,7 @@
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string_view.h> // NOLINT(misc-include-cleaner)
+#include <string>
 
 namespace ec {
 
@@ -90,8 +91,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
           },
           [](EquivalenceCheckingManager::Results& results,
              const nb::dict& value) {
-            nb::module_ json = nb::module_::import_("json");
-            nb::object dumps = json.attr("dumps");
+            const nb::module_ json = nb::module_::import_("json");
+            const nb::object dumps = json.attr("dumps");
             const auto jsonString = nb::cast<std::string>(dumps(value));
             results.checkerResults = nlohmann::json::parse(jsonString);
           })
