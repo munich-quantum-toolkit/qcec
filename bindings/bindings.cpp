@@ -22,8 +22,8 @@ void registerEquivalenceCheckingManager(const nb::module_& m);
 void registerEquivalenceCriterion(const nb::module_& m);
 void registerStateType(const nb::module_& m);
 
-// NOLINTNEXTLINE(misc-include-cleaner)
-NB_MODULE(MQT_QCEC_MODULE_NAME, m) {
+NB_MODULE(MQT_QCEC_MODULE_NAME, module_) {
+  const nb::module_& m = module_;
   registerApplicationSchema(m);
   registerConfiguration(m);
   registerEquivalenceCheckingManager(m);
