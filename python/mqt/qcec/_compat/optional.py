@@ -84,7 +84,7 @@ class OptionalDependencyTester:
             return
         message = f"The '{self._module}' library is required to {feature}."
         if self._msg:
-            message += f" {self._msg}."
+            message += f" {self._msg}"
         raise ImportError(message)
 
     @contextlib.contextmanager
