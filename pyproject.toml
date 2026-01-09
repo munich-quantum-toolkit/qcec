@@ -8,10 +8,10 @@
 
 [build-system]
 requires = [
-  "pybind11>=3.0.1",
+  "nanobind>=2.10.2",
   "scikit-build-core>=0.11.6",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.3.1",
+  "mqt.core~=3.4.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -48,7 +48,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "mqt.core~=3.3.1",
+    "mqt.core~=3.4.0",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
     "numpy>=1.22",
     "numpy>=1.24; python_version >= '3.11'",
@@ -77,6 +77,9 @@ wheel.install-dir = "mqt/qcec"
 
 # Explicitly set the package directory
 wheel.packages = ["python/mqt"]
+
+# Enable Stable ABI builds for CPython 3.12+
+wheel.py-api = "cp312"
 
 # Set required Ninja version
 ninja.version = ">=1.10"
@@ -366,10 +369,10 @@ mqt-qcec = { workspace = true }
 
 [dependency-groups]
 build = [
-  "pybind11>=3.0.1",
+  "nanobind>=2.10.2",
   "scikit-build-core>=0.11.6",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.3.1",
+  "mqt.core~=3.4.0",
 ]
 docs = [
   "furo>=2025.09.25",
