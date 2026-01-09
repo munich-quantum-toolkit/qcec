@@ -16,7 +16,7 @@
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "zx/FunctionalityConstruction.hpp"
-#include "zx/Rules.hpp"
+#include "zx/Simplify.hpp"
 #include "zx/ZXDefinitions.hpp"
 #include "zx/ZXDiagram.hpp"
 
@@ -83,7 +83,7 @@ EquivalenceCriterion ZXEquivalenceChecker::run() {
     }
     return equivalence;
   }
-  fullReduceApproximate();
+  zx::fullReduceApproximate(miter, tolerance);
 
   bool equivalent = true;
 
@@ -124,9 +124,8 @@ EquivalenceCriterion ZXEquivalenceChecker::run() {
   runtime += std::chrono::duration<double>(end - start).count();
 
   // non-equivalence might be due to incorrect assumption about the state of
-  // ancillaries or the check was aborted prematurely, so no information can be
-  // given
-  if ((!equivalent && ancilla) || isDone()) {
+  // ancillaries, so no information can be given
+  if (!equivalent && ancilla) {
     equivalence = EquivalenceCriterion::NoInformation;
   } else {
     if (equivalent) {
@@ -197,87 +196,6 @@ qc::Permutation complete(const qc::Permutation& p, const std::size_t n) {
 qc::Permutation invertPermutations(const qc::QuantumComputation& qc) {
   return concat(invert(complete(qc.outputPermutation, qc.getNqubits())),
                 complete(qc.initialLayout, qc.getNqubits()));
-}
-
-bool ZXEquivalenceChecker::fullReduceApproximate() {
-  auto simplified = fullReduce();
-  while (!isDone()) {
-    miter.approximateCliffords(tolerance);
-    if (!fullReduce()) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::fullReduce() {
-  if (!isDone()) {
-    miter.toGraphlike();
-  }
-  auto simplified = interiorCliffordSimp();
-  while (!isDone()) {
-    auto moreSimplified = cliffordSimp();
-    moreSimplified |= gadgetSimp();
-    moreSimplified |= interiorCliffordSimp();
-    moreSimplified |= pivotGadgetSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  if (!isDone()) {
-    miter.removeDisconnectedSpiders();
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::gadgetSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = false;
-    for (const auto& [v, _] : miter.getVertices()) {
-      if (miter.isDeleted(v)) {
-        continue;
-      }
-      if (checkAndFuseGadget(miter, v)) {
-        moreSimplified = true;
-      }
-    }
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::interiorCliffordSimp() {
-  auto simplified = spiderSimp();
-  while (!isDone()) {
-    auto moreSimplified = idSimp();
-    moreSimplified |= spiderSimp();
-    moreSimplified |= pivotPauliSimp();
-    moreSimplified |= localCompSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::cliffordSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = interiorCliffordSimp();
-    moreSimplified |= pivotSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
 }
 
 bool ZXEquivalenceChecker::canHandle(const qc::QuantumComputation& qc1,
