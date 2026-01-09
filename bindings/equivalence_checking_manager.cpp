@@ -90,8 +90,10 @@ void registerEquivalenceCheckingManager(const nb::module_& m) {
             return nb::cast(results.checkerResults);
           },
           [](EquivalenceCheckingManager::Results& results,
-             const nb::dict& obj) {
-            std::string jsonString = nb::cast<std::string>(nb::str(obj));
+             const nb::dict& value) {
+            nb::module_ json = nb::module_::import_("json");
+            nb::object dumps = json.attr("dumps");
+            const auto jsonString = nb::cast<std::string>(dumps(value));
             results.checkerResults = nlohmann::json::parse(jsonString);
           })
       .def("considered_equivalent",
