@@ -38,7 +38,7 @@ jobs:
   # Downloads the previously generated artifacts and deploys to PyPI on published releases.
   deploy:
     if: github.event_name == 'release' && github.event.action == 'published'
-    name: 🚀 Deploy to PyPI
+    name: Deploy to PyPI
     runs-on: ubuntu-latest
     environment:
       name: pypi
