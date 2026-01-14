@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Changed
+
+- 🔧 Replace `mypy` with `ty` ([#775], [#825]) ([**@denialhaag**])
+
 ## [3.4.0] - 2026-01-13
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#340)._
@@ -120,8 +124,10 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#825]: https://github.com/munich-quantum-toolkit/qcec/pull/825
 [#817]: https://github.com/munich-quantum-toolkit/qcec/pull/817
 [#796]: https://github.com/munich-quantum-toolkit/qcec/pull/796
+[#775]: https://github.com/munich-quantum-toolkit/qcec/pull/775
 [#735]: https://github.com/munich-quantum-toolkit/qcec/pull/735
 [#730]: https://github.com/munich-quantum-toolkit/qcec/pull/730
 [#704]: https://github.com/munich-quantum-toolkit/qcec/pull/704
