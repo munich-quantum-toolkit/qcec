@@ -11,6 +11,7 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ♻️ Auto-generate `pyqcec.pyi` via `nanobind.stubgen` ([#831]) ([**@denialhaag**])
 - 🔧 Replace `mypy` with `ty` ([#775], [#825]) ([**@denialhaag**])
 
 ## [3.4.0] - 2026-01-13
@@ -124,6 +125,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#831]: https://github.com/munich-quantum-toolkit/qcec/pull/831
 [#825]: https://github.com/munich-quantum-toolkit/qcec/pull/825
 [#817]: https://github.com/munich-quantum-toolkit/qcec/pull/817
 [#796]: https://github.com/munich-quantum-toolkit/qcec/pull/796
