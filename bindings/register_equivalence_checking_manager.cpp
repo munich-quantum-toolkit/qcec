@@ -11,6 +11,7 @@
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
+#include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "ir/QuantumComputation.hpp"
 
 #include <nanobind/nanobind.h>
