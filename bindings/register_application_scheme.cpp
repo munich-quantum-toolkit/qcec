@@ -18,7 +18,7 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 // NOLINTNEXTLINE(misc-use-internal-linkage)
-void registerApplicationSchema(const nb::module_& m) {
+void registerApplicationScheme(const nb::module_& m) {
   nb::enum_<ApplicationSchemeType>(
       m, "ApplicationScheme", nb::is_arithmetic(),
       R"pb(Describes the order in which the individual operations of both circuits are applied during the equivalence check.
