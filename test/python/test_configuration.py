@@ -51,8 +51,8 @@ def test_timeout() -> None:
     [
         ("computational_basis", StateType.computational_basis),
         ("classical", StateType.computational_basis),
-        ("random_1Q_basis", StateType.random_1Q_basis),
-        ("local_quantum", StateType.random_1Q_basis),
+        ("random_1q_basis", StateType.random_1q_basis),
+        ("local_quantum", StateType.random_1q_basis),
         ("stabilizer", StateType.stabilizer),
         ("global_quantum", StateType.stabilizer),
     ],
