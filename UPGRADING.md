@@ -4,6 +4,8 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
+To comply with established guidelines for attribute names, `mqt.qcec.pyqcec.StateType.random_1Q_basis` has been renamed to `random_1q_basis`.
+
 ## [3.4.0]
 
 ### Python wheels

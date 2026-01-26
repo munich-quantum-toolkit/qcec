@@ -16,7 +16,7 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 // forward declarations
-void registerApplicationSchema(const nb::module_& m);
+void registerApplicationScheme(const nb::module_& m);
 void registerConfiguration(const nb::module_& m);
 void registerEquivalenceCheckingManager(const nb::module_& m);
 void registerEquivalenceCriterion(const nb::module_& m);
@@ -24,7 +24,7 @@ void registerStateType(const nb::module_& m);
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 NB_MODULE(MQT_QCEC_MODULE_NAME, m) {
-  registerApplicationSchema(m);
+  registerApplicationScheme(m);
   registerConfiguration(m);
   registerEquivalenceCheckingManager(m);
   registerEquivalenceCriterion(m);
