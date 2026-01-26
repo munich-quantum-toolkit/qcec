@@ -25,7 +25,7 @@ class ApplicationScheme(enum.IntEnum):
     """
     Applies all gates from the first circuit, before proceeding with the second circuit.
 
-        Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
+    Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.
     """
 
     reference = 0

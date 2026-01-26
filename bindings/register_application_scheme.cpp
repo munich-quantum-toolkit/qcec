@@ -32,7 +32,7 @@ In case of the other checkers, which consider both circuits individually, using 
           "sequential", ApplicationSchemeType::Sequential,
           R"pb(Applies all gates from the first circuit, before proceeding with the second circuit.
 
-    Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.)pb")
+Referred to as *"reference"* in :cite:p:`burgholzer2021advanced`.)pb")
 
       .value("reference", ApplicationSchemeType::Sequential,
              R"pb(Alias for :attr:`~ApplicationScheme.sequential`.)pb")
