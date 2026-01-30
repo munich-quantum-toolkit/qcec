@@ -160,5 +160,5 @@ repos:
         language: unsupported
         require_serial: true
         types_or: [python, pyi, jupyter]
-        exclude: ^(docs/|mlir/|eval/)
+        exclude: ^(docs/)
         priority: 3
