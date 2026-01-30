@@ -1644,13 +1644,13 @@ provides-extras = ["qiskit"]
 [package.metadata.requires-dev]
 build = [
     { name = "mqt-core", specifier = "~=3.4.0" },
-    { name = "nanobind", specifier = "==2.10.2" },
+    { name = "nanobind", specifier = "~=2.10.2" },
     { name = "scikit-build-core", specifier = ">=0.11.6" },
     { name = "setuptools-scm", specifier = ">=9.2.2" },
 ]
 dev = [
     { name = "mqt-core", specifier = "~=3.4.0" },
-    { name = "nanobind", specifier = "==2.10.2" },
+    { name = "nanobind", specifier = "~=2.10.2" },
     { name = "nox", specifier = ">=2025.11.12" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
