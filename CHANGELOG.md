@@ -121,8 +121,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.4.1...HEAD
-[3.4.1]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.4.1
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.5.0
 [3.4.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.4.0
 [3.3.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.3.0
 [3.2.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.2.0
