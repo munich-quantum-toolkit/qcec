@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-02-02
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#350)._
+
 ### Changed
 
 - ⬆️ Update `mqt-core` to version 3.4.1 ([#837]) ([**@denialhaag**])
@@ -61,9 +65,9 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#320)._
 ### Changed
 
 - ⬆️ Bump minimum required `mqt-core` version to `3.2.1` ([#668]) ([**@denialhaag**])
-- **Breaking**: ⬆️ Bump minimum required `mqt-core` version to `3.2.0` ([#667]) ([**@denialhaag**])
-- **Breaking**: ⬆️ Require C++20 ([#667]) ([**@denialhaag**])
-- **Breaking**: ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
+- ⬆️ Bump minimum required `mqt-core` version to `3.2.0` ([#667]) ([**@denialhaag**])
+- ⬆️ Require C++20 ([#667]) ([**@denialhaag**])
+- ✨ Expose enums to Python via `pybind11`'s new (`enum.Enum`-compatible) `py::native_enum` ([#663]) ([**@denialhaag**])
 
 ### Fixed
 
@@ -75,11 +79,11 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#310)._
 
 ### Changed
 
-- **Breaking**: ⬆️ Bump minimum required `mqt-core` version to `3.1.0` ([#646]) ([**@denialhaag**])
-- **Breaking**: ⬆️ Bump minimum required `pybind11` version to `3.0.0` ([#646]) ([**@denialhaag**])
+- ⬆️ Bump minimum required `mqt-core` version to `3.1.0` ([#646]) ([**@denialhaag**])
+- ⬆️ Bump minimum required `pybind11` version to `3.0.0` ([#646]) ([**@denialhaag**])
 - ♻️ Move the C++ code for the Python bindings to the top-level `bindings` directory ([#618]) ([**@denialhaag**])
 - ♻️ Move all Python code (no tests) to the top-level `python` directory ([#618]) ([**@denialhaag**])
-- **Breaking**: 💥 ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
+- 💥 ZX-calculus checker now reports that it can't handle circuits with non-garbage ancilla qubits ([#512]) ([**@pehamTom**])
 
 ### Deprecated
 
@@ -99,17 +103,17 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#300)._
 
 ### Changed
 
-- **Breaking**: 🚚 Move MQT QCEC to the [munich-quantum-toolkit] GitHub organization
-- **Breaking**: ♻️ Use the `mqt-core` Python package for handling circuits ([#432]) ([**@burgholzer**])
-- **Breaking**: ♻️ Return counterexamples as decision diagrams instead of dense arrays ([#566]) ([**@burgholzer**])
-- **Breaking**: ♻️ Reduce and restructure public interface of the `EquivalenceCheckingManager` ([#566]) ([**@burgholzer**])
-- **Breaking**: ⬆️ Bump minimum required CMake version to `3.24.0` ([#582]) ([**@burgholzer**])
+- 🚚 Move MQT QCEC to the [munich-quantum-toolkit] GitHub organization
+- ♻️ Use the `mqt-core` Python package for handling circuits ([#432]) ([**@burgholzer**])
+- ♻️ Return counterexamples as decision diagrams instead of dense arrays ([#566]) ([**@burgholzer**])
+- ♻️ Reduce and restructure public interface of the `EquivalenceCheckingManager` ([#566]) ([**@burgholzer**])
+- ⬆️ Bump minimum required CMake version to `3.24.0` ([#582]) ([**@burgholzer**])
 - 📝 Rework existing project documentation ([#566]) ([**@burgholzer**])
 
 ### Removed
 
-- **Breaking**: 🔥 Remove support for `.real`, `.qc`, `.tfc`, and `GRCS` files ([#582]) ([**@burgholzer**])
-- **Breaking**: 🔥 Remove several re-exports from the top-level `mqt-qcec` package ([#566]) ([**@burgholzer**])
+- 🔥 Remove support for `.real`, `.qc`, `.tfc`, and `GRCS` files ([#582]) ([**@burgholzer**])
+- 🔥 Remove several re-exports from the top-level `mqt-qcec` package ([#566]) ([**@burgholzer**])
 
 ## [2.8.2] - 2025-02-18
 
@@ -117,7 +121,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.4.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.5.0
 [3.4.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.4.0
 [3.3.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.3.0
 [3.2.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.2.0
