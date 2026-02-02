@@ -11,6 +11,8 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ⬆️ Update `mqt-core` to version 3.4.1 ([#837]) ([**@denialhaag**])
+- ⬆️ Update `nanobind` to version 2.11.0 ([#837]) ([**@denialhaag**])
 - ♻️ Auto-generate `pyqcec.pyi` via `nanobind.stubgen` ([#831]) ([**@denialhaag**])
 - 🔧 Replace `mypy` with `ty` ([#775], [#825]) ([**@denialhaag**])
 
@@ -125,6 +127,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#837]: https://github.com/munich-quantum-toolkit/qcec/pull/837
 [#831]: https://github.com/munich-quantum-toolkit/qcec/pull/831
 [#825]: https://github.com/munich-quantum-toolkit/qcec/pull/825
 [#817]: https://github.com/munich-quantum-toolkit/qcec/pull/817
