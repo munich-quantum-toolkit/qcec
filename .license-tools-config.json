@@ -35,6 +35,6 @@
     "uv\\.lock",
     "py\\.typed",
     ".*build.*",
-    "qcec_patterns.txt"
+    "LICENSE"
   ]
 }
