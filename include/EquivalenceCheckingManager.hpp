@@ -12,7 +12,6 @@
 
 #include "Configuration.hpp"
 #include "EquivalenceCriterion.hpp"
-#include "ThreadSafeQueue.hpp"
 #include "checker/EquivalenceChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
@@ -21,6 +20,7 @@
 #include "dd/Node.hpp"
 #include "ir/QuantumComputation.hpp"
 
+#include <concepts>
 #include <condition_variable>
 #include <cstddef>
 #include <exception>
@@ -168,10 +168,8 @@ protected:
   StateGenerator stateGenerator;
   std::mutex stateGeneratorMutex;
 
-  bool done{false};
-  std::condition_variable doneCond;
-  std::mutex doneMutex;
-  std::vector<std::unique_ptr<EquivalenceChecker>> checkers;
+  // Map from process ID to checker results
+  std::map<std::size_t, std::unique_ptr<EquivalenceChecker>> checkers;
 
   Results results{};
 
@@ -198,65 +196,53 @@ protected:
   /// decision diagram checker is invoked to determine the equivalence.
   void checkSequential();
 
+  /// Helper method that runs sequential checks - can be called in a separate
+  /// process for timeout
+  EquivalenceCriterion runSequentialChecks();
+
   void checkSymbolic();
+
+  /// Helper method that runs symbolic check - can be called in a separate
+  /// process for timeout
+  EquivalenceCriterion runSymbolicCheck();
+
+  /// Helper method to execute a task with optional timeout using ProcessManager
+  /// @param task The task to execute
+  /// @param timeout The timeout duration (0 means no timeout)
+  /// @return The equivalence criterion result
+  EquivalenceCriterion
+  executeWithOptionalTimeout(const std::function<EquivalenceCriterion()>& task,
+                             std::chrono::duration<double> timeout);
 
   /// Parallel Equivalence Check
   /// The parallel flow makes use of the available processing power by
   /// orchestrating all configured checks in a parallel fashion
   void checkParallel();
 
-  /// Signal all checker that they shall abort the computation as soon as
-  /// possible since a result has been determined
-  void setAndSignalDone() {
-    done = true;
-    for (const auto& checker : checkers) {
-      if (checker) {
-        checker->signalDone();
+  /**
+   * @brief Create a task that runs an EquivalenceChecker
+   * @tparam Checker Checker type (must derive from EquivalenceChecker)
+   * @return Callable task suitable for execution in ProcessManager
+   *
+   * @details Captures circuit data by value for safety in forked processes.
+   * StateGenerator is captured by reference as it's copy-on-write safe after
+   * fork().
+   */
+  template <std::derived_from<EquivalenceChecker> Checker>
+  auto makeCheckerTask() -> std::function<EquivalenceCriterion()> {
+    // Capture circuits and config by value for process safety
+    return [qc1 = this->qc1, qc2 = this->qc2, config = this->configuration,
+            &stateGen = this->stateGenerator]() -> EquivalenceCriterion {
+      auto checker = std::make_unique<Checker>(qc1, qc2, config);
+
+      // Special handling for simulation checker
+      if constexpr (std::is_same_v<Checker, DDSimulationChecker>) {
+        // No dynamic_cast needed - we know the type at compile time
+        checker->setRandomInitialState(stateGen);
       }
-    }
-  }
 
-  /// \brief Run an EquivalenceChecker asynchronously
-  ///
-  /// This function is used to asynchronously run an EquivalenceChecker. It also
-  /// takes care of creating the checker if it does not exist yet. Additionally,
-  /// it takes care that the checker signals the main thread when it is done
-  /// (even in case of an exception).
-  ///
-  /// \tparam Checker The type of the checker (must be derived from the
-  /// EquivalenceChecker class).
-  /// \param id The id in the checkers vector where the checker is stored.
-  /// \param queue The queue to which the checker shall push its id
-  /// once it is done.
-  /// \return A future that can be used to wait for the checker to finish.
-  template <class Checker>
-  std::future<void> asyncRunChecker(const std::size_t id,
-                                    ThreadSafeQueue<std::size_t>& queue) {
-    static_assert(std::is_base_of_v<EquivalenceChecker, Checker>,
-                  "Checker must be derived from EquivalenceChecker");
-    return std::async(std::launch::async, [this, id, &queue]() {
-      try {
-        auto& checker = checkers[id];
-        if (!checker) {
-          checker = std::make_unique<Checker>(qc1, qc2, configuration);
-        }
-
-        if constexpr (std::is_same_v<Checker, DDSimulationChecker>) {
-          auto* const simChecker =
-              dynamic_cast<DDSimulationChecker*>(checker.get());
-          const std::lock_guard stateGeneratorLock(stateGeneratorMutex);
-          simChecker->setRandomInitialState(stateGenerator);
-        }
-
-        if (!done) {
-          checker->run();
-        }
-        queue.push(id);
-      } catch (const std::exception& e) {
-        queue.push(id);
-        throw;
-      }
-    });
+      return checker->run();
+    };
   }
 
   [[nodiscard]] bool simulationsFinished() const {
