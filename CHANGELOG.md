@@ -9,6 +9,13 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-04-23
+
+### Changed
+
+- ⬆️ Update `mqt-core` to version 3.5.1 ([#907]) ([**@burgholzer**])
+- ⬆️ Update `nanobind` to version 2.12.0 ([#907]) ([**@burgholzer**])
+
 ## [3.5.0] - 2026-02-02
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#350)._
@@ -121,7 +128,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.5.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.6.0...HEAD
+[3.6.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.6.0
 [3.5.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.5.0
 [3.4.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.4.0
 [3.3.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.3.0
@@ -132,6 +140,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#907]: https://github.com/munich-quantum-toolkit/qcec/pull/907
 [#837]: https://github.com/munich-quantum-toolkit/qcec/pull/837
 [#831]: https://github.com/munich-quantum-toolkit/qcec/pull/831
 [#825]: https://github.com/munich-quantum-toolkit/qcec/pull/825

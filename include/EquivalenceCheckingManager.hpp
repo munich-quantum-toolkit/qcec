@@ -27,7 +27,7 @@
 #include <future>
 #include <memory>
 #include <mutex>
-#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
 #include <ostream>
 #include <string>
 #include <string_view>
