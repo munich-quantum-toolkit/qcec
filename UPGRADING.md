@@ -7,11 +7,13 @@ This document describes breaking changes and how to upgrade. For a complete list
 ## [3.6.0]
 
 This release brings extended support for multi-controlled gates that was introduced in https://github.com/munich-quantum-toolkit/core/pull/1380 to the ZX-calculus checker.
+
 This release also updates the minimum required `mqt-core` version to `v3.5.1` as well as the `nanobind` version to `v2.12.0`.
 
 ## [3.5.0]
 
 To comply with established guidelines for attribute names, `mqt.qcec.pyqcec.StateType.random_1Q_basis` has been renamed to `random_1q_basis`.
+
 This release also updates the minimum required `mqt-core` version to `v3.4.1` as well as the `nanobind` version to `v2.11.0`.
 
 ## [3.4.0]
