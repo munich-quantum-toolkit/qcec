@@ -11,6 +11,12 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [3.6.0] - 2026-04-23
 
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#360)._
+
+### Added
+
+- ✨ Add support for many multi-controlled gates to the ZX-calculus checker ([#907]) ([**@burgholzer**])
+
 ### Changed
 
 - ⬆️ Update `mqt-core` to version 3.5.1 ([#907]) ([**@burgholzer**])
