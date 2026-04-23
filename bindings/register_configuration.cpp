@@ -12,7 +12,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/string.h> // NOLINT(misc-include-cleaner)
-#include <nlohmann/json.hpp>
+#include <nlohmann/json.hpp>     // NOLINT(misc-include-cleaner)
 
 namespace ec {
 
