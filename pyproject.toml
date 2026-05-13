@@ -11,7 +11,7 @@ requires = [
   "nanobind~=2.12.0",
   "scikit-build-core>=0.12.2",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.5.1",
+  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core@5329f09fdf292054baf21ba4096b65f58f3d6466",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -48,7 +48,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "mqt.core~=3.5.1",
+    "mqt.core @ git+https://github.com/munich-quantum-toolkit/core@5329f09fdf292054baf21ba4096b65f58f3d6466",
     "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
     "numpy>=1.22",
     "numpy>=1.24; python_version >= '3.11'",
@@ -363,7 +363,7 @@ build = [
   "nanobind~=2.12.0",
   "scikit-build-core>=0.12.2",
   "setuptools-scm>=9.2.2",
-  "mqt.core~=3.5.1",
+  "mqt.core @ git+https://github.com/munich-quantum-toolkit/core@5329f09fdf292054baf21ba4096b65f58f3d6466",
 ]
 docs = [
   "furo>=2025.09.25",
