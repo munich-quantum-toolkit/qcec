@@ -19,7 +19,7 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#360)._
 
 ### Changed
 
-- ⬆️ Update `mqt-core` to version 3.5.1 ([#907]) ([**@burgholzer**])
+- ⬆️ Update `mqt-core` to version 3.6.0 ([#907]) ([**@burgholzer**])
 - ⬆️ Update `nanobind` to version 2.12.0 ([#907]) ([**@burgholzer**])
 
 ## [3.5.0] - 2026-02-02
