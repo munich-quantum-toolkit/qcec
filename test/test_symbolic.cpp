@@ -80,7 +80,7 @@ TEST_F(SymbolicTest, Timeout) {
 
 TEST_F(SymbolicTest, InvalidCircuit) {
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1_pc, 2_pc, 3_pc}, 0);
+  qc.mcy({1_pc, 2_pc, 3_pc}, 0);
   qc.rx(xMonom, 0);
   auto ecm = ec::EquivalenceCheckingManager(qc, qc);
   ecm.run();

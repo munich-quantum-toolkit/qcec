@@ -222,7 +222,7 @@ TEST_F(ZXTest, ZXWrongAncilla) {
 
 TEST_F(ZXTest, ZXConfiguredForInvalidCircuitParallel) {
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1, 2, 3}, 0);
+  qc.mcy({1, 2, 3}, 0);
 
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qc, config);
   ecm->run();
@@ -233,7 +233,7 @@ TEST_F(ZXTest, ZXConfiguredForInvalidCircuitParallel) {
 
 TEST_F(ZXTest, ZXConfiguredForInvalidCircuitSequential) {
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1, 2, 3}, 0);
+  qc.mcy({1, 2, 3}, 0);
 
   config.execution.parallel = false;
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qc, config);
