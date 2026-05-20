@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Fixed
 
-- 🐛 Fix implementation of `ec::complete()` ([#929]) ([**@denialhaag**])
+- 🐛 Fix segfaults on permutation mismatches in the ZX checker ([#929]) ([**@denialhaag**])
 
 ## [3.6.0] - 2026-05-13
 
