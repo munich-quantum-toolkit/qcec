@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import pytest
+from mqt.core.ir import QuantumComputation
 from qiskit import transpile
 from qiskit.circuit import AncillaRegister, QuantumCircuit
 
@@ -128,3 +129,54 @@ def test_zx_ancilla_support() -> None:
         run_construction_checker=False,
     )
     assert result.equivalence == EquivalenceCriterion.no_information
+
+
+def test_issue_928() -> None:
+    """This is a regression test for the issue described in https://github.com/munich-quantum-toolkit/qcec/issues/928."""
+    qc1 = QuantumComputation.from_qasm_str("""
+OPENQASM 2.0;
+include "qelib1.inc";
+
+qreg q[8];
+creg m_c_7[1];
+
+id q[7];
+id q[0];
+id q[1];
+id q[2];
+id q[3];
+id q[4];
+id q[5];
+id q[6];
+measure q[7] -> m_c_7[0];
+id q[0];
+id q[1];
+id q[2];
+id q[3];
+id q[4];
+id q[5];
+id q[6];
+id q[7];
+""")
+
+    qc2 = QuantumComputation.from_qasm_str("""
+OPENQASM 2.0;
+include "qelib1.inc";
+
+qreg q[9];
+creg c[9];
+
+id q[0];
+id q[1];
+id q[2];
+id q[3];
+id q[4];
+id q[5];
+id q[6];
+id q[7];
+id q[8];
+cx q[7],q[8];
+""")
+
+    result = verify(qc1, qc2, transform_dynamic_circuit=True)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
