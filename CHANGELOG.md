@@ -9,6 +9,10 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛 Fix segfaults on permutation mismatches in the ZX checker ([#929]) ([**@denialhaag**])
+
 ## [3.6.0] - 2026-05-13
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#360)._
@@ -146,6 +150,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#929]: https://github.com/munich-quantum-toolkit/qcec/pull/929
 [#907]: https://github.com/munich-quantum-toolkit/qcec/pull/907
 [#837]: https://github.com/munich-quantum-toolkit/qcec/pull/837
 [#831]: https://github.com/munich-quantum-toolkit/qcec/pull/831
