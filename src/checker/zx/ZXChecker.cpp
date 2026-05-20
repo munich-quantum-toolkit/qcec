@@ -23,7 +23,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -161,42 +161,46 @@ qc::Permutation concat(const qc::Permutation& p1,
   return pComb;
 }
 
-qc::Permutation complete(const qc::Permutation& p, const std::size_t n) {
-  if (p.size() == n) {
+qc::Permutation complete(const qc::Permutation& p,
+                         const qc::Permutation& reference) {
+  if (p.size() == reference.size()) {
     return p;
   }
 
   qc::Permutation pComp = p;
 
-  std::vector<bool> mappedTo(n, false);
-  std::unordered_map<std::size_t, bool> mappedFrom;
-  for (const auto [k, v] : p) {
-    mappedFrom[k] = true;
-    mappedTo[v] = true;
+  std::unordered_set<qc::Qubit> usedLogicals;
+  usedLogicals.reserve(p.size());
+  for (const auto& [physical, logical] : p) {
+    usedLogicals.insert(logical);
   }
 
-  // Map qubits greedily
-  for (std::size_t i = 0; i < n; ++i) {
-    // If qubit is already mapped, skip
-    if (mappedTo[i]) {
-      continue;
+  std::vector<qc::Qubit> unmappedPhysicals;
+  unmappedPhysicals.reserve(reference.size() - p.size());
+  for (const auto& [physical, logical] : reference) {
+    if (pComp.find(physical) == pComp.end()) {
+      unmappedPhysicals.emplace_back(physical);
     }
+  }
 
-    for (std::size_t j = 0; j < n; ++j) {
-      if (!mappedFrom.contains(j)) {
-        pComp[static_cast<qc::Qubit>(j)] = static_cast<qc::Qubit>(i);
-        mappedTo[i] = true;
-        mappedFrom[j] = true;
-        break;
-      }
+  std::vector<qc::Qubit> unusedLogicals;
+  unusedLogicals.reserve(reference.size() - p.size());
+  for (const auto& [physical, logical] : reference) {
+    if (!usedLogicals.contains(logical)) {
+      unusedLogicals.emplace_back(logical);
     }
+  }
+
+  assert(unmappedPhysicals.size() == unusedLogicals.size());
+  for (std::size_t i = 0; i < unmappedPhysicals.size(); ++i) {
+    pComp[unmappedPhysicals[i]] = unusedLogicals[i];
   }
   return pComp;
 }
 
 qc::Permutation invertPermutations(const qc::QuantumComputation& qc) {
-  return concat(invert(complete(qc.outputPermutation, qc.getNqubits())),
-                complete(qc.initialLayout, qc.getNqubits()));
+  return concat(invert(complete(qc.outputPermutation, qc.initialLayout)),
+                qc.initialLayout);
 }
 
 bool ZXEquivalenceChecker::fullReduceApproximate() {
