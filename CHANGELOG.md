@@ -9,6 +9,14 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ## [Unreleased]
 
+### Added
+
+- 🚸 Add [CMake presets] to provide a standardized and reproducible way to configure builds ([#936]) ([**@denialhaag**])
+
+### Changed
+
+- ⬆️ Update [munich-quantum-toolkit/workflows] to version `v2.0.1` ([#936]) ([**@denialhaag**])
+
 ## [3.6.1] - 2026-05-21
 
 ### Fixed
@@ -153,6 +161,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#936]: https://github.com/munich-quantum-toolkit/qcec/pull/936
 [#929]: https://github.com/munich-quantum-toolkit/qcec/pull/929
 [#907]: https://github.com/munich-quantum-toolkit/qcec/pull/907
 [#837]: https://github.com/munich-quantum-toolkit/qcec/pull/837
@@ -192,3 +201,5 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 [GitHub Release Notes]: https://github.com/munich-quantum-toolkit/qcec/releases
 [munich-quantum-toolkit]: https://github.com/munich-quantum-toolkit
+[CMake presets]: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
+[munich-quantum-toolkit/workflows]: https://github.com/munich-quantum-toolkit/workflows

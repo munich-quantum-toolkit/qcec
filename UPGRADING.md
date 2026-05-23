@@ -4,6 +4,23 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
+### CMake presets
+
+[CMake presets] have been added to provide a standardized and reproducible way to configure builds across different platforms.
+These presets are also used in our CI.
+
+On Unix systems, the `debug`, `release`, and `coverage` presets can be used to configure, build, and test MQT QCEC.
+
+```console
+cmake --preset release
+cmake --build --preset release
+ctest --preset release
+```
+
+Additionally, the `lint` preset can be used to configure and build MQT QCEC in preparation for a `clang-tidy` run.
+
+If you are on Windows, use the `debug-windows` and `release-windows` presets.
+
 ## [3.6.0]
 
 This release brings extended support for multi-controlled gates that was introduced in https://github.com/munich-quantum-toolkit/core/pull/1380 to the ZX-calculus checker.
@@ -109,3 +126,4 @@ Alternatively, CMake can be conveniently installed from PyPI using the [`cmake`]
 <!-- Other links -->
 
 [MQT SyReC]: https://github.com/cda-tum/mqt-syrec
+[CMake presets]: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
