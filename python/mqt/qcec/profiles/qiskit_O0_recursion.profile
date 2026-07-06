@@ -1,4 +1,4 @@
-# qiskit_O0_recursion.profile, Qiskit version: 2.2.1
+# qiskit_O0_recursion.profile, Qiskit version: 2.5.0
 x 0 1
 y 0 2
 z 0 1
