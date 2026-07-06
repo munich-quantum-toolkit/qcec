@@ -1,4 +1,4 @@
-# qiskit_O2_recursion.profile, Qiskit version: 2.2.1
+# qiskit_O2_recursion.profile, Qiskit version: 2.5.0
 x 0 1
 y 0 2
 z 0 1
@@ -19,7 +19,7 @@ iswap 0 9
 dcx 0 2
 ecr 0 4
 rxx 0 14
-ryy 0 11
+ryy 0 12
 rzz 0 3
 rzx 0 9
 x 1 1
@@ -29,9 +29,9 @@ h 1 6
 sx 1 10
 p 1 5
 rx 1 9
-ry 1 10
+ry 1 11
 rz 1 4
-u 1 12
+u 1 10
 swap 1 26
 x 2 18
 p 2 13
