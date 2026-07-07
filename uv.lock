@@ -1744,7 +1744,7 @@ provides-extras = ["qiskit"]
 build = [
     { name = "mqt-core", specifier = "~=3.6.0" },
     { name = "nanobind", specifier = "~=2.12.0" },
-    { name = "scikit-build-core", specifier = ">=0.12.2" },
+    { name = "scikit-build-core", specifier = "~=0.12" },
     { name = "setuptools-scm", specifier = ">=9.2.2" },
 ]
 dev = [
@@ -1756,7 +1756,7 @@ dev = [
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
     { name = "qiskit", extras = ["qasm3-import"], specifier = ">=1.0.0" },
-    { name = "scikit-build-core", specifier = ">=0.12.2" },
+    { name = "scikit-build-core", specifier = "~=0.12" },
     { name = "setuptools-scm", specifier = ">=9.2.2" },
 ]
 docs = [
