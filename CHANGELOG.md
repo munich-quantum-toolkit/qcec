@@ -15,6 +15,8 @@ This project adheres to [Semantic Versioning], with the exception that minor rel
 
 ### Changed
 
+- ⬆️ Update `mqt-core` to version 3.7.0 ([#976]) ([**@denialhaag**])
+- ⬆️ Update `nanobind` to version 2.13.0 ([#976]) ([**@denialhaag**])
 - ⬆️ Update [munich-quantum-toolkit/workflows] to version `v2.0.1` ([#936]) ([**@denialhaag**])
 
 ## [3.6.1] - 2026-05-21
@@ -161,6 +163,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#976]: https://github.com/munich-quantum-toolkit/qcec/pull/976
 [#936]: https://github.com/munich-quantum-toolkit/qcec/pull/936
 [#929]: https://github.com/munich-quantum-toolkit/qcec/pull/929
 [#907]: https://github.com/munich-quantum-toolkit/qcec/pull/907
