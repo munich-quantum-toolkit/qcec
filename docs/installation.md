@@ -4,9 +4,8 @@
 # Installation
 
 MQT QCEC is primarily developed as a C++20 library with Python bindings. The
-Python package is available on
-[PyPI](https://pypi.org/project/mqt.qcec/) and can be installed on all
-major operating systems with all
+Python package is available on [PyPI](https://pypi.org/project/mqt.qcec/) and
+can be installed on all major operating systems with all
 [officially supported Python versions](https://devguide.python.org/versions/).
 
 :::::{tip}
@@ -66,6 +65,7 @@ python -m pip install mqt.qcec
 :::
 
 ::::
+
 In most cases, no compilation is required; a platform-specific prebuilt wheel is
 downloaded and installed.
 
@@ -111,8 +111,8 @@ and [CMake](https://cmake.org/) 3.24 or newer.
 
 ## Integrating MQT QCEC into Your Project
 
-To use the MQT QCEC Python package in your project, add it as a dependency
-in your {code}`pyproject.toml` or {code}`setup.py`. This ensures the package is
+To use the MQT QCEC Python package in your project, add it as a dependency in
+your {code}`pyproject.toml` or {code}`setup.py`. This ensures the package is
 installed when your project is installed.
 
 ::::{tab-set}
@@ -157,8 +157,8 @@ either
 
 - add it as a [{code}`git` submodule][git-submodule] and build it as part of
   your project, or
-- install MQT QCEC on your system and use CMake's {code}`find_package()`
-  command to locate it, or
+- install MQT QCEC on your system and use CMake's {code}`find_package()` command
+  to locate it, or
 - use CMake's [{code}`FetchContent`][FetchContent] module to combine both
   approaches.
 
@@ -167,9 +167,9 @@ either
 :::{tab-item} {code}`FetchContent`
 
 This is the recommended approach because it lets you detect installed versions
-of MQT QCEC and only downloads the library if it is not available on the
-system. Furthermore, CMake's [{code}`FetchContent`][FetchContent] module
-provides flexibility in how the library is integrated into the project.
+of MQT QCEC and only downloads the library if it is not available on the system.
+Furthermore, CMake's [{code}`FetchContent`][FetchContent] module provides
+flexibility in how the library is integrated into the project.
 
 ```cmake
 include(FetchContent)
