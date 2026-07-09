@@ -4,6 +4,8 @@ This document describes breaking changes and how to upgrade. For a complete list
 
 ## [Unreleased]
 
+This release updates the minimum required `mqt-core` version to 3.7.0 as well as the `nanobind` version to 2.13.0.
+
 ### CMake presets
 
 [CMake presets] have been added to provide a standardized and reproducible way to configure builds across different platforms.
@@ -25,13 +27,13 @@ If you are on Windows, use the `debug-windows` and `release-windows` presets.
 
 This release brings extended support for multi-controlled gates that was introduced in https://github.com/munich-quantum-toolkit/core/pull/1380 to the ZX-calculus checker.
 
-This release also updates the minimum required `mqt-core` version to `v3.6.0` as well as the `nanobind` version to `v2.12.0`.
+This release also updates the minimum required `mqt-core` version to 3.6.0 as well as the `nanobind` version to 2.12.0.
 
 ## [3.5.0]
 
 To comply with established guidelines for attribute names, `mqt.qcec.pyqcec.StateType.random_1Q_basis` has been renamed to `random_1q_basis`.
 
-This release also updates the minimum required `mqt-core` version to `v3.4.1` as well as the `nanobind` version to `v2.11.0`.
+This release also updates the minimum required `mqt-core` version to 3.4.1 as well as the `nanobind` version to 2.11.0.
 
 ## [3.4.0]
 
