@@ -337,7 +337,6 @@ repair-wheel-command = """delvewheel repair -w {dest_dir} {wheel} --namespace-pk
 --exclude mqt-core-algorithms.dll \
 --exclude mqt-core-dd.dll \
 --exclude mqt-core-zx.dll"""
-environment = { CMAKE_ARGS = "-T ClangCL" }
 
 [[tool.cibuildwheel.overrides]]
 select = "cp312-*"
