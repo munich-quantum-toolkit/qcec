@@ -9,7 +9,7 @@
 [build-system]
 requires = [
   "nanobind~=2.13.0",
-  "scikit-build-core~=0.12",
+  "scikit-build-core~=1.0.3",
   "setuptools-scm>=9.2.2",
   "mqt.core~=3.7.0",
 ]
@@ -337,7 +337,6 @@ repair-wheel-command = """delvewheel repair -w {dest_dir} {wheel} --namespace-pk
 --exclude mqt-core-algorithms.dll \
 --exclude mqt-core-dd.dll \
 --exclude mqt-core-zx.dll"""
-environment = { CMAKE_ARGS = "-T ClangCL" }
 
 [[tool.cibuildwheel.overrides]]
 select = "cp312-*"
@@ -360,7 +359,7 @@ mqt-qcec = { workspace = true }
 [dependency-groups]
 build = [
   "nanobind~=2.13.0",
-  "scikit-build-core~=0.12",
+  "scikit-build-core~=1.0.3",
   "setuptools-scm>=9.2.2",
   "mqt.core~=3.7.0",
 ]
