@@ -189,8 +189,7 @@ Design of Integrated Circuits and Systems (TCAD)_, 2021.
 
 [[2]](https://arxiv.org/pdf/2009.02376.pdf) L. Burgholzer, R. Raymond, and R.
 Wille. Verifying Results of the IBM Qiskit Quantum Circuit Compilation Flow. In
-_IEEE International Conference on Quantum Computing and Engineering (QCE)_,
-2020.
+_IEEE International Conference on Quantum Computing and Engineering (QCE)_, 2020.
 
 [[3]](https://arxiv.org/pdf/2011.07288.pdf) L. Burgholzer, R. Kueng, and R.
 Wille. Random Stimuli Generation for the Verification of Quantum Circuits. In
@@ -202,8 +201,7 @@ _Design Automation Conference (DAC)_, 2022.
 
 [[5]](https://arxiv.org/pdf/2208.12820.pdf) T. Peham, L. Burgholzer, and R.
 Wille. Equivalence Checking of Quantum Circuits with the ZX-Calculus.
-_IEEE Journal on Emerging and Selected Topics in Circuits and Systems (JETCAS)_,
-2022.
+_IEEE Journal on Emerging and Selected Topics in Circuits and Systems (JETCAS)_, 2022.
 
 [[6]](https://arxiv.org/pdf/2210.12166.pdf) T. Peham, L. Burgholzer, and R.
 Wille. Equivalence Checking of Parameterized Quantum Circuits: Verifying the
