@@ -26,13 +26,13 @@ from mqt.qcec.compilation_flow_profiles import AncillaMode, generate_profile, ge
 
 
 @pytest.fixture(params=[0, 1, 2, 3])
-def optimization_level(request: Any) -> int:  # noqa: ANN401
+def optimization_level(request: Any) -> int:  # ruff:ignore[any-type]
     """Fixture for optimization levels."""
     return cast("int", request.param)
 
 
 @pytest.fixture(params=[AncillaMode.NO_ANCILLA, AncillaMode.RECURSION, AncillaMode.V_CHAIN])
-def ancilla_mode(request: Any) -> AncillaMode:  # noqa: ANN401
+def ancilla_mode(request: Any) -> AncillaMode:  # ruff:ignore[any-type]
     """Fixture for ancilla modes."""
     return cast("AncillaMode", request.param)
 
