@@ -123,7 +123,7 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#320)._
 
 ### Added
 
-- 🐍 Build Python 3.14 wheels ([#665]) ([**@denialhaag**])
+- 🐍 Start building CPython 3.14 wheels ([#665]) ([**@denialhaag**])
 
 ### Changed
 
