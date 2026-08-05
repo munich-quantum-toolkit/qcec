@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- 🐍 Start building CPython 3.15 wheels ([#1008]) ([**@denialhaag**])
+
 ## [3.8.0] - 2026-08-02
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#380)._
@@ -212,6 +216,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1008]: https://github.com/munich-quantum-toolkit/qcec/pull/1008
 [#1004]: https://github.com/munich-quantum-toolkit/qcec/pull/1004
 [#977]: https://github.com/munich-quantum-toolkit/qcec/pull/977
 [#976]: https://github.com/munich-quantum-toolkit/qcec/pull/976
