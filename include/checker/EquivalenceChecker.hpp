@@ -15,7 +15,6 @@
 #include "ir/QuantumComputation.hpp"
 
 #include <algorithm>
-#include <atomic>
 #include <cstddef>
 #include <nlohmann/json_fwd.hpp>
 #include <utility>
@@ -41,11 +40,6 @@ public:
 
   virtual void json(nlohmann::json& j) const noexcept;
 
-  void signalDone() { done.store(true, std::memory_order_relaxed); }
-  [[nodiscard]] auto isDone() const {
-    return done.load(std::memory_order_relaxed);
-  }
-
 protected:
   qc::QuantumComputation const* qc1;
   qc::QuantumComputation const* qc2;
@@ -56,9 +50,6 @@ protected:
 
   EquivalenceCriterion equivalence = EquivalenceCriterion::NoInformation;
   double runtime{};
-
-private:
-  std::atomic<bool> done{false};
 };
 
 } // namespace ec

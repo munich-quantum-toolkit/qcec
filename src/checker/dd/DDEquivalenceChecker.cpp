@@ -119,10 +119,6 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::run() {
   // postprocess the result
   postprocess();
 
-  if (isDone()) {
-    return equivalence;
-  }
-
   // check the equivalence
   equivalence = checkEquivalence();
 
@@ -144,33 +140,25 @@ template <class DDType> void DDEquivalenceChecker<DDType>::initialize() {
 }
 
 template <class DDType> void DDEquivalenceChecker<DDType>::execute() {
-  while (!taskManager1.finished() && !taskManager2.finished() && !isDone()) {
+  while (!taskManager1.finished() && !taskManager2.finished()) {
     // skip over any SWAP operations
     taskManager1.applySwapOperations();
     taskManager2.applySwapOperations();
 
-    if (!taskManager1.finished() && !taskManager2.finished() && !isDone()) {
+    if (!taskManager1.finished() && !taskManager2.finished()) {
       // query application scheme on how to proceed
       const auto [apply1, apply2] = (*applicationScheme)();
 
       // advance both tasks correspondingly
-      if (!isDone()) {
-        taskManager1.advance(apply1);
-      }
-      if (!isDone()) {
-        taskManager2.advance(apply2);
-      }
+      taskManager1.advance(apply1);
+      taskManager2.advance(apply2);
     }
   }
 }
 
 template <class DDType> void DDEquivalenceChecker<DDType>::finish() {
-  if (!isDone()) {
-    taskManager1.finish();
-  }
-  if (!isDone()) {
-    taskManager2.finish();
-  }
+  taskManager1.finish();
+  taskManager2.finish();
 }
 
 template <class DDType>
@@ -178,15 +166,11 @@ void DDEquivalenceChecker<DDType>::postprocessTask(TaskManager<DDType>& task) {
   // ensure that the permutation that was tracked throughout the circuit matches
   // the expected output permutation
   task.changePermutation();
-  if (isDone()) {
-    return;
-  }
+
   // eliminate the superfluous contributions of ancillary qubits (this only has
   // an effect on matrices)
   task.reduceAncillae();
-  if (isDone()) {
-    return;
-  }
+
   // sum up the contributions of garbage qubits if we want to check for partial
   // equivalence
   if (configuration.functionality.checkPartialEquivalence) {
@@ -195,12 +179,8 @@ void DDEquivalenceChecker<DDType>::postprocessTask(TaskManager<DDType>& task) {
 }
 
 template <class DDType> void DDEquivalenceChecker<DDType>::postprocess() {
-  if (!isDone()) {
-    postprocessTask(taskManager1);
-  }
-  if (!isDone()) {
-    postprocessTask(taskManager2);
-  }
+  postprocessTask(taskManager1);
+  postprocessTask(taskManager2);
 }
 
 template <class DDType>
