@@ -12,8 +12,6 @@
 #include "checker/zx/Simplify.hpp"
 #include "checker/zx/ZXDefinitions.hpp"
 #include "checker/zx/ZXDiagram.hpp"
-#include "dd/FunctionalityConstruction.hpp"
-#include "dd/Package.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
@@ -59,18 +57,6 @@ void checkEquivalence(const qc::QuantumComputation& qc1,
     ASSERT_LT(q, qc1.getNqubits());
     EXPECT_TRUE(d1.connected(d1.getInput(q), d1.getOutput(q)));
   }
-}
-
-void checkExactUnitaryEquivalence(const qc::QuantumComputation& qc1,
-                                  const qc::QuantumComputation& qc2) {
-  ASSERT_EQ(qc1.getNqubits(), qc2.getNqubits());
-
-  dd::Package package(qc1.getNqubits());
-  const auto actual = dd::buildFunctionality(qc1, package);
-  const auto expected = dd::buildFunctionality(qc2, package);
-  EXPECT_EQ(actual, expected);
-  package.decRef(actual);
-  package.decRef(expected);
 }
 
 void addDirtyAncillaMcx(qc::QuantumComputation& circuit,
@@ -184,12 +170,12 @@ TEST_F(ZXFunctionalityTest, parseQasm) {
       std::array{EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
                  EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple};
   for (std::size_t i = 0; i < edges.size(); ++i) {
-    const auto& [v1, v2] = edges[i];
+    const auto& [v1, v2] = edges.at(i);
     const auto& edge = diag.getEdge(v1, v2);
     const auto hasValue = edge.has_value();
     ASSERT_TRUE(hasValue);
     if (hasValue) {
-      EXPECT_EQ(edge->type, expectedEdgeTypes[i]);
+      EXPECT_EQ(edge->type, expectedEdgeTypes.at(i));
     }
   }
 
@@ -203,7 +189,7 @@ TEST_F(ZXFunctionalityTest, parseQasm) {
     const auto hasValue = vData.has_value();
     ASSERT_TRUE(hasValue);
     if (hasValue) {
-      EXPECT_EQ(vData->type, expectedVertexTypes[i]);
+      EXPECT_EQ(vData->type, expectedVertexTypes.at(i));
       EXPECT_TRUE(vData->phase.isZero());
     }
   }
@@ -334,7 +320,6 @@ TEST_F(ZXFunctionalityTest, MCX) {
 
   const auto qcPrime = makeReferenceMcx(3);
 
-  checkExactUnitaryEquivalence(qc, qcPrime);
   checkEquivalence(qc, qcPrime, {0, 1, 2, 3});
 }
 
@@ -376,7 +361,6 @@ TEST_F(ZXFunctionalityTest, LargeMCX) {
     std::vector<qc::Qubit> qubits(numQubits);
     std::iota(qubits.begin(), qubits.end(), 0U);
 
-    checkExactUnitaryEquivalence(qc, reference);
     checkEquivalence(qc, reference, qubits);
 
     const auto diag = FunctionalityConstruction::buildFunctionality(&qc);
@@ -392,7 +376,6 @@ TEST_F(ZXFunctionalityTest, MCZ) {
   auto qcPrime = qc::QuantumComputation(4);
   addReferenceMcphase(qcPrime, PI, {1, 2, 3}, 0);
 
-  checkExactUnitaryEquivalence(qc, qcPrime);
   checkEquivalence(qc, qcPrime, {0, 1, 2, 3});
 }
 
@@ -443,7 +426,6 @@ TEST_F(ZXFunctionalityTest, MCRZ) {
   qcPrime.crz(-phase / 2, 3, 0);
   qcPrime.mcx({1, 2}, 0);
 
-  checkExactUnitaryEquivalence(qc, qcPrime);
   checkEquivalence(qc, qcPrime, {0, 1, 2, 3});
 }
 

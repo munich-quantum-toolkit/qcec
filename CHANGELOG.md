@@ -17,7 +17,8 @@ releases may include breaking changes.
 ### Changed
 
 - ♻️ Move the ZX-calculus implementation from MQT Core into QCEC and integrate
-  its simplification directly with the equivalence checker.
+  its simplification directly with the equivalence checker ([#1018])
+  ([**@burgholzer**])
 - ⬆️ Update `nanobind` to version 2.14.0 ([#1017]) ([**@denialhaag**])
 
 ## [3.8.0] - 2026-08-02
@@ -222,6 +223,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1018]: https://github.com/munich-quantum-toolkit/qcec/pull/1018
 [#1017]: https://github.com/munich-quantum-toolkit/qcec/pull/1017
 [#1008]: https://github.com/munich-quantum-toolkit/qcec/pull/1008
 [#1004]: https://github.com/munich-quantum-toolkit/qcec/pull/1004

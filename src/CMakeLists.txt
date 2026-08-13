@@ -17,12 +17,14 @@ if(NOT TARGET MQT::QCEC)
   # set include directories
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<BUILD_INTERFACE:${MQT_QCEC_INCLUDE_BUILD_DIR}>)
+  target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
 
   # link to the MQT::Core libraries
   target_link_libraries(
     ${PROJECT_NAME}
-    PUBLIC MQT::CoreDD mqt-qcec-multiprecision
-    PRIVATE MQT::CoreCircuitOptimizer MQT::CoreAlgorithms MQT::ProjectWarnings MQT::ProjectOptions)
+    PUBLIC MQT::CoreDD
+    PRIVATE Boost::multiprecision MQT::CoreCircuitOptimizer MQT::CoreAlgorithms
+            MQT::ProjectWarnings MQT::ProjectOptions)
 
   # add MQT alias
   add_library(MQT::QCEC ALIAS ${PROJECT_NAME})

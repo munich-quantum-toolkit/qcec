@@ -49,26 +49,17 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
 list(APPEND FETCH_PACKAGES mqt-core)
 
-option(MQT_QCEC_USE_SYSTEM_BOOST "Whether to use the system Boost installation" OFF)
-set(MQT_QCEC_BOOST_MIN_VERSION
-    1.80.0
-    CACHE STRING "Minimum required Boost version")
-if(MQT_QCEC_USE_SYSTEM_BOOST)
-  find_package(Boost ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG REQUIRED)
-else()
-  set(BOOST_MP_STANDALONE
-      ON
-      CACHE INTERNAL "Use standalone Boost.Multiprecision")
-  set(MQT_QCEC_BOOST_VERSION
-      1_89_0
-      CACHE INTERNAL "Boost version")
-  set(MQT_QCEC_BOOST_URL
-      https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz
-  )
-  FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL} FIND_PACKAGE_ARGS
-                                    ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG NAMES boost_multiprecision)
-  list(APPEND FETCH_PACKAGES boost_mp)
-endif()
+set(BOOST_MP_STANDALONE
+    ON
+    CACHE INTERNAL "Use standalone Boost.Multiprecision")
+set(MQT_QCEC_BOOST_VERSION
+    1_89_0
+    CACHE INTERNAL "Boost version")
+set(MQT_QCEC_BOOST_URL
+    https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz
+)
+FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL})
+list(APPEND FETCH_PACKAGES boost_mp)
 
 if(BUILD_MQT_QCEC_TESTS)
   set(gtest_force_shared_crt
@@ -85,12 +76,4 @@ endif()
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
 
-add_library(mqt-qcec-multiprecision INTERFACE)
-if(MQT_QCEC_USE_SYSTEM_BOOST)
-  set(MQT_QCEC_BOOST_TARGET Boost::headers)
-else()
-  set(MQT_QCEC_BOOST_TARGET Boost::multiprecision)
-endif()
-get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS ${MQT_QCEC_BOOST_TARGET}
-                    INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(mqt-qcec-multiprecision SYSTEM INTERFACE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
+get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS Boost::multiprecision INTERFACE_INCLUDE_DIRECTORIES)
