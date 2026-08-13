@@ -116,6 +116,16 @@ TEST_F(SimplifyTest, CancellationStopsRewriteTraversal) {
   EXPECT_TRUE(diag.isIdentity());
 }
 
+TEST_F(SimplifyTest, CompositeSimplificationCountsEveryRewrite) {
+  constexpr std::size_t nspiders = 3U;
+  ZXDiagram diag = makeIdentityDiagram(1, nspiders);
+  for (Vertex v = 2; v < diag.getNVertices(); ++v) {
+    diag.addPhase(v, PiExpression(PiRational(1, 1)));
+  }
+
+  EXPECT_EQ(interiorCliffordSimp(diag), nspiders - 1U);
+}
+
 TEST_F(SimplifyTest, spiderFusion) {
   constexpr std::size_t nqubits = 1U;
   constexpr std::size_t nspiders = 100U;

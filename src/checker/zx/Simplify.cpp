@@ -67,10 +67,9 @@ std::size_t pivotPauliSimp(ZXDiagram& diag,
 
 std::size_t interiorCliffordSimp(ZXDiagram& diag,
                                  const CancellationPredicate& cancelled) {
-  spiderSimp(diag, cancelled);
+  auto nSimplifications = spiderSimp(diag, cancelled);
 
   bool newMatches = true;
-  std::size_t nSimplifications = 0;
   while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
     const auto nId = idSimp(diag, cancelled);
@@ -78,9 +77,10 @@ std::size_t interiorCliffordSimp(ZXDiagram& diag,
     const auto nPivot = pivotPauliSimp(diag, cancelled);
     const auto nLocalComp = localCompSimp(diag, cancelled);
 
-    if ((nId + nSpider + nPivot + nLocalComp) != 0) {
+    const auto nNewSimplifications = nId + nSpider + nPivot + nLocalComp;
+    if (nNewSimplifications != 0) {
       newMatches = true;
-      nSimplifications++;
+      nSimplifications += nNewSimplifications;
     }
   }
   return nSimplifications;
@@ -94,9 +94,10 @@ std::size_t cliffordSimp(ZXDiagram& diag,
     newMatches = false;
     const auto nClifford = interiorCliffordSimp(diag, cancelled);
     const auto nPivot = pivotSimp(diag, cancelled);
-    if ((nClifford + nPivot) != 0) {
+    const auto nNewSimplifications = nClifford + nPivot;
+    if (nNewSimplifications != 0) {
       newMatches = true;
-      nSimplifications++;
+      nSimplifications += nNewSimplifications;
     }
   }
   return nSimplifications;
