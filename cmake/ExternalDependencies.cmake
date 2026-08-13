@@ -49,6 +49,18 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
 list(APPEND FETCH_PACKAGES mqt-core)
 
+set(BOOST_MP_STANDALONE
+    ON
+    CACHE INTERNAL "Use standalone Boost.Multiprecision")
+set(MQT_QCEC_BOOST_VERSION
+    1_89_0
+    CACHE INTERNAL "Boost version")
+set(MQT_QCEC_BOOST_URL
+    https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz
+)
+FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL})
+list(APPEND FETCH_PACKAGES boost_mp)
+
 if(BUILD_MQT_QCEC_TESTS)
   set(gtest_force_shared_crt
       ON
@@ -63,3 +75,5 @@ endif()
 
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
+
+get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS Boost::multiprecision INTERFACE_INCLUDE_DIRECTORIES)

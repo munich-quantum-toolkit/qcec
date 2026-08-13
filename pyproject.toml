@@ -326,8 +326,7 @@ repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
 --exclude libmqt-core-qasm.so.3.8 \
 --exclude libmqt-core-circuit-optimizer.so.3.8 \
 --exclude libmqt-core-algorithms.so.3.8 \
---exclude libmqt-core-dd.so.3.8 \
---exclude libmqt-core-zx.so.3.8"""
+--exclude libmqt-core-dd.so.3.8"""
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
@@ -339,8 +338,7 @@ repair-wheel-command = """delvewheel repair -w {dest_dir} {wheel} --namespace-pk
 --exclude mqt-core-qasm.dll \
 --exclude mqt-core-circuit-optimizer.dll \
 --exclude mqt-core-algorithms.dll \
---exclude mqt-core-dd.dll \
---exclude mqt-core-zx.dll"""
+--exclude mqt-core-dd.dll"""
 
 [tool.uv]
 required-version = ">=0.5.20"

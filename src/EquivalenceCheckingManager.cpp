@@ -16,13 +16,13 @@
 #include "checker/dd/DDConstructionChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/simulation/StateType.hpp"
+#include "checker/zx/FunctionalityConstruction.hpp"
 #include "checker/zx/ZXChecker.hpp"
 #include "circuit_optimizer/CircuitOptimizer.hpp"
 #include "dd/ComplexNumbers.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "zx/FunctionalityConstruction.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -616,8 +616,8 @@ void EquivalenceCheckingManager::checkParallel() {
     tasksToExecute += configuration.simulation.maxSims;
   }
   if (configuration.execution.runZXChecker) {
-    if (zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-        zx::FunctionalityConstruction::transformableToZX(&qc2)) {
+    if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+        ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
       ++tasksToExecute;
     } else {
       configuration.execution.runZXChecker = false;
@@ -853,8 +853,8 @@ void EquivalenceCheckingManager::checkSymbolic() {
   }
 
   if (!done) {
-    if (zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-        zx::FunctionalityConstruction::transformableToZX(&qc2)) {
+    if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+        ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
       checkers.emplace_back(
           std::make_unique<ZXEquivalenceChecker>(qc1, qc2, configuration));
       const auto& zxChecker = checkers.back();
