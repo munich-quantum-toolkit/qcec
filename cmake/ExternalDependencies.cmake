@@ -49,23 +49,24 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
 list(APPEND FETCH_PACKAGES mqt-core)
 
-option(USE_SYSTEM_BOOST "Whether to use the system Boost installation" OFF)
-set(BOOST_MIN_VERSION
+option(MQT_QCEC_USE_SYSTEM_BOOST "Whether to use the system Boost installation" OFF)
+set(MQT_QCEC_BOOST_MIN_VERSION
     1.80.0
     CACHE STRING "Minimum required Boost version")
-if(USE_SYSTEM_BOOST)
-  find_package(Boost ${BOOST_MIN_VERSION} CONFIG REQUIRED)
+if(MQT_QCEC_USE_SYSTEM_BOOST)
+  find_package(Boost ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG REQUIRED)
 else()
   set(BOOST_MP_STANDALONE
       ON
       CACHE INTERNAL "Use standalone Boost.Multiprecision")
-  set(BOOST_VERSION
+  set(MQT_QCEC_BOOST_VERSION
       1_89_0
       CACHE INTERNAL "Boost version")
-  set(BOOST_URL
-      https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${BOOST_VERSION}.tar.gz)
-  FetchContent_Declare(boost_mp URL ${BOOST_URL} FIND_PACKAGE_ARGS ${BOOST_MIN_VERSION} CONFIG
-                                    NAMES boost_multiprecision)
+  set(MQT_QCEC_BOOST_URL
+      https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz)
+  FetchContent_Declare(
+    boost_mp URL ${MQT_QCEC_BOOST_URL} FIND_PACKAGE_ARGS ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG
+                 NAMES boost_multiprecision)
   list(APPEND FETCH_PACKAGES boost_mp)
 endif()
 
@@ -85,8 +86,12 @@ endif()
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
 
 add_library(mqt-qcec-multiprecision INTERFACE)
-if(USE_SYSTEM_BOOST)
-  target_link_libraries(mqt-qcec-multiprecision INTERFACE Boost::headers)
+if(MQT_QCEC_USE_SYSTEM_BOOST)
+  set(MQT_QCEC_BOOST_TARGET Boost::headers)
 else()
-  target_link_libraries(mqt-qcec-multiprecision INTERFACE Boost::multiprecision)
+  set(MQT_QCEC_BOOST_TARGET Boost::multiprecision)
 endif()
+get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS ${MQT_QCEC_BOOST_TARGET}
+                    INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(mqt-qcec-multiprecision SYSTEM
+                           INTERFACE ${MQT_QCEC_BOOST_INCLUDE_DIRS})

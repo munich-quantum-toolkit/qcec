@@ -8,9 +8,15 @@
 
 # collect all test files
 file(GLOB_RECURSE TEST_FILES "*.cpp")
+list(FILTER TEST_FILES EXCLUDE REGEX "/test_coexistence\\.cpp$")
 
 # add test executable
 package_add_test(mqt-qcec-test MQT::QCEC ${TEST_FILES})
 
 # link to MQT::CoreAlgorithms library for dynamic circuit tests
 target_link_libraries(mqt-qcec-test PRIVATE MQT::CoreAlgorithms MQT::CoreQASM)
+
+if(TARGET MQT::CoreZX)
+  target_sources(mqt-qcec-test PRIVATE checker/zx/test_coexistence.cpp)
+  target_link_libraries(mqt-qcec-test PRIVATE MQT::CoreZX)
+endif()

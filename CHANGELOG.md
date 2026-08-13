@@ -16,6 +16,8 @@ releases may include breaking changes.
 
 ### Changed
 
+- ♻️ Move the ZX-calculus implementation from MQT Core into QCEC and integrate
+  its simplification directly with the equivalence checker.
 - ⬆️ Update `nanobind` to version 2.14.0 ([#1017]) ([**@denialhaag**])
 
 ## [3.8.0] - 2026-08-02
