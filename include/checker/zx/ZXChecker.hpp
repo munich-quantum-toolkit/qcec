@@ -13,11 +13,11 @@
 #include "Configuration.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
-#include "ir/Permutation.hpp"
-#include "ir/QuantumComputation.hpp"
-#include "checker/zx/Rules.hpp"
+#include "checker/zx/Simplify.hpp"
 #include "checker/zx/ZXDefinitions.hpp"
 #include "checker/zx/ZXDiagram.hpp"
+#include "ir/Permutation.hpp"
+#include "ir/QuantumComputation.hpp"
 
 #include <cstddef>
 #include <nlohmann/json.hpp>
@@ -43,77 +43,6 @@ private:
   ::ec::zx::ZXDiagram miter;
   ::ec::zx::fp tolerance;
   bool ancilla = false;
-
-  // the following methods are adaptations of the core ZX simplification
-  // routines that additionally check a criterion for early termination of the
-  // simplification.
-  bool fullReduceApproximate();
-  bool fullReduce();
-
-  bool gadgetSimp();
-  bool interiorCliffordSimp();
-  bool cliffordSimp();
-
-  bool idSimp() { return simplifyVertices(::ec::zx::checkIdSimp, ::ec::zx::removeId); }
-
-  bool spiderSimp() {
-    return simplifyEdges(::ec::zx::checkSpiderFusion, ::ec::zx::fuseSpiders);
-  }
-
-  bool localCompSimp() {
-    return simplifyVertices(::ec::zx::checkLocalComp, ::ec::zx::localComp);
-  }
-
-  bool pivotPauliSimp() {
-    return simplifyEdges(::ec::zx::checkPivotPauli, ::ec::zx::pivotPauli);
-  }
-
-  bool pivotSimp() { return simplifyEdges(::ec::zx::checkPivot, ::ec::zx::pivot); }
-
-  bool pivotGadgetSimp() {
-    return simplifyEdges(::ec::zx::checkPivotGadget, ::ec::zx::pivotGadget);
-  }
-
-  template <class CheckFun, class RuleFun>
-  bool simplifyVertices(CheckFun check, RuleFun rule) {
-    auto simplified = false;
-    while (!isDone()) {
-      auto moreSimplified = false;
-      for (const auto& [v, _] : miter.getVertices()) {
-        if (isDone() || !check(miter, v)) {
-          continue;
-        }
-        rule(miter, v);
-        moreSimplified = true;
-      }
-      if (!moreSimplified) {
-        break;
-      }
-      simplified = true;
-    }
-    return simplified;
-  }
-
-  template <class CheckFun, class RuleFun>
-  bool simplifyEdges(CheckFun check, RuleFun rule) {
-    auto simplified = false;
-    while (!isDone()) {
-      auto moreSimplified = false;
-      for (const auto& [v0, v1] : miter.getEdges()) {
-        if (isDone() || miter.isDeleted(v0) || miter.isDeleted(v1) ||
-            !check(miter, v0, v1)) {
-          continue;
-        }
-        rule(miter, v0, v1);
-        moreSimplified = true;
-      }
-      if (!moreSimplified) {
-        break;
-      }
-      simplified = true;
-    }
-    return simplified;
-  }
 };
 
 qc::Permutation complete(const qc::Permutation& p,

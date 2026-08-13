@@ -19,8 +19,16 @@
 #include "checker/zx/ZXDiagram.hpp"
 
 #include <cstddef>
+#include <functional>
 
 namespace ec::zx {
+
+using CancellationPredicate = std::function<bool()>;
+
+[[nodiscard]] inline bool
+cancellationRequested(const CancellationPredicate& cancelled) {
+  return cancelled && cancelled();
+}
 
 /**
  * @brief Simplify the diagram by applying the given rule to all vertices that
@@ -35,13 +43,17 @@ namespace ec::zx {
  */
 template <class VertexCheckFun, class VertexRuleFun>
 std::size_t simplifyVertices(ZXDiagram& diag, VertexCheckFun check,
-                             VertexRuleFun rule) {
+                             VertexRuleFun rule,
+                             const CancellationPredicate& cancelled = {}) {
   std::size_t nSimplifications = 0;
   bool newMatches = true;
 
-  while (newMatches) {
+  while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
     for (const auto& [v, _] : diag.getVertices()) {
+      if (cancellationRequested(cancelled)) {
+        break;
+      }
       if (check(diag, v)) {
         rule(diag, v);
         newMatches = true;
@@ -65,14 +77,17 @@ std::size_t simplifyVertices(ZXDiagram& diag, VertexCheckFun check,
  * @return The number of simplifications that were applied
  */
 template <class EdgeCheckFun, class EdgeRuleFun>
-std::size_t simplifyEdges(ZXDiagram& diag, EdgeCheckFun check,
-                          EdgeRuleFun rule) {
+std::size_t simplifyEdges(ZXDiagram& diag, EdgeCheckFun check, EdgeRuleFun rule,
+                          const CancellationPredicate& cancelled = {}) {
   std::size_t nSimplifications = 0;
   bool newMatches = true;
 
-  while (newMatches) {
+  while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
     for (const auto& [v0, v1] : diag.getEdges()) {
+      if (cancellationRequested(cancelled)) {
+        break;
+      }
       if (diag.isDeleted(v0) || diag.isDeleted(v1) || !check(diag, v0, v1)) {
         continue;
       }
@@ -85,7 +100,8 @@ std::size_t simplifyEdges(ZXDiagram& diag, EdgeCheckFun check,
   return nSimplifications;
 }
 
-std::size_t gadgetSimp(ZXDiagram& diag);
+std::size_t gadgetSimp(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Apply the identity rule to the Diagram until exhaustion.
@@ -95,7 +111,8 @@ std::size_t gadgetSimp(ZXDiagram& diag);
  * @return The number of simplifications that were applied
  */
 
-std::size_t idSimp(ZXDiagram& diag);
+std::size_t idSimp(ZXDiagram& diag,
+                   const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Apply the spider rule to the Diagram until exhaustion.
@@ -106,7 +123,8 @@ std::size_t idSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify
  * @return The number of simplifications that were applied
  */
-std::size_t spiderSimp(ZXDiagram& diag);
+std::size_t spiderSimp(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Apply the local complementation rule to the Diagram until exhaustion.
@@ -114,7 +132,8 @@ std::size_t spiderSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify
  * @return The number of simplifications that were applied
  */
-std::size_t localCompSimp(ZXDiagram& diag);
+std::size_t localCompSimp(ZXDiagram& diag,
+                          const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Simplify the diagram by applying the pivot rule.
@@ -124,7 +143,8 @@ std::size_t localCompSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t pivotSimp(ZXDiagram& diag);
+std::size_t pivotSimp(ZXDiagram& diag,
+                      const CancellationPredicate& cancelled = {});
 
 /**
  * Simplify the diagram by applying the pivot rule in the case that the pivot
@@ -133,7 +153,8 @@ std::size_t pivotSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t pivotPauliSimp(ZXDiagram& diag);
+std::size_t pivotPauliSimp(ZXDiagram& diag,
+                           const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Simplify all internal vertices and edges of the diagram using Clifford
@@ -143,7 +164,8 @@ std::size_t pivotPauliSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t interiorCliffordSimp(ZXDiagram& diag);
+std::size_t interiorCliffordSimp(ZXDiagram& diag,
+                                 const CancellationPredicate& cancelled = {});
 
 /*
  * @brief Simplify the diagram using Clifford simplifications.
@@ -152,7 +174,8 @@ std::size_t interiorCliffordSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t cliffordSimp(ZXDiagram& diag);
+std::size_t cliffordSimp(ZXDiagram& diag,
+                         const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Simplify the diagram by applying the pivot rule to non-Pauli spider.
@@ -162,7 +185,8 @@ std::size_t cliffordSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t pivotgadgetSimp(ZXDiagram& diag);
+std::size_t pivotgadgetSimp(ZXDiagram& diag,
+                            const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Simplify the diagram by applying Clifford simplifications and the
@@ -172,7 +196,8 @@ std::size_t pivotgadgetSimp(ZXDiagram& diag);
  * @param diag The diagram to simplify.
  * @return The number of simplifications applied.
  */
-std::size_t fullReduce(ZXDiagram& diag);
+std::size_t fullReduce(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled = {});
 
 /**
  * @brief Apply full reduction to the diagram. Rounds phases to nearest multiple
@@ -181,6 +206,7 @@ std::size_t fullReduce(ZXDiagram& diag);
  * @param tolerance The tolerance for rounding phases to multiples of Pi/2.
  * @return The number of simplifications applied
  */
-std::size_t fullReduceApproximate(ZXDiagram& diag, fp tolerance);
+std::size_t fullReduceApproximate(ZXDiagram& diag, fp tolerance,
+                                  const CancellationPredicate& cancelled = {});
 
 } // namespace ec::zx

@@ -13,12 +13,12 @@
 #include "Configuration.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
-#include "ir/Definitions.hpp"
-#include "ir/QuantumComputation.hpp"
 #include "checker/zx/FunctionalityConstruction.hpp"
-#include "checker/zx/Rules.hpp"
+#include "checker/zx/Simplify.hpp"
 #include "checker/zx/ZXDefinitions.hpp"
 #include "checker/zx/ZXDiagram.hpp"
+#include "ir/Definitions.hpp"
+#include "ir/QuantumComputation.hpp"
 
 #include <cassert>
 #include <chrono>
@@ -34,7 +34,8 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
     : EquivalenceChecker(circ1, circ2, std::move(config)),
       miter(::ec::zx::FunctionalityConstruction::buildFunctionality(qc1)),
       tolerance(configuration.functionality.traceThreshold) {
-  ::ec::zx::ZXDiagram dPrime = ::ec::zx::FunctionalityConstruction::buildFunctionality(qc2);
+  ::ec::zx::ZXDiagram dPrime =
+      ::ec::zx::FunctionalityConstruction::buildFunctionality(qc2);
 
   if ((qc1->getNancillae() != 0U) || (qc2->getNancillae() != 0U)) {
     ancilla = true;
@@ -55,8 +56,8 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
     const auto numQubits1 = static_cast<::ec::zx::Qubit>(qc1->getNqubits());
     for (::ec::zx::Qubit i = 0; std::cmp_less(i, qc1->getNancillae()); ++i) {
       const auto anc = numQubits1 - i - 1;
-      miter.makeAncilla(
-          anc, static_cast<::ec::zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
+      miter.makeAncilla(anc, static_cast<::ec::zx::Qubit>(
+                                 p1.at(static_cast<qc::Qubit>(anc))));
     }
     miter.invert();
   }
@@ -83,7 +84,8 @@ EquivalenceCriterion ZXEquivalenceChecker::run() {
     }
     return equivalence;
   }
-  fullReduceApproximate();
+  ::ec::zx::fullReduceApproximate(miter, tolerance,
+                                  [this] { return isDone(); });
 
   bool equivalent = true;
 
@@ -201,87 +203,6 @@ qc::Permutation complete(const qc::Permutation& p,
 qc::Permutation invertPermutations(const qc::QuantumComputation& qc) {
   return concat(invert(complete(qc.outputPermutation, qc.initialLayout)),
                 qc.initialLayout);
-}
-
-bool ZXEquivalenceChecker::fullReduceApproximate() {
-  auto simplified = fullReduce();
-  while (!isDone()) {
-    miter.approximateCliffords(tolerance);
-    if (!fullReduce()) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::fullReduce() {
-  if (!isDone()) {
-    miter.toGraphlike();
-  }
-  auto simplified = interiorCliffordSimp();
-  while (!isDone()) {
-    auto moreSimplified = cliffordSimp();
-    moreSimplified |= gadgetSimp();
-    moreSimplified |= interiorCliffordSimp();
-    moreSimplified |= pivotGadgetSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  if (!isDone()) {
-    miter.removeDisconnectedSpiders();
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::gadgetSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = false;
-    for (const auto& [v, _] : miter.getVertices()) {
-      if (miter.isDeleted(v)) {
-        continue;
-      }
-      if (checkAndFuseGadget(miter, v)) {
-        moreSimplified = true;
-      }
-    }
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::interiorCliffordSimp() {
-  auto simplified = spiderSimp();
-  while (!isDone()) {
-    auto moreSimplified = idSimp();
-    moreSimplified |= spiderSimp();
-    moreSimplified |= pivotPauliSimp();
-    moreSimplified |= localCompSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::cliffordSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = interiorCliffordSimp();
-    moreSimplified |= pivotSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
 }
 
 bool ZXEquivalenceChecker::canHandle(const qc::QuantumComputation& qc1,

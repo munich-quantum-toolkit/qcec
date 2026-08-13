@@ -18,13 +18,17 @@
 
 namespace ec::zx {
 
-std::size_t gadgetSimp(ZXDiagram& diag) {
+std::size_t gadgetSimp(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled) {
   std::size_t nSimplifications = 0;
   bool newMatches = true;
 
-  while (newMatches) {
+  while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
     for (auto [v, _] : diag.getVertices()) {
+      if (cancellationRequested(cancelled)) {
+        break;
+      }
       if (diag.isDeleted(v)) {
         continue;
       }
@@ -38,37 +42,41 @@ std::size_t gadgetSimp(ZXDiagram& diag) {
   return nSimplifications;
 }
 
-std::size_t idSimp(ZXDiagram& diag) {
-  return simplifyVertices(diag, checkIdSimp, removeId);
+std::size_t idSimp(ZXDiagram& diag, const CancellationPredicate& cancelled) {
+  return simplifyVertices(diag, checkIdSimp, removeId, cancelled);
 }
 
-std::size_t spiderSimp(ZXDiagram& diag) {
-  return simplifyEdges(diag, checkSpiderFusion, fuseSpiders);
+std::size_t spiderSimp(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled) {
+  return simplifyEdges(diag, checkSpiderFusion, fuseSpiders, cancelled);
 }
 
-std::size_t localCompSimp(ZXDiagram& diag) {
-  return simplifyVertices(diag, checkLocalComp, localComp);
+std::size_t localCompSimp(ZXDiagram& diag,
+                          const CancellationPredicate& cancelled) {
+  return simplifyVertices(diag, checkLocalComp, localComp, cancelled);
 }
 
-std::size_t pivotSimp(ZXDiagram& diag) {
-  return simplifyEdges(diag, checkPivot, pivot);
+std::size_t pivotSimp(ZXDiagram& diag, const CancellationPredicate& cancelled) {
+  return simplifyEdges(diag, checkPivot, pivot, cancelled);
 }
 
-std::size_t pivotPauliSimp(ZXDiagram& diag) {
-  return simplifyEdges(diag, checkPivotPauli, pivotPauli);
+std::size_t pivotPauliSimp(ZXDiagram& diag,
+                           const CancellationPredicate& cancelled) {
+  return simplifyEdges(diag, checkPivotPauli, pivotPauli, cancelled);
 }
 
-std::size_t interiorCliffordSimp(ZXDiagram& diag) {
-  spiderSimp(diag);
+std::size_t interiorCliffordSimp(ZXDiagram& diag,
+                                 const CancellationPredicate& cancelled) {
+  spiderSimp(diag, cancelled);
 
   bool newMatches = true;
   std::size_t nSimplifications = 0;
-  while (newMatches) {
+  while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
-    const auto nId = idSimp(diag);
-    const auto nSpider = spiderSimp(diag);
-    const auto nPivot = pivotPauliSimp(diag);
-    const auto nLocalComp = localCompSimp(diag);
+    const auto nId = idSimp(diag, cancelled);
+    const auto nSpider = spiderSimp(diag, cancelled);
+    const auto nPivot = pivotPauliSimp(diag, cancelled);
+    const auto nLocalComp = localCompSimp(diag, cancelled);
 
     if ((nId + nSpider + nPivot + nLocalComp) != 0) {
       newMatches = true;
@@ -78,13 +86,14 @@ std::size_t interiorCliffordSimp(ZXDiagram& diag) {
   return nSimplifications;
 }
 
-std::size_t cliffordSimp(ZXDiagram& diag) {
+std::size_t cliffordSimp(ZXDiagram& diag,
+                         const CancellationPredicate& cancelled) {
   bool newMatches = true;
   std::size_t nSimplifications = 0;
-  while (newMatches) {
+  while (newMatches && !cancellationRequested(cancelled)) {
     newMatches = false;
-    const auto nClifford = interiorCliffordSimp(diag);
-    const auto nPivot = pivotSimp(diag);
+    const auto nClifford = interiorCliffordSimp(diag, cancelled);
+    const auto nPivot = pivotSimp(diag, cancelled);
     if ((nClifford + nPivot) != 0) {
       newMatches = true;
       nSimplifications++;
@@ -93,35 +102,43 @@ std::size_t cliffordSimp(ZXDiagram& diag) {
   return nSimplifications;
 }
 
-std::size_t pivotgadgetSimp(ZXDiagram& diag) {
-  return simplifyEdges(diag, checkPivotGadget, pivotGadget);
+std::size_t pivotgadgetSimp(ZXDiagram& diag,
+                            const CancellationPredicate& cancelled) {
+  return simplifyEdges(diag, checkPivotGadget, pivotGadget, cancelled);
 }
 
-std::size_t fullReduce(ZXDiagram& diag) {
+std::size_t fullReduce(ZXDiagram& diag,
+                       const CancellationPredicate& cancelled) {
+  if (cancellationRequested(cancelled)) {
+    return 0;
+  }
   diag.toGraphlike();
-  interiorCliffordSimp(diag);
+  auto nSimplifications = interiorCliffordSimp(diag, cancelled);
 
-  std::size_t nSimplifications = 0;
-  while (true) {
-    cliffordSimp(diag);
-    const auto nGadget = gadgetSimp(diag);
-    interiorCliffordSimp(diag);
-    const auto nPivot = pivotgadgetSimp(diag);
-    if ((nGadget + nPivot) == 0) {
+  while (!cancellationRequested(cancelled)) {
+    const auto nClifford = cliffordSimp(diag, cancelled);
+    const auto nGadget = gadgetSimp(diag, cancelled);
+    const auto nInterior = interiorCliffordSimp(diag, cancelled);
+    const auto nPivot = pivotgadgetSimp(diag, cancelled);
+    const auto nNewSimplifications = nClifford + nGadget + nInterior + nPivot;
+    if (nNewSimplifications == 0) {
       break;
     }
-    nSimplifications += nGadget + nPivot;
+    nSimplifications += nNewSimplifications;
   }
-  diag.removeDisconnectedSpiders();
+  if (!cancellationRequested(cancelled)) {
+    diag.removeDisconnectedSpiders();
+  }
 
   return nSimplifications;
 }
 
-std::size_t fullReduceApproximate(ZXDiagram& diag, const fp tolerance) {
-  auto nSimplifications = fullReduce(diag);
-  while (true) {
+std::size_t fullReduceApproximate(ZXDiagram& diag, const fp tolerance,
+                                  const CancellationPredicate& cancelled) {
+  auto nSimplifications = fullReduce(diag, cancelled);
+  while (!cancellationRequested(cancelled)) {
     diag.approximateCliffords(tolerance);
-    const auto newSimps = fullReduce(diag);
+    const auto newSimps = fullReduce(diag, cancelled);
     if (newSimps == 0U) {
       break;
     }

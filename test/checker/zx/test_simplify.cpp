@@ -8,14 +8,13 @@
  * Licensed under the MIT License
  */
 
-#include "ir/operations/Expression.hpp"
 #include "checker/zx/Simplify.hpp"
 #include "checker/zx/ZXDefinitions.hpp"
 #include "checker/zx/ZXDiagram.hpp"
-
-#include <gtest/gtest.h>
+#include "ir/operations/Expression.hpp"
 
 #include <cstddef>
+#include <gtest/gtest.h>
 #include <utility>
 #include <vector>
 
@@ -86,6 +85,35 @@ TEST_F(SimplifyTest, idSimp2) {
   EXPECT_EQ(diag.getNVertices(), (nqubits * 2) + 2);
   EXPECT_EQ(diag.getNEdges(), 5);
   EXPECT_TRUE(diag.globalPhaseIsZero());
+}
+
+TEST_F(SimplifyTest, CancellationBeforeReductionLeavesDiagramUnchanged) {
+  ZXDiagram diag = makeIdentityDiagram(2, 10);
+  const auto vertices = diag.getNVertices();
+  const auto edges = diag.getNEdges();
+
+  const auto removed = fullReduce(diag, [] { return true; });
+
+  EXPECT_EQ(removed, 0);
+  EXPECT_EQ(diag.getNVertices(), vertices);
+  EXPECT_EQ(diag.getNEdges(), edges);
+}
+
+TEST_F(SimplifyTest, CancellationStopsRewriteTraversal) {
+  constexpr std::size_t nqubits = 3U;
+  constexpr std::size_t spiders = 100U;
+  ZXDiagram diag = makeIdentityDiagram(nqubits, spiders);
+  const auto initialVertices = diag.getNVertices();
+  const auto cancelled = [&diag, initialVertices] {
+    return diag.getNVertices() + 5U <= initialVertices;
+  };
+
+  const auto removedBeforeCancellation =
+      idSimp(diag, CancellationPredicate{cancelled});
+
+  EXPECT_EQ(removedBeforeCancellation, 5);
+  EXPECT_EQ(idSimp(diag), (nqubits * spiders) - removedBeforeCancellation);
+  EXPECT_TRUE(diag.isIdentity());
 }
 
 TEST_F(SimplifyTest, spiderFusion) {
