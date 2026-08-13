@@ -16,13 +16,13 @@
 #include "checker/dd/DDConstructionChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/simulation/StateType.hpp"
+#include "checker/zx/FunctionalityConstruction.hpp"
 #include "checker/zx/ZXChecker.hpp"
 #include "circuit_optimizer/CircuitOptimizer.hpp"
 #include "dd/ComplexNumbers.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "checker/zx/FunctionalityConstruction.hpp"
 
 #include <algorithm>
 #include <cassert>

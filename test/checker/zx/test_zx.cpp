@@ -13,10 +13,9 @@
 #include "checker/zx/ZXDefinitions.hpp"
 #include "checker/zx/ZXDiagram.hpp"
 
-#include <gtest/gtest.h>
-
 #include <array>
 #include <cstddef>
+#include <gtest/gtest.h>
 #include <iostream>
 #include <optional>
 #include <sstream>

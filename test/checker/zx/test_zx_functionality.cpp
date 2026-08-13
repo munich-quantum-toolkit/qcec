@@ -8,6 +8,10 @@
  * Licensed under the MIT License
  */
 
+#include "checker/zx/FunctionalityConstruction.hpp"
+#include "checker/zx/Simplify.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDiagram.hpp"
 #include "dd/FunctionalityConstruction.hpp"
 #include "dd/Package.hpp"
 #include "ir/Definitions.hpp"
@@ -18,15 +22,10 @@
 #include "ir/operations/OpType.hpp"
 #include "ir/operations/StandardOperation.hpp"
 #include "qasm3/Importer.hpp"
-#include "checker/zx/FunctionalityConstruction.hpp"
-#include "checker/zx/Simplify.hpp"
-#include "checker/zx/ZXDefinitions.hpp"
-#include "checker/zx/ZXDiagram.hpp"
-
-#include <gtest/gtest.h>
 
 #include <array>
 #include <cstddef>
+#include <gtest/gtest.h>
 #include <memory>
 #include <numeric>
 #include <sstream>

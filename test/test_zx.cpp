@@ -11,12 +11,12 @@
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "qasm3/Importer.hpp"
-#include "checker/zx/ZXDefinitions.hpp"
 
 #include <gtest/gtest.h>
 #include <iostream>

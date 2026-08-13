@@ -10,15 +10,15 @@
 
 #include "checker/zx/FunctionalityConstruction.hpp"
 
+#include "checker/zx/Rational.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDiagram.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/CompoundOperation.hpp"
 #include "ir/operations/Expression.hpp"
 #include "ir/operations/OpType.hpp"
 #include "ir/operations/SymbolicOperation.hpp"
-#include "checker/zx/Rational.hpp"
-#include "checker/zx/ZXDefinitions.hpp"
-#include "checker/zx/ZXDiagram.hpp"
 
 #include <algorithm>
 #include <cstddef>

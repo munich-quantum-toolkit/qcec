@@ -10,10 +10,10 @@
 
 #include "checker/zx/ZXDiagram.hpp"
 
-#include "ir/operations/Expression.hpp"
 #include "checker/zx/Rational.hpp"
 #include "checker/zx/Utils.hpp"
 #include "checker/zx/ZXDefinitions.hpp"
+#include "ir/operations/Expression.hpp"
 
 #include <algorithm>
 #include <cstddef>

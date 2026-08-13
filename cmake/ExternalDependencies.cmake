@@ -63,10 +63,10 @@ else()
       1_89_0
       CACHE INTERNAL "Boost version")
   set(MQT_QCEC_BOOST_URL
-      https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz)
-  FetchContent_Declare(
-    boost_mp URL ${MQT_QCEC_BOOST_URL} FIND_PACKAGE_ARGS ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG
-                 NAMES boost_multiprecision)
+      https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz
+  )
+  FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL} FIND_PACKAGE_ARGS
+                                    ${MQT_QCEC_BOOST_MIN_VERSION} CONFIG NAMES boost_multiprecision)
   list(APPEND FETCH_PACKAGES boost_mp)
 endif()
 
@@ -93,5 +93,4 @@ else()
 endif()
 get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS ${MQT_QCEC_BOOST_TARGET}
                     INTERFACE_INCLUDE_DIRECTORIES)
-target_include_directories(mqt-qcec-multiprecision SYSTEM
-                           INTERFACE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
+target_include_directories(mqt-qcec-multiprecision SYSTEM INTERFACE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
