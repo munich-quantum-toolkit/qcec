@@ -16,7 +16,7 @@
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "qasm3/Importer.hpp"
-#include "zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
 
 #include <gtest/gtest.h>
 #include <iostream>
@@ -245,10 +245,10 @@ TEST_F(ZXTest, ZXConfiguredForInvalidCircuitSequential) {
 
 TEST_F(ZXTest, GlobalPhase) {
   auto qc = qc::QuantumComputation(1);
-  qc.rz(zx::PI / 8, 0);
+  qc.rz(::ec::zx::PI / 8, 0);
 
   auto qcPrime = qc::QuantumComputation(1);
-  qcPrime.p(zx::PI / 8, 0);
+  qcPrime.p(::ec::zx::PI / 8, 0);
 
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qcPrime, config);
   ecm->run();

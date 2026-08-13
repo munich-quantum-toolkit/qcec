@@ -15,10 +15,10 @@
 #include "checker/EquivalenceChecker.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "zx/FunctionalityConstruction.hpp"
-#include "zx/Rules.hpp"
-#include "zx/ZXDefinitions.hpp"
-#include "zx/ZXDiagram.hpp"
+#include "checker/zx/FunctionalityConstruction.hpp"
+#include "checker/zx/Rules.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDiagram.hpp"
 
 #include <cassert>
 #include <chrono>
@@ -32,9 +32,9 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
                                            const qc::QuantumComputation& circ2,
                                            Configuration config) noexcept
     : EquivalenceChecker(circ1, circ2, std::move(config)),
-      miter(zx::FunctionalityConstruction::buildFunctionality(qc1)),
+      miter(::ec::zx::FunctionalityConstruction::buildFunctionality(qc1)),
       tolerance(configuration.functionality.traceThreshold) {
-  zx::ZXDiagram dPrime = zx::FunctionalityConstruction::buildFunctionality(qc2);
+  ::ec::zx::ZXDiagram dPrime = ::ec::zx::FunctionalityConstruction::buildFunctionality(qc2);
 
   if ((qc1->getNancillae() != 0U) || (qc2->getNancillae() != 0U)) {
     ancilla = true;
@@ -50,13 +50,13 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
    * the empty diagram.
    */
   if (qc1->getNqubitsWithoutAncillae() == 0) {
-    this->miter = zx::ZXDiagram();
+    this->miter = ::ec::zx::ZXDiagram();
   } else {
-    const auto numQubits1 = static_cast<zx::Qubit>(qc1->getNqubits());
-    for (zx::Qubit i = 0; std::cmp_less(i, qc1->getNancillae()); ++i) {
+    const auto numQubits1 = static_cast<::ec::zx::Qubit>(qc1->getNqubits());
+    for (::ec::zx::Qubit i = 0; std::cmp_less(i, qc1->getNancillae()); ++i) {
       const auto anc = numQubits1 - i - 1;
       miter.makeAncilla(
-          anc, static_cast<zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
+          anc, static_cast<::ec::zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
     }
     miter.invert();
   }
@@ -64,11 +64,11 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
   if (qc2->getNqubitsWithoutAncillae() == 0) {
     return;
   }
-  const auto numQubits2 = static_cast<zx::Qubit>(qc2->getNqubits());
-  for (zx::Qubit i = 0; std::cmp_less(i, qc2->getNancillae()); ++i) {
+  const auto numQubits2 = static_cast<::ec::zx::Qubit>(qc2->getNqubits());
+  for (::ec::zx::Qubit i = 0; std::cmp_less(i, qc2->getNancillae()); ++i) {
     const auto anc = numQubits2 - i - 1;
     dPrime.makeAncilla(
-        anc, static_cast<zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
+        anc, static_cast<::ec::zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
   }
   miter.concat(dPrime);
 }
@@ -101,7 +101,7 @@ EquivalenceCriterion ZXEquivalenceChecker::run() {
       const auto& in = miter.getInput(i);
       const auto& edge = miter.incidentEdge(in, 0U);
 
-      if (edge.type == zx::EdgeType::Hadamard) {
+      if (edge.type == ::ec::zx::EdgeType::Hadamard) {
         equivalent = false;
         break;
       }
@@ -291,7 +291,7 @@ bool ZXEquivalenceChecker::canHandle(const qc::QuantumComputation& qc1,
       qc2.getNancillae() - qc2.getNgarbageQubits() != 0U) {
     return false;
   }
-  return zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-         zx::FunctionalityConstruction::transformableToZX(&qc2);
+  return ::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+         ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2);
 }
 } // namespace ec

@@ -15,9 +15,9 @@
 #include "checker/EquivalenceChecker.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "zx/Rules.hpp"
-#include "zx/ZXDefinitions.hpp"
-#include "zx/ZXDiagram.hpp"
+#include "checker/zx/Rules.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDiagram.hpp"
 
 #include <cstddef>
 #include <nlohmann/json.hpp>
@@ -40,8 +40,8 @@ public:
   }
 
 private:
-  zx::ZXDiagram miter;
-  zx::fp tolerance;
+  ::ec::zx::ZXDiagram miter;
+  ::ec::zx::fp tolerance;
   bool ancilla = false;
 
   // the following methods are adaptations of the core ZX simplification
@@ -54,24 +54,24 @@ private:
   bool interiorCliffordSimp();
   bool cliffordSimp();
 
-  bool idSimp() { return simplifyVertices(zx::checkIdSimp, zx::removeId); }
+  bool idSimp() { return simplifyVertices(::ec::zx::checkIdSimp, ::ec::zx::removeId); }
 
   bool spiderSimp() {
-    return simplifyEdges(zx::checkSpiderFusion, zx::fuseSpiders);
+    return simplifyEdges(::ec::zx::checkSpiderFusion, ::ec::zx::fuseSpiders);
   }
 
   bool localCompSimp() {
-    return simplifyVertices(zx::checkLocalComp, zx::localComp);
+    return simplifyVertices(::ec::zx::checkLocalComp, ::ec::zx::localComp);
   }
 
   bool pivotPauliSimp() {
-    return simplifyEdges(zx::checkPivotPauli, zx::pivotPauli);
+    return simplifyEdges(::ec::zx::checkPivotPauli, ::ec::zx::pivotPauli);
   }
 
-  bool pivotSimp() { return simplifyEdges(zx::checkPivot, zx::pivot); }
+  bool pivotSimp() { return simplifyEdges(::ec::zx::checkPivot, ::ec::zx::pivot); }
 
   bool pivotGadgetSimp() {
-    return simplifyEdges(zx::checkPivotGadget, zx::pivotGadget);
+    return simplifyEdges(::ec::zx::checkPivotGadget, ::ec::zx::pivotGadget);
   }
 
   template <class CheckFun, class RuleFun>

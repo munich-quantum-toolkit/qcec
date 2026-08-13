@@ -21,7 +21,7 @@ if(NOT TARGET MQT::QCEC)
   # link to the MQT::Core libraries
   target_link_libraries(
     ${PROJECT_NAME}
-    PUBLIC MQT::CoreDD MQT::CoreZX
+    PUBLIC MQT::CoreDD MQT::CoreZX mqt-qcec-multiprecision
     PRIVATE MQT::CoreCircuitOptimizer MQT::CoreAlgorithms MQT::ProjectWarnings MQT::ProjectOptions)
 
   # add MQT alias
