@@ -357,8 +357,8 @@ TEST_F(EqualityTest, StripIdleQubitPresentInBothCircuits) {
   const auto& circ2 = ecm.getSecondCircuit();
   EXPECT_EQ(circ1.getNqubits(), circ2.getNqubits());
   EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits() - 1);
-  EXPECT_EQ(circ1.getNmeasuredQubits(), 1);
-  EXPECT_EQ(circ2.getNmeasuredQubits(), 1);
+  EXPECT_EQ(circ1.getNqubits() - circ1.getNgarbageQubits(), 1);
+  EXPECT_EQ(circ2.getNqubits() - circ2.getNgarbageQubits(), 1);
 }
 
 TEST_F(EqualityTest, NotEqualDueToNoSeparateIdleQubitStripping) {
@@ -392,8 +392,8 @@ TEST_F(EqualityTest, NotEqualDueToNoSeparateIdleQubitStripping) {
   EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits());
   EXPECT_EQ(circ1.getNancillae(), 0);
   EXPECT_EQ(circ2.getNancillae(), 0);
-  EXPECT_EQ(circ1.getNmeasuredQubits(), 2);
-  EXPECT_EQ(circ2.getNmeasuredQubits(), 2);
+  EXPECT_EQ(circ1.getNqubits() - circ1.getNgarbageQubits(), 2);
+  EXPECT_EQ(circ2.getNqubits() - circ2.getNgarbageQubits(), 2);
 }
 
 TEST_F(EqualityTest, EqualDueToNoSeparateIdleQubitStripping) {
