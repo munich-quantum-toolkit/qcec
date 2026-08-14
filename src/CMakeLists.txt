@@ -19,10 +19,10 @@ if(NOT TARGET MQT::QCEC)
                              PUBLIC $<BUILD_INTERFACE:${MQT_QCEC_INCLUDE_BUILD_DIR}>)
   target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
 
-  # link to the MQT::Core libraries
+  # link to the MQT::Core and nlohmann_json libraries
   target_link_libraries(
     ${PROJECT_NAME}
-    PUBLIC MQT::CoreDD
+    PUBLIC MQT::CoreDD nlohmann_json::nlohmann_json
     PRIVATE Boost::multiprecision MQT::CoreCircuitOptimizer MQT::CoreAlgorithms
             MQT::ProjectWarnings MQT::ProjectOptions)
 
