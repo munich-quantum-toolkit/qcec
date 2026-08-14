@@ -19,10 +19,7 @@ if(NOT TARGET MQT::QCEC)
                              PUBLIC $<BUILD_INTERFACE:${MQT_QCEC_INCLUDE_BUILD_DIR}>)
   target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
 
-  # link to the MQT::Core libraries
-  #
-  # nlohmann_json is part of QCEC's own public API (Configuration, Results, and the checker `json`
-  # hooks), so it is linked publicly here instead of being picked up transitively from MQT::Core.
+  # link to the MQT::Core and nlohmann_json libraries
   target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC MQT::CoreDD nlohmann_json::nlohmann_json
