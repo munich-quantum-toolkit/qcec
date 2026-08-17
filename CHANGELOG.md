@@ -18,6 +18,8 @@ releases may include breaking changes.
 
 - ➕ Depend on `nlohmann_json` directly instead of relying on `mqt-core` to
   provide it ([#1021]) ([**@denialhaag**])
+- ♻️ Use explicit output qubit counts in tests ([#1019])
+  ([**@simon1hofmann**])
 - ♻️ Move the ZX-calculus implementation from MQT Core into QCEC and integrate
   its simplification directly with the equivalence checker ([#1018])
   ([**@burgholzer**])
@@ -226,6 +228,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#1021]: https://github.com/munich-quantum-toolkit/qcec/pull/1021
+[#1019]: https://github.com/munich-quantum-toolkit/qcec/pull/1019
 [#1018]: https://github.com/munich-quantum-toolkit/qcec/pull/1018
 [#1017]: https://github.com/munich-quantum-toolkit/qcec/pull/1017
 [#1008]: https://github.com/munich-quantum-toolkit/qcec/pull/1008
@@ -263,6 +266,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [**@burgholzer**]: https://github.com/burgholzer
 [**@pehamTom**]: https://github.com/pehamTom
 [**@denialhaag**]: https://github.com/denialhaag
+[**@simon1hofmann**]: https://github.com/simon1hofmann
 
 <!-- General links -->
 
