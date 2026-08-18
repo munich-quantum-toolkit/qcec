@@ -12,8 +12,6 @@ build:
     python: "3.14"
   apt_packages:
     - cmake
-    - graphviz
-    - inkscape
 
 python:
   install:

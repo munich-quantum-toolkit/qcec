@@ -1,8 +1,8 @@
 # References
 
-*MQT QCEC* has a strong foundation in peer‑reviewed research. Many of its
-built‑in algorithms are based on methods published in scientific journals and
-conferences. For an overview of *MQT QCEC* and its features, see
+MQT QCEC has a strong foundation in peer‑reviewed research. Many of its built‑in
+algorithms are based on methods published in scientific journals and
+conferences. For an overview of MQT QCEC and its features, see
 {cite:p}`burgholzerQCECJKQTool2021`. If you want to cite this article, please
 use the following BibTeX entry:
 
@@ -17,7 +17,7 @@ use the following BibTeX entry:
 }
 ```
 
-*MQT QCEC* is part of the Munich Quantum Toolkit, which is described in
+MQT QCEC is part of the Munich Quantum Toolkit, which is described in
 {cite:p}`mqt`. If you want to cite the Munich Quantum Toolkit, please use the
 following BibTeX entry:
 
@@ -35,7 +35,7 @@ following BibTeX entry:
 }
 ```
 
-If you use *MQT QCEC* in your work, we would appreciate if you cited
+If you use MQT QCEC in your work, we would appreciate if you cited
 {cite:p}`burgholzer2021advanced` (which subsumes
 {cite:p}`burgholzer2020ImprovedDDbasedEquivalence` and
 {cite:p}`burgholzer2020PowerSimulationEquivalence`).
