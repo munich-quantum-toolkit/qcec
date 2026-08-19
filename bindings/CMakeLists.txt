@@ -27,7 +27,7 @@ list(
 
 file(GLOB_RECURSE QCEC_SOURCES **.cpp)
 
-add_mqt_python_binding_nanobind(
+add_mqt_python_binding(
   QCEC
   ${MQT_QCEC_TARGET_NAME}-bindings
   ${QCEC_SOURCES}
