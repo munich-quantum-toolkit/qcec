@@ -10,12 +10,18 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+## [3.9.0] - 2026-08-19
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#390)._
+
 ### Added
 
 - 🐍 Start building CPython 3.15 wheels ([#1008]) ([**@denialhaag**])
 
 ### Changed
 
+- ⬆️ Update `mqt-core` to version 3.9.0 ([#1030]) ([**@denialhaag**])
+- ⬆️ Update `nanobind` to version 2.15.0 ([#1030]) ([**@denialhaag**])
 - ➕ Depend on `nlohmann_json` directly instead of relying on `mqt-core` to
   provide it ([#1021]) ([**@denialhaag**])
 - ♻️ Use explicit output qubit counts in tests ([#1019])
@@ -23,7 +29,6 @@ releases may include breaking changes.
 - ♻️ Move the ZX-calculus implementation from MQT Core into QCEC and integrate
   its simplification directly with the equivalence checker ([#1018])
   ([**@burgholzer**])
-- ⬆️ Update `nanobind` to version 2.14.0 ([#1017]) ([**@denialhaag**])
 
 ## [3.8.0] - 2026-08-02
 
@@ -212,7 +217,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.8.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...HEAD
+[3.9.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.9.0
 [3.8.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.8.0
 [3.7.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.7.0
 [3.6.1]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.6.1
@@ -227,10 +233,10 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1030]: https://github.com/munich-quantum-toolkit/qcec/pull/1030
 [#1021]: https://github.com/munich-quantum-toolkit/qcec/pull/1021
 [#1019]: https://github.com/munich-quantum-toolkit/qcec/pull/1019
 [#1018]: https://github.com/munich-quantum-toolkit/qcec/pull/1018
-[#1017]: https://github.com/munich-quantum-toolkit/qcec/pull/1017
 [#1008]: https://github.com/munich-quantum-toolkit/qcec/pull/1008
 [#1004]: https://github.com/munich-quantum-toolkit/qcec/pull/1004
 [#977]: https://github.com/munich-quantum-toolkit/qcec/pull/977

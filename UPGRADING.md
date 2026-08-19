@@ -6,6 +6,19 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+## [3.9.0]
+
+This release updates the minimum required `mqt-core` version to 3.9.0 as well as
+the `nanobind` version to 2.15.0.
+
+### ZX-calculus implementation
+
+The ZX-calculus implementation that used to live in MQT Core is now part of MQT
+QCEC. The ZX checker is configured and used exactly as before, so using MQT QCEC
+requires no changes. However, `MQT::QCEC` no longer links `MQT::CoreZX`
+publicly, so C++ projects that relied on getting MQT Core's ZX library
+transitively must link it explicitly.
+
 ## [3.8.0]
 
 This release updates the minimum required `mqt-core` version to 3.8.0.s
@@ -157,7 +170,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.8.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...HEAD
+[3.9.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.8.0...v3.9.0
 [3.8.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.7.0...v3.8.0
 [3.7.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.5.0...v3.6.0
