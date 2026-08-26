@@ -278,4 +278,23 @@ TEST(EliminateResets, testCompoundOperation) {
   EXPECT_EQ(elseTargets.at(0), 4);
   EXPECT_EQ(elseOp->getNcontrols(), 0);
 }
+
+TEST(EliminateResets, compoundBeginningWithReset) {
+  QuantumComputation qc(1);
+  QuantumComputation compound(1);
+  compound.reset(0);
+  compound.x(0);
+  qc.emplace_back(compound.asOperation());
+
+  ec::detail::eliminateResets(qc);
+
+  ASSERT_EQ(qc.getNqubits(), 2);
+  ASSERT_EQ(qc.size(), 1);
+  const auto* operation =
+      dynamic_cast<const CompoundOperation*>(qc.front().get());
+  ASSERT_NE(operation, nullptr);
+  ASSERT_EQ(operation->size(), 1);
+  EXPECT_EQ(operation->front()->getType(), X);
+  EXPECT_EQ(operation->front()->getTargets(), Targets{1});
+}
 } // namespace qc

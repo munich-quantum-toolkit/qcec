@@ -394,7 +394,7 @@ void eliminateResets(QuantumComputation& qc) {
         }
       }
       it = qc.erase(it);
-    } else if (!replacementMap.empty()) {
+    } else if ((*it)->isCompoundOperation() || !replacementMap.empty()) {
       if ((*it)->isCompoundOperation()) {
         auto& compOp = dynamic_cast<CompoundOperation&>(**it);
         auto compOpIt = compOp.begin();
@@ -541,6 +541,10 @@ void deferMeasurements(QuantumComputation& qc) {
 
           // if this is the same measurement a breakpoint has been reached
           if (targets == targets2 && classics == classics2) {
+            it = qc.insert(
+                currentInsertionPoint,
+                std::make_unique<NonUnitaryOperation>(targets, classics));
+            qubitsToAddMeasurements.erase(measurementQubit);
             break;
           }
 

@@ -98,4 +98,33 @@ TEST(RemoveDiagonalGateBeforeMeasure, removePartOfCompoundOpBeforeMeasure) {
   ec::detail::removeDiagonalGatesBeforeMeasure(qc);
   EXPECT_EQ(qc.getNops(), 2);
 }
+
+TEST(RemoveDiagonalGateBeforeMeasure, stopAtEarlierMeasurement) {
+  QuantumComputation qc(1, 2);
+  qc.z(0);
+  qc.measure(0, 0);
+  qc.z(0);
+  qc.measure(0, 1);
+
+  ec::detail::removeDiagonalGatesBeforeMeasure(qc);
+
+  ASSERT_EQ(qc.getNops(), 3);
+  EXPECT_EQ(qc.at(0)->getType(), Z);
+  EXPECT_EQ(qc.at(1)->getType(), Measure);
+  EXPECT_EQ(qc.at(2)->getType(), Measure);
+}
+
+TEST(RemoveDiagonalGateBeforeMeasure, preserveGateOnUnmeasuredQubit) {
+  QuantumComputation qc(2, 1);
+  qc.z(0);
+  qc.z(1);
+  qc.measure(0, 0);
+
+  ec::detail::removeDiagonalGatesBeforeMeasure(qc);
+
+  ASSERT_EQ(qc.getNops(), 2);
+  EXPECT_EQ(qc.at(0)->getType(), Z);
+  EXPECT_EQ(qc.at(0)->getTargets(), Targets{1});
+  EXPECT_EQ(qc.at(1)->getType(), Measure);
+}
 } // namespace qc

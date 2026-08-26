@@ -15,6 +15,11 @@ releases may include breaking changes.
 - ♻️ Move the equivalence-checking-specific circuit transformations from MQT
   Core into QCEC ([#1040]) ([**@simon1hofmann**])
 
+### Fixed
+
+- 🐛 Preserve an earlier repeated measurement when deferring measurements
+  ([#1040]) ([**@simon1hofmann**])
+
 ## [3.9.0] - 2026-08-19
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#390)._

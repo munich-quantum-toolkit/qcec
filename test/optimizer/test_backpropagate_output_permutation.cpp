@@ -69,6 +69,18 @@ TEST(BackpropagateOutputPermutation, PartiallySpecifiedWithSWAP) {
   EXPECT_EQ(qc.initialLayout[1], qc.outputPermutation[0]);
 }
 
+TEST(BackpropagateOutputPermutation, PreferIdentityForMissingQubit) {
+  auto qc = QuantumComputation(2);
+  qc.outputPermutation.clear();
+  qc.outputPermutation[0] = 1;
+  qc.swap(0, 1);
+
+  ec::detail::backpropagateOutputPermutation(qc);
+
+  EXPECT_EQ(qc.initialLayout[0], 0);
+  EXPECT_EQ(qc.initialLayout[1], 1);
+}
+
 TEST(BackpropagateOutputPermutation, PartiallySpecifiedWithSWAP2) {
   // i *  *      i 1  0
   //   x--x  ->    x--x

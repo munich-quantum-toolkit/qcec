@@ -527,4 +527,44 @@ TEST(DeferMeasurements, isDynamicOnRepeatedMeasurements) {
   EXPECT_TRUE(qc.isDynamic());
 }
 
+TEST(DeferMeasurements, repeatedMeasurementIsBreakpoint) {
+  QuantumComputation qc(1, 1);
+  qc.h(0);
+  qc.measure(0, 0);
+  qc.x(0);
+  qc.measure(0, 0);
+
+  ec::detail::deferMeasurements(qc);
+
+  ASSERT_EQ(qc.getNops(), 4);
+  EXPECT_EQ(qc.at(0)->getType(), H);
+  EXPECT_EQ(qc.at(1)->getType(), Measure);
+  EXPECT_EQ(qc.at(2)->getType(), X);
+  EXPECT_EQ(qc.at(3)->getType(), Measure);
+}
+
+TEST(DeferMeasurements, errorOnGroupedMeasurement) {
+  QuantumComputation qc(2, 2);
+  qc.measure({0, 1}, {0, 1});
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnReset) {
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.reset(0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnImplicitResetInElseOperation) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
+  qc.ifElse(std::make_unique<StandardOperation>(1, X),
+            std::make_unique<StandardOperation>(0, Y), 0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
 } // namespace qc
