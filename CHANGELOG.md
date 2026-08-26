@@ -10,6 +10,14 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- 💥 Drop support for x86 macOS and stop publishing the respective wheels
+  ([#1041]) ([**@denialhaag**])
+- ⬆️ Raise the macOS deployment target to 13.3 to enable `std::format` in libc++
+  ([#1041]) ([**@denialhaag**])
+- 💥 Require Python 3.11 or newer ([#1041]) ([**@denialhaag**])
+
 ## [3.9.0] - 2026-08-19
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#390)._
@@ -233,6 +241,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
 [#1030]: https://github.com/munich-quantum-toolkit/qcec/pull/1030
 [#1021]: https://github.com/munich-quantum-toolkit/qcec/pull/1021
 [#1019]: https://github.com/munich-quantum-toolkit/qcec/pull/1019
