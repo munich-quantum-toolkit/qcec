@@ -6,6 +6,10 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+MQT QCEC now owns the circuit transformations used only by its equivalence
+checking flow. This ownership change does not change the QCEC API or its
+configuration.
+
 ## [3.9.0]
 
 This release updates the minimum required `mqt-core` version to 3.9.0 and

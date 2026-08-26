@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- ♻️ Move the equivalence-checking-specific circuit transformations from MQT
+  Core into QCEC ([#1040]) ([**@simon1hofmann**])
+
 ## [3.9.0] - 2026-08-19
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#390)._
@@ -266,6 +271,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pull/566
 [#512]: https://github.com/munich-quantum-toolkit/qcec/pull/512
 [#432]: https://github.com/munich-quantum-toolkit/qcec/pull/432
+[#1040]: https://github.com/munich-quantum-toolkit/qcec/pull/1040
 
 <!-- Contributor -->
 
