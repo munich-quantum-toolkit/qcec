@@ -1,48 +1,71 @@
+#!/usr/bin/env -S uv run --script --quiet
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+# /// script
+# dependencies = ["nox"]
+# ///
+
 """Nox sessions."""
 
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import shutil
 import sys
+import tempfile
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import nox
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Generator, Sequence
 
-nox.needs_version = ">=2024.3.2"
+nox.needs_version = ">=2025.10.16"
 nox.options.default_venv_backend = "uv"
 
-nox.options.sessions = ["lint", "tests", "minimums"]
-
-PYTHON_ALL_VERSIONS = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+PYTHON_ALL_VERSIONS = ["3.11", "3.12", "3.13", "3.14"]
 
 if os.environ.get("CI", None):
     nox.options.error_on_missing_interpreters = True
 
 
-@nox.session(reuse_venv=True)
+@contextlib.contextmanager
+def preserve_lockfile() -> Generator[None]:
+    """Preserve the lockfile by moving it to a temporary directory."""
+    with tempfile.TemporaryDirectory() as temp_dir_name:
+        shutil.move("uv.lock", f"{temp_dir_name}/uv.lock")
+        try:
+            yield
+        finally:
+            shutil.move(f"{temp_dir_name}/uv.lock", "uv.lock")
+
+
+@nox.session(reuse_venv=True, default=True)
 def lint(session: nox.Session) -> None:
     """Run the linter."""
-    if shutil.which("pre-commit") is None:
-        session.install("pre-commit")
+    if shutil.which("prek") is None:
+        session.install("prek")
 
-    session.run("pre-commit", "run", "--all-files", *session.posargs, external=True)
+    session.run("prek", "run", "--all-files", *session.posargs, external=True)
 
 
 def _run_tests(
     session: nox.Session,
     *,
     install_args: Sequence[str] = (),
-    run_args: Sequence[str] = (),
+    extra_command: Sequence[str] = (),
+    pytest_run_args: Sequence[str] = (),
 ) -> None:
     env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
-    if os.environ.get("CI", None) and sys.platform == "win32":
-        env["SKBUILD_CMAKE_ARGS"] = "-T ClangCL"
-
     if shutil.which("cmake") is None and shutil.which("cmake3") is None:
         session.install("cmake")
     if shutil.which("ninja") is None:
@@ -57,30 +80,29 @@ def _run_tests(
         "build",
         "--only-group",
         "test",
-        # Build mqt-core from source to work around pybind believing that two
-        # compiled extensions might not be binary compatible.
-        # This will be fixed in a new pybind11 release that includes https://github.com/pybind/pybind11/pull/5439.
-        "--no-binary-package",
-        "mqt-core",
+        "--verbose",
         *install_args,
         env=env,
     )
+    if extra_command:
+        session.run(*extra_command, env=env)
     session.run(
         "uv",
         "run",
         "--no-dev",  # do not auto-install dev dependencies
         "--no-build-isolation-package",
         "mqt-qcec",  # build the project without isolation
+        "--verbose",
         *install_args,
         "pytest",
-        *run_args,
+        *pytest_run_args,
         *session.posargs,
         "--cov-config=pyproject.toml",
         env=env,
     )
 
 
-@nox.session(reuse_venv=True, python=PYTHON_ALL_VERSIONS)
+@nox.session(python=PYTHON_ALL_VERSIONS, reuse_venv=True, default=True)
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
     # enable profile check when running locally or when running on Linux with Python 3.12 in CI
@@ -90,17 +112,29 @@ def tests(session: nox.Session) -> None:
     _run_tests(session)
 
 
-@nox.session(reuse_venv=True, venv_backend="uv", python=PYTHON_ALL_VERSIONS)
+@nox.session(python=PYTHON_ALL_VERSIONS, reuse_venv=True, venv_backend="uv", default=True)
 def minimums(session: nox.Session) -> None:
     """Test the minimum versions of dependencies."""
-    _run_tests(
-        session,
-        install_args=["--resolution=lowest-direct"],
-        run_args=["-Wdefault"],
-    )
-    env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
-    session.run("uv", "tree", "--frozen", env=env)
-    session.run("uv", "lock", "--refresh", env=env)
+    with preserve_lockfile():
+        _run_tests(
+            session,
+            install_args=["--resolution=lowest-direct"],
+            pytest_run_args=["-Wdefault"],
+        )
+        env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+        session.run("uv", "tree", "--frozen", env=env)
+
+
+@nox.session(reuse_venv=True, venv_backend="uv", python=PYTHON_ALL_VERSIONS)
+def qiskit(session: nox.Session) -> None:
+    """Tests against the latest version of Qiskit."""
+    with preserve_lockfile():
+        _run_tests(
+            session,
+            extra_command=["uv", "pip", "install", "qiskit[qasm3-import] @ git+https://github.com/Qiskit/qiskit.git"],
+        )
+        env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+        session.run("uv", "pip", "show", "qiskit", env=env)
 
 
 @nox.session(reuse_venv=True)
@@ -124,11 +158,6 @@ def docs(session: nox.Session) -> None:
         "build",
         "--only-group",
         "docs",
-        # Build mqt-core from source to work around pybind believing that two
-        # compiled extensions might not be binary compatible.
-        # This will be fixed in a new pybind11 release that includes https://github.com/pybind/pybind11/pull/5439.
-        "--no-binary-package",
-        "mqt-core",
         env=env,
     )
 
@@ -136,7 +165,7 @@ def docs(session: nox.Session) -> None:
         "-n",  # nitpicky mode
         "-T",  # full tracebacks
         f"-b={args.builder}",
-        "docs/source",
+        "docs",
         f"docs/_build/{args.builder}",
         *posargs,
     ]
@@ -151,3 +180,53 @@ def docs(session: nox.Session) -> None:
         *shared_args,
         env=env,
     )
+
+
+@nox.session(reuse_venv=True, venv_backend="uv")
+def stubs(session: nox.Session) -> None:
+    """Generate type stubs for Python bindings using nanobind."""
+    env = {"UV_PROJECT_ENVIRONMENT": session.virtualenv.location}
+    session.run(
+        "uv",
+        "sync",
+        "--no-dev",
+        "--group",
+        "build",
+        env=env,
+    )
+
+    package_root = Path(__file__).parent / "python" / "mqt" / "qcec"
+
+    session.run(
+        "python",
+        "-m",
+        "nanobind.stubgen",
+        "--recursive",
+        "--include-private",
+        "--output-dir",
+        package_root,
+        "--module",
+        "mqt.qcec.pyqcec",
+    )
+
+    pyi_files = list(package_root.glob("**/*.pyi"))
+
+    if not pyi_files:
+        session.warn("No .pyi files found")
+        return
+
+    if shutil.which("prek") is None:
+        session.install("prek")
+
+    # Allow both 0 (no issues) and 1 as success codes for fixing up stubs
+    success_codes = [0, 1]
+    session.run("prek", "run", "license-tools", "--files", *pyi_files, external=True, success_codes=success_codes)
+    session.run("prek", "run", "ruff-check", "--files", *pyi_files, external=True, success_codes=success_codes)
+    session.run("prek", "run", "ruff-format", "--files", *pyi_files, external=True, success_codes=success_codes)
+
+    # Run ruff-check again to ensure everything is clean
+    session.run("prek", "run", "ruff-check", "--files", *pyi_files, external=True)
+
+
+if __name__ == "__main__":
+    nox.main()

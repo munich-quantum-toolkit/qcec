@@ -1,12 +1,17 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#include "Definitions.hpp"
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "dd/DDDefinitions.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "ir/operations/OpType.hpp"
@@ -26,6 +31,7 @@
 
 namespace dd {
 
+namespace {
 const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_1{
     {}, {}, {}, {}};
 
@@ -41,13 +47,13 @@ const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_2{
 void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
                              qc::QuantumComputation& circuit2,
                              const qc::Qubit groupBeginIndex,
-                             const qc::Qubit groupSize) {
+                             const qc::Qubit groupSize,
+                             std::mt19937_64& randomGenerator) {
   const auto& circuits1 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_1
                                          : PRE_GENERATED_CIRCUITS_SIZE_2_1;
   const auto& circuits2 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_2
                                          : PRE_GENERATED_CIRCUITS_SIZE_2_2;
   const auto nrCircuits = circuits1.size();
-  auto randomGenerator = circuit1.getGenerator();
   std::uniform_int_distribution<size_t> randomDistribution(0, nrCircuits - 1);
 
   const auto randomIndex = randomDistribution(randomGenerator);
@@ -248,11 +254,12 @@ Circuits" (https://arxiv.org/abs/2208.07564) in Section VI. B.
   @param n number of qubits of the resulting circuits
   @param d number of data qubits in the resulting circuits
   @param m number of measured qubits in the resulting circuit
+  @param seed seed for the random-number generator
   @return two circuits that are partially equivalent
 **/
 std::pair<qc::QuantumComputation, qc::QuantumComputation>
 generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
-                                    const qc::Qubit m) {
+                                    const qc::Qubit m, const size_t seed) {
   if (d > n || m > n) {
     throw std::runtime_error("The number of data or measured qubits can't be "
                              "bigger than the total number of qubits. n = " +
@@ -263,7 +270,7 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
   qc::QuantumComputation circuit1{n};
   qc::QuantumComputation circuit2{n};
 
-  auto randomGenerator = circuit1.getGenerator();
+  std::mt19937_64 randomGenerator(seed);
 
   // 1) H gates
   for (qc::Qubit i = 0U; i < d; i++) {
@@ -297,7 +304,8 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
       groupSize = randomDistrGroupSize(randomGenerator);
     }
 
-    addPreGeneratedCircuits(circuit1, circuit2, groupBeginIndex, groupSize);
+    addPreGeneratedCircuits(circuit1, circuit2, groupBeginIndex, groupSize,
+                            randomGenerator);
 
     groupBeginIndex += groupSize;
   }
@@ -350,7 +358,7 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
 
   return std::make_pair(circuit1, circuit2);
 }
-
+} // namespace
 } // namespace dd
 
 class PartialEquivalenceTest : public testing::Test {
@@ -374,6 +382,17 @@ protected:
   qc::QuantumComputation qc2;
   ec::Configuration config{};
 };
+
+TEST(PartialEquivalenceGenerator, ReproducibleAndIndependentSeeds) {
+  constexpr size_t seed = 17U;
+  const auto expected =
+      dd::generatePartiallyEquivalentCircuits(8U, 6U, 4U, seed);
+
+  EXPECT_EQ(dd::generatePartiallyEquivalentCircuits(8U, 6U, 4U, seed),
+            expected);
+  EXPECT_NE(dd::generatePartiallyEquivalentCircuits(8U, 6U, 4U, seed + 1U),
+            expected);
+}
 
 TEST_F(PartialEquivalenceTest, AlternatingCheckerGarbage) {
   // these circuits have the same gates acting on the measured qubit
@@ -897,6 +916,7 @@ TEST_F(PartialEquivalenceTest, ConstructionCheckerSliQECPeriodFinding8Qubits) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
 }
 
+namespace {
 void partialEquivalencCheckingBenchmarks(const qc::Qubit minN,
                                          const qc::Qubit maxN,
                                          const size_t reps,
@@ -916,7 +936,8 @@ void partialEquivalencCheckingBenchmarks(const qc::Qubit minN,
       std::uniform_int_distribution<qc::Qubit> nrDataQubits(1, d);
       const qc::Qubit m = nrDataQubits(gen);
 
-      const auto [c1, c2] = dd::generatePartiallyEquivalentCircuits(n, d, m);
+      const auto [c1, c2] =
+          dd::generatePartiallyEquivalentCircuits(n, d, m, gen());
 
       ec::EquivalenceCheckingManager ecm(c1, c2, config);
       ecm.run();
@@ -935,6 +956,7 @@ void partialEquivalencCheckingBenchmarks(const qc::Qubit minN,
               << "\n";
   }
 }
+} // namespace
 
 TEST_F(PartialEquivalenceTest, Benchmark) {
   config.execution.runConstructionChecker = true;

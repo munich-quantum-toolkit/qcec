@@ -1,4 +1,12 @@
-"""Tests the partial equivalence checking support of QCEC."""
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+"""Tests the hybrid Schrödinger-Feynman checker."""
 
 from __future__ import annotations
 
@@ -6,6 +14,7 @@ import pytest
 from qiskit import QuantumCircuit
 
 from mqt import qcec
+from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 
 @pytest.fixture
@@ -30,7 +39,7 @@ def alternative_circuit() -> QuantumCircuit:
 
 def test_configuration_pec(original_circuit: QuantumCircuit, alternative_circuit: QuantumCircuit) -> None:
     """Test if the flag for hsf equivalence checking works."""
-    config = qcec.Configuration()
+    config = Configuration()
     config.execution.run_alternating_checker = False
     config.execution.run_construction_checker = False
     config.execution.run_simulation_checker = False
@@ -39,12 +48,12 @@ def test_configuration_pec(original_circuit: QuantumCircuit, alternative_circuit
     config.functionality.check_approximate_equivalence = True
     config.functionality.approximate_checking_threshold = 0.8
     result = qcec.verify(original_circuit, alternative_circuit, configuration=config)
-    assert result.equivalence == qcec.EquivalenceCriterion.equivalent
+    assert result.equivalence == EquivalenceCriterion.equivalent
 
 
 def test_argument_pec(original_circuit: QuantumCircuit, alternative_circuit: QuantumCircuit) -> None:
     """Test if the flag for hsf equivalence checking works."""
-    config = qcec.Configuration()
+    config = Configuration()
     config.execution.run_alternating_checker = False
     config.execution.run_construction_checker = False
     config.execution.run_simulation_checker = False
@@ -57,4 +66,4 @@ def test_argument_pec(original_circuit: QuantumCircuit, alternative_circuit: Qua
         check_approximate_equivalence=True,
         approximate_checking_threshold=0.8,
     )
-    assert result.equivalence == qcec.EquivalenceCriterion.equivalent
+    assert result.equivalence == EquivalenceCriterion.equivalent

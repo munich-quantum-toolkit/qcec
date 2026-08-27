@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
@@ -12,13 +17,12 @@
 #include <utility>
 
 namespace ec {
-template <class DDType, class Config>
-class OneToOneApplicationScheme final
-    : public ApplicationScheme<DDType, Config> {
+template <class DDType>
+class OneToOneApplicationScheme final : public ApplicationScheme<DDType> {
 public:
-  OneToOneApplicationScheme(TaskManager<DDType, Config>& tm1,
-                            TaskManager<DDType, Config>& tm2) noexcept
-      : ApplicationScheme<DDType, Config>(tm1, tm2) {}
+  OneToOneApplicationScheme(TaskManager<DDType>& tm1,
+                            TaskManager<DDType>& tm2) noexcept
+      : ApplicationScheme<DDType>(tm1, tm2) {}
 
   std::pair<size_t, size_t> operator()() noexcept override { return {1U, 1U}; }
 };

@@ -1,37 +1,38 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Test the configuration of the equivalence checker."""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import pytest
 
-if TYPE_CHECKING:
-    from mqt.qcec.literals import ApplicationSchemeName, StateTypeName
-
-from mqt import qcec
+from mqt.qcec.pyqcec import ApplicationScheme, Configuration, StateType
 
 
 @pytest.mark.parametrize(
     ("application_scheme_string", "application_scheme_enum"),
     [
-        ("sequential", qcec.ApplicationScheme.sequential),
-        ("reference", qcec.ApplicationScheme.sequential),
-        ("one_to_one", qcec.ApplicationScheme.one_to_one),
-        ("naive", qcec.ApplicationScheme.one_to_one),
-        ("lookahead", qcec.ApplicationScheme.lookahead),
-        ("gate_cost", qcec.ApplicationScheme.gate_cost),
-        ("compilation_flow", qcec.ApplicationScheme.gate_cost),
-        ("proportional", qcec.ApplicationScheme.proportional),
+        ("sequential", ApplicationScheme.sequential),
+        ("reference", ApplicationScheme.sequential),
+        ("one_to_one", ApplicationScheme.one_to_one),
+        ("naive", ApplicationScheme.one_to_one),
+        ("lookahead", ApplicationScheme.lookahead),
+        ("gate_cost", ApplicationScheme.gate_cost),
+        ("compilation_flow", ApplicationScheme.gate_cost),
+        ("proportional", ApplicationScheme.proportional),
     ],
 )
-def test_application_scheme(
-    application_scheme_string: ApplicationSchemeName, application_scheme_enum: qcec.ApplicationScheme
-) -> None:
+def test_application_scheme(application_scheme_string: str, application_scheme_enum: ApplicationScheme) -> None:
     """Test the application scheme enum."""
-    assert qcec.ApplicationScheme(application_scheme_string) == application_scheme_enum
+    assert ApplicationScheme[application_scheme_string] == application_scheme_enum
 
-    config = qcec.Configuration()
+    config = Configuration()
 
     config.application.construction_scheme = application_scheme_enum
     config.application.simulation_scheme = application_scheme_enum
@@ -40,7 +41,7 @@ def test_application_scheme(
 
 def test_timeout() -> None:
     """Test the timeout configuration."""
-    config = qcec.Configuration()
+    config = Configuration()
     config.execution.timeout = 60
     config.execution.timeout = 60.0
 
@@ -48,17 +49,17 @@ def test_timeout() -> None:
 @pytest.mark.parametrize(
     ("state_type_string", "state_type_enum"),
     [
-        ("computational_basis", qcec.StateType.computational_basis),
-        ("classical", qcec.StateType.computational_basis),
-        ("random_1Q_basis", qcec.StateType.random_1Q_basis),
-        ("local_quantum", qcec.StateType.random_1Q_basis),
-        ("stabilizer", qcec.StateType.stabilizer),
-        ("global_quantum", qcec.StateType.stabilizer),
+        ("computational_basis", StateType.computational_basis),
+        ("classical", StateType.computational_basis),
+        ("random_1q_basis", StateType.random_1q_basis),
+        ("local_quantum", StateType.random_1q_basis),
+        ("stabilizer", StateType.stabilizer),
+        ("global_quantum", StateType.stabilizer),
     ],
 )
-def test_state_type(state_type_string: StateTypeName, state_type_enum: qcec.StateType) -> None:
+def test_state_type(state_type_string: str, state_type_enum: StateType) -> None:
     """Test the state type enum."""
-    assert qcec.StateType(state_type_string) == state_type_enum
+    assert StateType[state_type_string] == state_type_enum
 
-    config = qcec.Configuration()
+    config = Configuration()
     config.simulation.state_type = state_type_enum

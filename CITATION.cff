@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+title: MQT QCEC - A tool for Quantum Circuit Equivalence Checking
+message: >-
+  If you use this software, please cite both the article from preferred-citation and the software itself.
+type: software
+authors:
+  - given-names: Lukas
+    family-names: Burgholzer
+    email: lukas.burgholzer@tum.de
+    affiliation: 'Technical University of Munich, Germany'
+    orcid: 'https://orcid.org/0000-0003-4699-1316'
+  - given-names: Tom
+    family-names: Peham
+    email: tom.peham@tum.de
+    affiliation: 'Technical University of Munich, Germany'
+    orcid: 'https://orcid.org/0000-0003-3434-7881'
+  - given-names: Robert
+    family-names: Wille
+    email: robert.wille@tum.de
+    affiliation: 'Technical University of Munich, Germany'
+    orcid: 'https://orcid.org/0000-0002-4993-7860'
+
+identifiers:
+  - type: doi
+    value: 10.1109/TCAD.2020.3032630
+  - type: url
+    value: 'https://arxiv.org/abs/2004.08420'
+url: 'https://mqt.readthedocs.io/projects/qcec'
+license: MIT
+preferred-citation:
+    type: article
+    title: "Advanced equivalence checking for quantum circuits"
+    journal: "IEEE Transactions on CAD of Integrated Circuits and Systems"
+    year: 2021
+    month: 9
+    doi: "10.1109/TCAD.2020.3032630"
+    authors:
+      - given-names: Lukas
+        family-names: Burgholzer
+        email: lukas.burgholzer@tum.de
+        affiliation: 'Technical University of Munich, Germany'
+        orcid: 'https://orcid.org/0000-0003-4699-1316'
+      - given-names: Robert
+        family-names: Wille
+        email: robert.wille@tum.de
+        affiliation: 'Technical University of Munich, Germany'
+        orcid: 'https://orcid.org/0000-0002-4993-7860'

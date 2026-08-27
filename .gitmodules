@@ -1,3 +1,0 @@
-[submodule "extern/mqt-core"]
-	path = extern/mqt-core
-	url = git@github.com:cda-tum/mqt-core.git

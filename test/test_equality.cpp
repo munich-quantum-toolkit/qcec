@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
@@ -9,6 +14,7 @@
 #include "dd/DDDefinitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
+#include "qasm3/Importer.hpp"
 
 #include <cstddef>
 #include <gtest/gtest.h>
@@ -34,6 +40,15 @@ protected:
   ec::Configuration config{};
 };
 
+TEST_F(EqualityTest, NothingToDo) {
+  qc1.x(0);
+  qc2.x(0);
+
+  auto ecm = ec::EquivalenceCheckingManager(qc1, qc2, config);
+  ecm.run();
+  EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NoInformation);
+}
+
 TEST_F(EqualityTest, GlobalPhase) {
   qc1.x(0);
   qc2.x(0);
@@ -53,7 +68,7 @@ TEST_F(EqualityTest, GlobalPhase) {
 
 /**
  * @brief The following is a regression test for
- * https://github.com/cda-tum/mqt-qcec/issues/347
+ * https://github.com/munich-quantum-toolkit/qcec/issues/347
  */
 TEST_F(EqualityTest, GlobalPhaseSimulation) {
   qc1.x(0);
@@ -170,8 +185,10 @@ TEST_F(EqualityTest, AutomaticSwitchToConstructionChecker) {
 
   // setup default configuration
   config = ec::Configuration{};
+  config.functionality.checkPartialEquivalence = true;
+  // clang-tidy is having an aneurysm here and suggests to use const.
+  // NOLINTNEXTLINE(misc-const-correctness)
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
-  ecm.setCheckPartialEquivalence(true);
 
   // this should notice that the alternating checker is not capable of running
   // the circuit and should switch to the construction checker
@@ -191,8 +208,9 @@ TEST_F(EqualityTest, AutomaticSwitchToConstructionChecker) {
   // Note: this exception can only be caught in sequential mode since it is
   // raised in a different thread otherwise.
   ecm.reset();
-  ecm.setAlternatingChecker(true);
-  ecm.setParallel(false);
+  auto& conf = ecm.getConfiguration();
+  conf.execution.runAlternatingChecker = true;
+  conf.execution.parallel = false;
   EXPECT_THROW(ecm.run(), std::invalid_argument);
 }
 
@@ -205,7 +223,8 @@ TEST_F(EqualityTest, ExceptionInParallelThread) {
   config.execution.runSimulationChecker = true;
   config.execution.runZXChecker = false;
   config.application.simulationScheme = ec::ApplicationSchemeType::Lookahead;
-
+  // clang-tidy is having an aneurysm here and suggests to use const.
+  // NOLINTNEXTLINE(misc-const-correctness)
   ec::EquivalenceCheckingManager ecm(qc1, qc1, config);
   EXPECT_THROW(ecm.run(), std::invalid_argument);
 }
@@ -301,19 +320,19 @@ TEST_F(EqualityTest, onlySingleTask) {
 
   ecm.reset();
   ecm.disableAllCheckers();
-  ecm.setConstructionChecker(true);
+  ecm.getConfiguration().execution.runConstructionChecker = true;
   ecm.run();
   EXPECT_TRUE(ecm.getConfiguration().onlySingleTask());
 
   ecm.reset();
   ecm.disableAllCheckers();
-  ecm.setZXChecker(true);
+  ecm.getConfiguration().execution.runZXChecker = true;
   ecm.run();
   EXPECT_TRUE(ecm.getConfiguration().onlySingleTask());
 
   ecm.reset();
   ecm.disableAllCheckers();
-  ecm.setAlternatingChecker(true);
+  ecm.getConfiguration().execution.runAlternatingChecker = true;
   ecm.run();
   EXPECT_TRUE(ecm.getConfiguration().onlySingleTask());
 }
@@ -336,10 +355,12 @@ TEST_F(EqualityTest, StripIdleQubitPresentInBothCircuits) {
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits() - 1);
-  EXPECT_EQ(ecm.getResults().numMeasuredQubits1, 1);
-  EXPECT_EQ(ecm.getResults().numMeasuredQubits2, 1);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), circ2.getNqubits());
+  EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits() - 1);
+  EXPECT_EQ(circ1.getNqubits() - circ1.getNgarbageQubits(), 1);
+  EXPECT_EQ(circ2.getNqubits() - circ2.getNgarbageQubits(), 1);
 }
 
 TEST_F(EqualityTest, NotEqualDueToNoSeparateIdleQubitStripping) {
@@ -367,12 +388,14 @@ TEST_F(EqualityTest, NotEqualDueToNoSeparateIdleQubitStripping) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
   // Check that idle qubits have not been removed and re-added as ancillary
   // qubits
-  EXPECT_EQ(ecm.getResults().numQubits1, qc1.getNqubits());
-  EXPECT_EQ(ecm.getResults().numAncillae1, 0);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits());
-  EXPECT_EQ(ecm.getResults().numAncillae2, 0);
-  EXPECT_EQ(ecm.getResults().numMeasuredQubits1, 2);
-  EXPECT_EQ(ecm.getResults().numMeasuredQubits2, 2);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), qc1.getNqubits());
+  EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits());
+  EXPECT_EQ(circ1.getNancillae(), 0);
+  EXPECT_EQ(circ2.getNancillae(), 0);
+  EXPECT_EQ(circ1.getNqubits() - circ1.getNgarbageQubits(), 2);
+  EXPECT_EQ(circ2.getNqubits() - circ2.getNgarbageQubits(), 2);
 }
 
 TEST_F(EqualityTest, EqualDueToNoSeparateIdleQubitStripping) {
@@ -398,11 +421,12 @@ TEST_F(EqualityTest, EqualDueToNoSeparateIdleQubitStripping) {
   config.optimizations.elidePermutations = false;
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
-  EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits());
-  EXPECT_EQ(ecm.getResults().numAncillae1, 0);
-  EXPECT_EQ(ecm.getResults().numAncillae2, 0);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), qc1.getNqubits());
+  EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits());
+  EXPECT_EQ(circ1.getNancillae(), 0);
+  EXPECT_EQ(circ2.getNancillae(), 0);
 }
 
 TEST_F(EqualityTest,
@@ -433,8 +457,10 @@ TEST_F(EqualityTest,
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits() - 1);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), circ2.getNqubits());
+  EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits() - 1);
 }
 
 TEST_F(EqualityTest, StripIdleQubitPresentOnlyInOneCircuit) {
@@ -458,7 +484,7 @@ TEST_F(EqualityTest, StripIdleQubitPresentOnlyInOneCircuit) {
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits() - 1);
+  EXPECT_EQ(ecm.getSecondCircuit().getNqubits(), qc2.getNqubits() - 1);
 }
 
 TEST_F(EqualityTest, StripIdleQubitLogicalOnlyInOnePhysicalInBothCircuits) {
@@ -488,7 +514,7 @@ TEST_F(EqualityTest, StripIdleQubitLogicalOnlyInOnePhysicalInBothCircuits) {
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits() - 1);
+  EXPECT_EQ(ecm.getSecondCircuit().getNqubits(), qc2.getNqubits() - 1);
 }
 
 TEST_F(EqualityTest, StripIdleQubitOutputPermutationDifferent) {
@@ -512,10 +538,12 @@ TEST_F(EqualityTest, StripIdleQubitOutputPermutationDifferent) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
   // Check that no qubits were removed as the initial and output permutation are
   // not equivalent for the idle qubits
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, qc2.getNqubits());
-  EXPECT_EQ(ecm.getResults().numAncillae1, 0);
-  EXPECT_EQ(ecm.getResults().numAncillae2, 0);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), qc1.getNqubits());
+  EXPECT_EQ(circ2.getNqubits(), qc2.getNqubits());
+  EXPECT_EQ(circ1.getNancillae(), 0);
+  EXPECT_EQ(circ2.getNancillae(), 0);
 }
 
 TEST_F(EqualityTest, StripIdleQubitOutputPermutationEquivalent) {
@@ -537,8 +565,10 @@ TEST_F(EqualityTest, StripIdleQubitOutputPermutationEquivalent) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
   // Check that qubits were removed as the initial and output permutation are
   // equivalent
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, 0);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), 0);
+  EXPECT_EQ(circ2.getNqubits(), 0);
 }
 
 TEST_F(EqualityTest, StripQubitIdleInOneCircuitOnlyOutputPermutationDifferent) {
@@ -559,10 +589,12 @@ TEST_F(EqualityTest, StripQubitIdleInOneCircuitOnlyOutputPermutationDifferent) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
   // Check that no qubits were removed as the initial and output permutation are
   // not equivalent for the idle qubits
-  EXPECT_EQ(ecm.getResults().numQubits1, 2);
-  EXPECT_EQ(ecm.getResults().numQubits2, 2);
-  EXPECT_EQ(ecm.getResults().numAncillae1, 1);
-  EXPECT_EQ(ecm.getResults().numAncillae2, 1);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), 2);
+  EXPECT_EQ(circ2.getNqubits(), 2);
+  EXPECT_EQ(circ1.getNancillae(), 1);
+  EXPECT_EQ(circ2.getNancillae(), 1);
 }
 
 TEST_F(EqualityTest,
@@ -580,8 +612,10 @@ TEST_F(EqualityTest,
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
   // Check that qubits were removed as the initial and output permutation are
   // equivalent
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, 0);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), 0);
+  EXPECT_EQ(circ2.getNqubits(), 0);
 }
 
 TEST_F(EqualityTest, StripIdleQubitInOutputPermutationWithAncilla) {
@@ -600,10 +634,50 @@ TEST_F(EqualityTest, StripIdleQubitInOutputPermutationWithAncilla) {
   config.execution.runConstructionChecker = true;
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
-  EXPECT_EQ(ecm.getResults().numQubits1, ecm.getResults().numQubits2);
-  EXPECT_EQ(ecm.getResults().numQubits2, 0);
-  EXPECT_EQ(ecm.getResults().numAncillae1, 0);
-  EXPECT_EQ(ecm.getResults().numAncillae2, 0);
+  const auto& circ1 = ecm.getFirstCircuit();
+  const auto& circ2 = ecm.getSecondCircuit();
+  EXPECT_EQ(circ1.getNqubits(), 0);
+  EXPECT_EQ(circ2.getNqubits(), 0);
+  EXPECT_EQ(circ1.getNancillae(), 0);
+  EXPECT_EQ(circ2.getNancillae(), 0);
+}
+
+TEST_F(EqualityTest, RemoveDiagonalGatesBeforeMeasure) {
+  qc1.addClassicalRegister(1U);
+  qc1.x(0);
+  qc1.measure(0, 0U);
+  std::cout << qc1 << "\n";
+  std::cout << "-----------------------------\n";
+
+  qc2.addClassicalRegister(1U);
+  qc2.x(0);
+  qc2.z(0);
+  qc2.measure(0, 0U);
+  std::cout << qc2 << "\n";
+  std::cout << "-----------------------------\n";
+
+  // the standard check should reveal that both circuits are not equivalent
+  auto ecm = ec::EquivalenceCheckingManager(qc1, qc2);
+  ecm.run();
+  EXPECT_FALSE(ecm.getResults().consideredEquivalent());
+  std::cout << ecm.getResults() << "\n";
+
+  // simulations should suggest both circuits to be equivalent
+  ecm.reset();
+  ecm.disableAllCheckers();
+  ecm.getConfiguration().execution.runSimulationChecker = true;
+  ecm.run();
+  EXPECT_TRUE(ecm.getResults().consideredEquivalent());
+  std::cout << ecm.getResults() << "\n";
+
+  // if configured to remove diagonal gates before measurements, the circuits
+  // are equivalent
+  config = ec::Configuration{};
+  config.optimizations.removeDiagonalGatesBeforeMeasure = true;
+  auto ecm2 = ec::EquivalenceCheckingManager(qc1, qc2, config);
+  ecm2.run();
+  EXPECT_TRUE(ecm2.getResults().consideredEquivalent());
+  std::cout << ecm2.getResults() << "\n";
 }
 
 TEST_F(EqualityTest, ApproximateEquivalenceConstructionEqual) {
@@ -673,10 +747,10 @@ TEST_F(EqualityTest, ApproximateEquivalenceAlternatingNotEqual) {
 TEST_F(EqualityTest, ApproximateEquivalenceBqskitToffoliDefaultError) {
   // Check that the Toffoli gate is equivalent to itself after synthesizing it
   // with the BQSKit compiler, which introduces by default a distance up to 1e-8
-  const qc::QuantumComputation c1{
-      "./circuits/approximateEquivalenceTest/toffoli.qasm"};
-  const qc::QuantumComputation c2{"./circuits/approximateEquivalenceTest/"
-                                  "toffoli_out_default_error.qasm"};
+  const auto c1 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli.qasm");
+  const auto c2 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli_out_default_error.qasm");
   config.execution.runAlternatingChecker = true;
   config.functionality.checkApproximateEquivalence = true;
   // using default error threshold
@@ -688,10 +762,10 @@ TEST_F(EqualityTest, ApproximateEquivalenceBqskitToffoliDefaultError) {
 TEST_F(EqualityTest, ApproximateEquivalenceBqskitToffoliSmallError) {
   // Check that the Toffoli gate is equivalent to itself after synthesizing it
   // with the BQSKit compiler, when setting the error_threshold to 5e-2
-  const qc::QuantumComputation c1{
-      "./circuits/approximateEquivalenceTest/toffoli.qasm"};
-  const qc::QuantumComputation c2{"./circuits/approximateEquivalenceTest/"
-                                  "toffoli_out_small_error.qasm"};
+  const auto c1 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli.qasm");
+  const auto c2 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli_out_small_error.qasm");
   config.execution.runAlternatingChecker = true;
   config.functionality.checkApproximateEquivalence = true;
   config.functionality.approximateCheckingThreshold = 5e-2;
@@ -704,10 +778,10 @@ TEST_F(EqualityTest, ApproximateEquivalenceBqskitToffoliHighError) {
   // Check that the Toffoli gate is equivalent to itself after synthesizing it
   // with the BQSKit compiler, when setting the error_threshold to 0.5 Here, the
   // computed distance indeed exceeds the default threshold of 1e-8.
-  const qc::QuantumComputation c1{
-      "./circuits/approximateEquivalenceTest/toffoli.qasm"};
-  const qc::QuantumComputation c2{"./circuits/approximateEquivalenceTest/"
-                                  "toffoli_out_high_error.qasm"};
+  const auto c1 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli.qasm");
+  const auto c2 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/toffoli_out_high_error.qasm");
   config.execution.runAlternatingChecker = true;
   config.functionality.checkApproximateEquivalence = true;
   // using default error threshold
@@ -724,10 +798,10 @@ TEST_F(EqualityTest, ApproximateEquivalenceBqskitToffoliHighError) {
 TEST_F(EqualityTest, ApproximateEquivalenceBqskitBellDefaultError) {
   // Check that the Bell circuit is equivalent to itself after synthesizing it
   // with the BQSKit compiler, which introduces by default a distance up to 1e-8
-  const qc::QuantumComputation c1{
-      "./circuits/approximateEquivalenceTest/bell.qasm"};
-  const qc::QuantumComputation c2{"./circuits/approximateEquivalenceTest/"
-                                  "bell_out_default_error.qasm"};
+  const auto c1 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/bell.qasm");
+  const auto c2 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/bell_out_default_error.qasm");
   config.execution.runAlternatingChecker = true;
   config.functionality.checkApproximateEquivalence = true;
   // using default error threshold
@@ -740,10 +814,10 @@ TEST_F(EqualityTest, ApproximateEquivalenceBqskitBellHighError) {
   // Check that the Bell circuit is equivalent to itself after synthesizing it
   // with the BQSKit compiler, when setting the error_threshold to 0.5 Here, the
   // computed distance indeed exceeds the default threshold of 1e-8.
-  const qc::QuantumComputation c1{
-      "./circuits/approximateEquivalenceTest/bell.qasm"};
-  const qc::QuantumComputation c2{"./circuits/approximateEquivalenceTest/"
-                                  "bell_out_high_error.qasm"};
+  const auto c1 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/bell.qasm");
+  const auto c2 = qasm3::Importer::importf(
+      "./circuits/approximateEquivalenceTest/bell_out_high_error.qasm");
   config.execution.runAlternatingChecker = true;
   config.functionality.checkApproximateEquivalence = true;
   // using default error threshold

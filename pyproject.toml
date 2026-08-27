@@ -1,9 +1,17 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 [build-system]
 requires = [
-  "scikit-build-core>=0.10.7",
-  "setuptools-scm>=8.1",
-  "pybind11>=2.13.6",
-  "mqt.core>=3.0.0b4",
+  "nanobind~=2.15.0",
+  "scikit-build-core>=1.0.3",
+  "vcs-versioning>=2.3.0",
+  "mqt.core~=3.9.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -16,37 +24,37 @@ authors = [
     { name = "Tom Peham", email = "tom.peham@tum.de" }
 ]
 keywords = ["MQT", "quantum-computing", "design-automation", "equivalence-checking", "verification"]
-license = { file = "LICENSE.md" }
+license = "MIT"
+license-files = ["LICENSE"]
 
 classifiers = [
-    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
-    "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
-    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
     "Programming Language :: C++",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Topic :: Scientific/Engineering :: Quantum Computing",
     "Typing :: Typed",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
-    "mqt.core>=3.0.0b4",
-    "importlib_resources>=5.0; python_version < '3.10'",
-    "typing_extensions>=4.2; python_version < '3.11'", # used for typing.Unpack
-    "numpy>=2.1; python_version >= '3.13'",
+    "mqt.core~=3.9.0",
+    "numpy>=1.24",
     "numpy>=1.26; python_version >= '3.12'",
-    "numpy>=1.24; python_version >= '3.11'",
-    "numpy>=1.22",
+    "numpy>=2.1; python_version >= '3.13'",
+    "numpy>=2.3.2; python_version >= '3.14'",
 ]
 dynamic = ["version"]
 
@@ -54,10 +62,10 @@ dynamic = ["version"]
 qiskit = ["qiskit[qasm3-import]>=1.0.0"]
 
 [project.urls]
-Homepage = "https://github.com/cda-tum/mqt-qcec"
+Homepage = "https://github.com/munich-quantum-toolkit/qcec"
 Documentation = "https://mqt.readthedocs.io/projects/qcec"
-Issues = "https://github.com/cda-tum/mqt-qcec/issues"
-Discussions = "https://github.com/cda-tum/mqt-qcec/discussions"
+Issues = "https://github.com/munich-quantum-toolkit/qcec/issues"
+Discussions = "https://github.com/munich-quantum-toolkit/qcec/discussions"
 
 
 [tool.scikit-build]
@@ -68,7 +76,10 @@ minimum-version = "build-system.requires"
 wheel.install-dir = "mqt/qcec"
 
 # Explicitly set the package directory
-wheel.packages = ["src/mqt"]
+wheel.packages = ["python/mqt"]
+
+# Enable Stable ABI builds for CPython 3.12+
+wheel.py-api = "cp312"
 
 # Set required Ninja version
 ninja.version = ">=1.10"
@@ -77,21 +88,21 @@ ninja.version = ">=1.10"
 build-dir = "build/{wheel_tag}/{build_type}"
 
 # Only build the Python bindings target
-build.targets = ["pyqcec"]
+build.targets = [
+  "mqt-qcec-bindings",
+]
 
 # Only install the Python package component
 install.components = ["mqt-qcec_Python"]
-
-metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
-sdist.include = ["src/mqt/qcec/_version.py"]
+sdist.include = ["python/mqt/qcec/_version.py"]
 sdist.exclude = [
-    "**/.github",
-    "**/doc",
-    "**/docs",
-    "**/meta",
-    "**/plots",
-    "**/test",
-    "**/tests",
+  "**/.github",
+  "**/doc",
+  "**/docs",
+  "**/meta",
+  "**/plots",
+  "**/test",
+  "**/tests",
 ]
 
 [tool.scikit-build.cmake.define]
@@ -107,62 +118,77 @@ inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
 
 
+[[tool.dynamic-metadata]]
+provider = "vcs_versioning"
+
+
 [tool.check-sdist]
-sdist-only = ["src/mqt/qcec/_version.py"]
+sdist-only = ["python/mqt/qcec/_version.py"]
 git-only = [
-    "docs/*",
-    "extern/*",
-    "test/*",
-    ".idea/*",
+  "docs/*",
+  "extern/*",
+  "test/*",
+  ".idea/*",
 ]
 
 
-[tool.setuptools_scm]
-write_to = "src/mqt/qcec/_version.py"
+[tool.vcs-versioning]
+write_to = "python/mqt/qcec/_version.py"
 
 
-[tool.pytest.ini_options]
-minversion = "7.2"
+[tool.pytest]
+minversion = "9.0"
 testpaths = ["test/python"]
-addopts = ["-ra", "--strict-markers", "--strict-config", "--showlocals"]
-log_cli_level = "INFO"
-xfail_strict = true
+strict = true
+addopts = [
+  "-ra",
+  "--showlocals",
+  "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
+]
+log_level = "INFO"
 filterwarnings = [
   "error",
   'ignore:.*encountered in det.*:RuntimeWarning:numpy.linalg:',
   'ignore:.*datetime\.datetime\.utcfromtimestamp.*:DeprecationWarning:',
   # Qiskit 1.3 deprecations
-  'ignore:.*``qiskit.dagcircuit.dagcircuit.DAGCircuit.*`` is deprecated as of qiskit 1.3.0.*:DeprecationWarning:',
   'ignore:.*``qiskit.circuit.library.standard_gates.x.*`` is pending deprecation as of qiskit 1.3.*:PendingDeprecationWarning:',
+  # Qiskit 2.1 deprecations
+  "ignore:.*``qiskit.circuit.quantumcircuit.QuantumCircuit.mcx.*``'s argument ``mode`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXGate.get_num_ancilla_qubits.*`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXRecursive.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  "ignore:.*``qiskit.circuit.library.standard_gates.x.MCXVChain.__new__()`` is deprecated as of Qiskit 2.1.*:DeprecationWarning:",
+  # mqt.qcec deprecations
+  "ignore:.*``mqt.qcec`` has deprecated the ``mode`` argument of ``generate_profile``*:DeprecationWarning:",
+  "ignore:.*``mqt.qcec`` has deprecated the ``ancilla_mode`` argument of ``verify_compilation``*:DeprecationWarning:",
 ]
+
 
 [tool.coverage]
 run.source = ["mqt.qcec"]
-run.omit = ["src/mqt/qcec/literals.py"]
+run.core = "sysmon"
+run.parallel = true
+run.omit = ["python/mqt/qcec/_compat/typing.py"]
 report.exclude_also = [
-    '\.\.\.',
-    'if TYPE_CHECKING:',
-    'raise AssertionError',
-    'raise NotImplementedError',
-    'def __dir__()',  # Ignore __dir__ method that exists mainly for better IDE support
-    '@overload'  # Overloads are only for static typing
+  '\.\.\.',
+  'if TYPE_CHECKING:',
+  'raise AssertionError',
+  'raise NotImplementedError',
+  'def __dir__()',  # Ignore __dir__ method that exists mainly for better IDE support
+  '@overload',  # Overloads are only for static typing
+]
+run.disable_warnings = [
+  "no-sysmon",
 ]
 
 
-[tool.mypy]
-files = ["src/mqt", "test/python", "noxfile.py"]
-mypy_path = ["$MYPY_CONFIG_FILE_DIR/src"]
-python_version = "3.9"
-warn_unused_configs = true
-enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
-strict = true
-disallow_untyped_defs = false
-explicit_package_bases = true
-warn_unreachable = true
+[tool.ty.terminal]
+# Error if ty emits any warning-level diagnostics.
+error-on-warning = true
 
-[[tool.mypy.overrides]]
-module = ["qiskit.*"]
-ignore_missing_imports = true
+[tool.ty.src]
+exclude = [
+    "docs/**",
+]
 
 
 [tool.check-wheel-contents]
@@ -173,7 +199,14 @@ ignore = ["W002"]  # Triggers on __init__.py's
 line-length = 120
 namespace-packages = ["mqt"]
 preview = true
+fix = true
 unsafe-fixes = true
+show-fixes = true
+src = ["python"]
+
+[tool.ruff.format]
+preview = true
+docstring-code-format = true
 
 [tool.ruff.lint]
 extend-select = [
@@ -181,7 +214,7 @@ extend-select = [
     "ANN",         # flake8-annotations
     "ARG",         # flake8-unused-arguments
     "ASYNC",       # flake8-async
-    "B",  "B904",  # flake8-bugbear
+    "B",           # flake8-bugbear
     "C4",          # flake8-comprehensions
     "D",           # pydocstyle
     "EM",          # flake8-errmsg
@@ -218,23 +251,15 @@ extend-select = [
     "YTT",         # flake8-2020
 ]
 ignore = [
-    "ISC001",  # Conflicts with formatter
     "PLR09",   # Too many <...>
     "PLR2004", # Magic value used in comparison
-    "PLC0415", # Import should be at top of file
     "S101",    # Use of assert detected
 ]
+future-annotations = true
 typing-modules = ["mqt.qcec._compat.typing"]
-isort.required-imports = ["from __future__ import annotations"]
 
-[tool.ruff.lint.flake8-tidy-imports.banned-api]
-"typing.Callable".msg = "Use collections.abc.Callable instead."
-"typing.Iterator".msg = "Use collections.abc.Iterator instead."
-"typing.Mapping".msg = "Use collections.abc.Mapping instead."
-"typing.Sequence".msg = "Use collections.abc.Sequence instead."
-"typing.Set".msg = "Use collections.abc.Set instead."
-"importlib.resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
-"importlib_resources".msg = "Use mqt.qcec._compat.importlib.resources instead."
+[tool.ruff.lint.isort]
+known-first-party = ["mqt.qcec"]
 
 [tool.ruff.lint.per-file-ignores]
 "test/python/**" = [
@@ -243,8 +268,8 @@ isort.required-imports = ["from __future__ import annotations"]
 ]
 "docs/**" = ["T20"]
 "noxfile.py" = ["T20", "TID251"]
-"src/mqt/qcec/_compat/**.py" = ["TID251"]
-"*.pyi" = ["D"]  # pydocstyle
+"python/mqt/qcec/_compat/**.py" = ["TID251"]
+"*.pyi" = ["D301", "D418", "E501", "PYI021"]
 "*.ipynb" = [
     "D",    # pydocstyle
     "E402", # Allow imports to appear anywhere in Jupyter notebooks
@@ -261,29 +286,31 @@ default.extend-ignore-re = [
   "(?Rm)^.*(#|//)\\s*spellchecker:disable-line$",  # ignore line
   "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on" # ignore block
 ]
+
 [tool.typos.default.extend-words]
 wille = "wille"
 anc = "anc"
 aer = "aer"
 
 
-[tool.repo-review]
-ignore = ["GH200"]
+[tool.repo-review.ignore]
+GH200 = "We use Renovate instead of Dependabot"
+PC160 = "We use a mirror of crate-ci/typos"
+PC170 = "We do not use rST files anymore"
 
 
 [tool.cibuildwheel]
 build = "cp3*"
-skip = "*-musllinux_*"
+skip = ["*-musllinux_*"]
 archs = "auto64"
 test-groups = ["test"]
 test-command = "pytest {project}/test/python"
-test-skip = ["cp3*t-*"] # skip testing on free-threading Python until our dependencies are ready
-build-frontend = "build[uv]"
-enable = ["cpython-freethreading"]
-manylinux-x86_64-image = "manylinux_2_28"
-manylinux-aarch64-image = "manylinux_2_28"
-manylinux-ppc64le-image = "manylinux_2_28"
-manylinux-s390x-image = "manylinux_2_28"
+build-frontend = "uv"
+test-skip = [
+  "cp3??t-*", # no freethreading qiskit wheels
+  "cp*-win_arm64", # no numpy, qiskit, ... wheels
+  "cp315*", # no 3.15 wheels yet
+]
 
 # The mqt-core shared libraries are provided by the mqt-core Python package.
 # They should not be vendorized into the mqt-qcec wheel. This requires
@@ -293,69 +320,64 @@ manylinux-s390x-image = "manylinux_2_28"
 environment = { DEPLOY="ON" }
 # The SOVERSION needs to be updated when the shared libraries are updated.
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
---exclude libmqt-core-ir.so.3.0 \
---exclude libmqt-core-qasm.so.3.0 \
---exclude libmqt-core-circuit-optimizer.so.3.0 \
---exclude libmqt-core-algorithms.so.3.0 \
---exclude libmqt-core-dd.so.3.0 \
---exclude libmqt-core-zx.so.3.0"""
+--exclude libmqt-core-ir.so.3.9 \
+--exclude libmqt-core-qasm.so.3.9 \
+--exclude libmqt-core-circuit-optimizer.so.3.9 \
+--exclude libmqt-core-algorithms.so.3.9 \
+--exclude libmqt-core-dd.so.3.9"""
 
 [tool.cibuildwheel.macos]
-environment = { MACOSX_DEPLOYMENT_TARGET = "10.15" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.3" }
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} --ignore-missing-dependencies"
 
 [tool.cibuildwheel.windows]
-before-build = "uv pip install delvewheel>=1.9.0"
 repair-wheel-command = """delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mqt \
 --exclude mqt-core-ir.dll \
 --exclude mqt-core-qasm.dll \
 --exclude mqt-core-circuit-optimizer.dll \
 --exclude mqt-core-algorithms.dll \
---exclude mqt-core-dd.dll \
---exclude mqt-core-zx.dll"""
-environment = { CMAKE_ARGS = "-T ClangCL" }
-
-[[tool.cibuildwheel.overrides]]
-select = "*-macosx_arm64"
-environment = { MACOSX_DEPLOYMENT_TARGET = "11.0" }
-
+--exclude mqt-core-dd.dll"""
 
 [tool.uv]
 required-version = ">=0.5.20"
-reinstall-package = ["mqt.qcec"]
-
+cache-keys = [
+  { file = "pyproject.toml" },
+  { git = { commit = true, tags = true } },
+  { file = "bindings/**/*.cpp"},
+]
 
 [tool.uv.sources]
 mqt-qcec = { workspace = true }
 
+
 [dependency-groups]
 build = [
-  "pybind11>=2.13.6",
-  "scikit-build-core>=0.10.7",
-  "setuptools-scm>=8.1",
-  "mqt-core>=3.0.0b4",
+  "nanobind~=2.15.0",
+  "scikit-build-core>=1.0.3",
+  "vcs-versioning>=2.3.0",
+  "mqt.core~=3.9.0",
 ]
 docs = [
-  "furo>=2024.8.6",
-  "qiskit[qasm3-import,visualization]>=1.0.0",
-  "setuptools-scm>=8.1",
-  "sphinx-autoapi>=3.4.0",
+  "furo>=2025.09.25",
+  "myst-nb>=1.3.0",
+  "sphinx>=8.2.3",
+  "sphinx-autoapi>=3.6.1",
   "sphinx-copybutton>=0.5.2",
   "sphinx-design>=0.6.1",
-  "sphinxcontrib-bibtex>=2.6.3",
-  "sphinxcontrib-svg2pdfconverter>=1.2.3",
-  "sphinxext-opengraph>=0.9.1",
-  "ipykernel>=6.29.5",
-  "nbsphinx>=0.9.6",
-  "sphinx-autodoc-typehints>=2.3.0",
+  "sphinx-llm>=0.4.1",
+  "sphinxcontrib-bibtex>=2.6.5",
+  "sphinxext-opengraph>=0.13.0",
+  "qiskit[qasm3-import,visualization]>=1.0.0"
 ]
 test = [
-  "pytest>=8.3.4",
-  "pytest-cov>=6",
+  "pytest>=9.0.3",
+  "pytest-cov>=7.1.0",
+  "pytest-sugar>=1.1.1",
+  "pytest-xdist>=3.8.0",
   "qiskit[qasm3-import]>=1.0.0",
 ]
 dev = [
   {include-group = "build"},
-  {include-group = "docs"},
   {include-group = "test"},
+  "nox>=2025.11.12",
 ]

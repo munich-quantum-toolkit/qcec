@@ -1,13 +1,23 @@
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
 #pragma once
 
 #include "Configuration.hpp"
-#include "Definitions.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
 #include "dd/ComplexValue.hpp"
 #include "dd/DDpackageConfig.hpp"
 #include "dd/Package.hpp"
 #include "dd/Package_fwd.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "memory"
 #include "nlohmann/json_fwd.hpp"
@@ -100,7 +110,7 @@ public:
 private:
   qc::Qubit splitQubit;
 
-  using DDPackage = typename dd::Package<dd::DDPackageConfig>;
+  using DDPackage = dd::Package;
 
   /**
    * @brief Computing the Frobenius inner product trace(U * V^-1) and comparing
@@ -186,7 +196,7 @@ private:
     std::size_t controlIdx;
     qc::Qubit nqubits;
     std::size_t nDecisionsExecuted = 0;
-    qc::MatrixDD matrix{};
+    dd::MatrixDD matrix{};
 
     explicit Slice(std::unique_ptr<DDPackage>& dd, const qc::Qubit startQ,
                    const qc::Qubit endQ, const std::size_t controlQ)

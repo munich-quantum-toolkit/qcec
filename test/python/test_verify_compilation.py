@@ -1,11 +1,22 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Test the compilation flow verification."""
 
 from __future__ import annotations
 
 import pytest
-from qiskit import QuantumCircuit, transpile
+from qiskit import transpile
+from qiskit.circuit import QuantumCircuit
 
-from mqt import qcec
+from mqt.qcec import verify_compilation
+from mqt.qcec.compilation_flow_profiles import AncillaMode
+from mqt.qcec.pyqcec import EquivalenceCriterion
 
 
 @pytest.fixture
@@ -28,10 +39,10 @@ def test_verify_compilation_on_optimization_levels(original_circuit: QuantumCirc
         basis_gates=["cx", "x", "id", "u3", "measure", "u2", "rz", "u1", "reset", "sx"],
         optimization_level=optimization_level,
     )
-    result = qcec.verify_compilation(original_circuit, compiled_circuit, optimization_level=optimization_level)
+    result = verify_compilation(original_circuit, compiled_circuit, optimization_level=optimization_level)
     assert result.equivalence in {
-        qcec.EquivalenceCriterion.equivalent,
-        qcec.EquivalenceCriterion.equivalent_up_to_global_phase,
+        EquivalenceCriterion.equivalent,
+        EquivalenceCriterion.equivalent_up_to_global_phase,
     }
 
 
@@ -42,5 +53,11 @@ def test_warning_on_missing_measurements() -> None:
     qc.cx(0, 1)
 
     with pytest.warns(UserWarning, match=r"One of the circuits does not contain any measurements."):
-        result = qcec.verify_compilation(qc, qc)
-    assert result.equivalence == qcec.EquivalenceCriterion.equivalent
+        result = verify_compilation(qc, qc)
+    assert result.equivalence == EquivalenceCriterion.equivalent
+
+
+def test_deprecation_warning(original_circuit: QuantumCircuit) -> None:
+    """Tests that a deprecation warning is raised when the ``ancilla_mode`` argument is passed."""
+    with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``ancilla_mode`` argument"):
+        verify_compilation(original_circuit, original_circuit, ancilla_mode=AncillaMode.V_CHAIN)

@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
@@ -13,9 +18,7 @@
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "checker/dd/applicationscheme/GateCostApplicationScheme.hpp"
 #include "checker/dd/simulation/StateGenerator.hpp"
-#include "checker/dd/simulation/StateType.hpp"
-#include "dd/ComplexNumbers.hpp"
-#include "dd/DDDefinitions.hpp"
+#include "dd/Node.hpp"
 #include "ir/QuantumComputation.hpp"
 
 #include <condition_variable>
@@ -24,11 +27,10 @@
 #include <future>
 #include <memory>
 #include <mutex>
-#include <nlohmann/json_fwd.hpp>
+#include <nlohmann/json.hpp>
 #include <ostream>
 #include <string>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 namespace ec {
@@ -36,23 +38,6 @@ namespace ec {
 class EquivalenceCheckingManager {
 public:
   struct Results {
-    std::string name1;
-    std::string name2;
-
-    std::size_t numQubits1{};
-    std::size_t numQubits2{};
-
-    std::size_t numMeasuredQubits1{};
-    std::size_t numMeasuredQubits2{};
-
-    std::size_t numAncillae1{};
-    std::size_t numAncillae2{};
-
-    std::size_t numGates1{};
-    std::size_t numGates2{};
-
-    Configuration configuration{};
-
     double preprocessingTime{};
     double checkTime{};
 
@@ -60,9 +45,9 @@ public:
 
     std::size_t startedSimulations = 0U;
     std::size_t performedSimulations = 0U;
-    dd::CVec cexInput;
-    dd::CVec cexOutput1;
-    dd::CVec cexOutput2;
+    dd::VectorDD cexInput{};
+    dd::VectorDD cexOutput1{};
+    dd::VectorDD cexOutput2{};
     std::size_t performedInstantiations = 0U;
 
     nlohmann::json checkerResults = nlohmann::json::array();
@@ -80,24 +65,15 @@ public:
     }
 
     [[nodiscard]] nlohmann::json json() const;
-
-    static void toJson(nlohmann::json& j, const dd::CVec& stateVector) {
-      j = nlohmann::json::array();
-      for (const auto& amp : stateVector) {
-        j.emplace_back(std::pair{amp.real(), amp.imag()});
-      }
-    }
     [[nodiscard]] std::string toString() const { return json().dump(2); }
-    friend std::ostream&
-    operator<<(std::ostream& os,
-               const EquivalenceCheckingManager::Results& res) {
+    friend std::ostream& operator<<(std::ostream& os, const Results& res) {
       return os << res.toString();
     }
   };
 
   EquivalenceCheckingManager(const qc::QuantumComputation& circ1,
                              const qc::QuantumComputation& circ2,
-                             Configuration configuration = Configuration{});
+                             Configuration config = Configuration{});
 
   void run();
 
@@ -110,37 +86,32 @@ public:
   [[nodiscard]] EquivalenceCriterion equivalence() const {
     return results.equivalence;
   }
-  [[nodiscard]] Configuration getConfiguration() const { return configuration; }
-  [[nodiscard]] Results getResults() const { return results; }
 
-  // convenience functions for changing the configuration after the manager has
-  // been constructed: Execution: These settings may be changed to influence
-  // what is executed during `run`
-  void setTolerance(dd::fp tol) {
-    configuration.execution.numericalTolerance = tol;
-    dd::ComplexNumbers::setTolerance(tol);
-  }
-  void setParallel(bool parallel) {
-    configuration.execution.parallel = parallel;
-  }
-  void setNThreads(std::size_t nthreads) {
-    configuration.execution.nthreads = nthreads;
-  }
-  void setTimeout(const double timeout) {
-    configuration.execution.timeout = timeout;
-  }
-  void setConstructionChecker(bool run) {
-    configuration.execution.runConstructionChecker = run;
-  }
-  void setSimulationChecker(bool run) {
-    configuration.execution.runSimulationChecker = run;
-  }
-  void setAlternatingChecker(bool run) {
-    configuration.execution.runAlternatingChecker = run;
-  }
-  void setZXChecker(bool run) { configuration.execution.runZXChecker = run; }
-  void setHSFChecker(bool run) { configuration.execution.runHSFChecker = run; }
+  /// Returns a mutable reference to the used configuration
+  [[nodiscard]] auto getConfiguration() -> auto& { return configuration; }
 
+  /// Returns an immutable reference to the results of the equivalence check
+  [[nodiscard]] auto getResults() const -> const auto& { return results; }
+
+  /**
+   * @brief Get an immutable reference to the first circuit
+   * @details This method allows introspection of the first circuit after the
+   * EquivalenceCheckingManager has been constructed, which entails running the
+   * configured optimizations.
+   * @return The first circuit
+   */
+  [[nodiscard]] auto getFirstCircuit() const -> const auto& { return qc1; }
+
+  /**
+   * @brief Get an immutable reference to the second circuit
+   * @details This method allows introspection of the second circuit after the
+   * EquivalenceCheckingManager has been constructed, which entails running the
+   * configured optimizations.
+   * @return The second circuit
+   */
+  [[nodiscard]] auto getSecondCircuit() const -> const auto& { return qc2; }
+
+  /// Disable all previously enabled checkers
   void disableAllCheckers() {
     configuration.execution.runConstructionChecker = false;
     configuration.execution.runZXChecker = false;
@@ -149,111 +120,43 @@ public:
     configuration.execution.runHSFChecker = false;
   }
 
-  // Optimization: Optimizations are applied during initialization. Already
-  // configured and applied optimizations cannot be reverted.
-  void fuseSingleQubitGates();
-  void reconstructSWAPs();
-  void reorderOperations();
-  void backpropagateOutputPermutation();
-  void elidePermutations();
-
-  // Application: These settings may be changed to influence the sequence in
-  // which gates are applied during the equivalence check
-  void setConstructionApplicationScheme(
-      const ApplicationSchemeType applicationScheme) {
+  /**
+   * @brief Set the application scheme for all checkers that support schemes.
+   * @param applicationScheme The application scheme to use
+   */
+  void setApplicationScheme(const ApplicationSchemeType applicationScheme) {
     configuration.application.constructionScheme = applicationScheme;
-  }
-  void setSimulationApplicationScheme(
-      const ApplicationSchemeType applicationScheme) {
     configuration.application.simulationScheme = applicationScheme;
-  }
-  void setAlternatingApplicationScheme(
-      const ApplicationSchemeType applicationScheme) {
     configuration.application.alternatingScheme = applicationScheme;
   }
-  void setApplicationScheme(const ApplicationSchemeType applicationScheme) {
-    setConstructionApplicationScheme(applicationScheme);
-    setSimulationApplicationScheme(applicationScheme);
-    setAlternatingApplicationScheme(applicationScheme);
-  }
-  void setConstructionGateCostProfile(std::string_view profileLocation) {
+
+  /**
+   * @brief Set the gate cost profile for all checkers that support schemes.
+   * @details This also sets the application scheme to GateCost.
+   * @param profileLocation The location of the gate cost profile.
+   */
+  void setGateCostProfile(const std::string_view profileLocation) {
     configuration.application.constructionScheme =
         ApplicationSchemeType::GateCost;
-    configuration.application.profile = profileLocation;
-  }
-  void setSimulationGateCostProfile(std::string_view profileLocation) {
     configuration.application.simulationScheme =
         ApplicationSchemeType::GateCost;
-    configuration.application.profile = profileLocation;
-  }
-  void setAlternatingGateCostProfile(std::string_view profileLocation) {
     configuration.application.alternatingScheme =
         ApplicationSchemeType::GateCost;
     configuration.application.profile = profileLocation;
   }
-  void setGateCostProfile(std::string_view profileLocation) {
-    setConstructionGateCostProfile(profileLocation);
-    setSimulationGateCostProfile(profileLocation);
-    setAlternatingGateCostProfile(profileLocation);
-  }
-  void setConstructionGateCostFunction(const CostFunction& costFunction) {
-    configuration.application.constructionScheme =
-        ApplicationSchemeType::GateCost;
-    configuration.application.costFunction = costFunction;
-  }
-  void setSimulationGateCostFunction(const CostFunction& costFunction) {
-    configuration.application.simulationScheme =
-        ApplicationSchemeType::GateCost;
-    configuration.application.costFunction = costFunction;
-  }
-  void setAlternatingGateCostFunction(const CostFunction& costFunction) {
-    configuration.application.alternatingScheme =
-        ApplicationSchemeType::GateCost;
-    configuration.application.costFunction = costFunction;
-  }
+  /**
+   * @brief Set the gate cost function for all checkers that support schemes.
+   * @details This also sets the application scheme to GateCost.
+   * @param costFunction The cost function to use.
+   */
   void setGateCostFunction(const CostFunction& costFunction) {
-    setConstructionGateCostFunction(costFunction);
-    setSimulationGateCostFunction(costFunction);
-    setAlternatingGateCostFunction(costFunction);
-  }
-  // Functionality: These settings may be changed to adjust options for checkers
-  // considering the whole functionality
-  void setTraceThreshold(double traceThreshold) {
-    configuration.functionality.traceThreshold = traceThreshold;
-  }
-  void setApproximateCheckingThreshold(double approximateCheckingThreshold) {
-    configuration.functionality.approximateCheckingThreshold =
-        approximateCheckingThreshold;
-  }
-  void setCheckPartialEquivalence(bool checkPE) {
-    configuration.functionality.checkPartialEquivalence = checkPE;
-  }
-  void setCheckApproximateEquivalence(bool checkAE) {
-    configuration.functionality.checkApproximateEquivalence = checkAE;
-  }
-  // Simulation: These setting may be changed to adjust the kinds of simulations
-  // that are performed
-  void setFidelityThreshold(double fidelityThreshold) {
-    configuration.simulation.fidelityThreshold = fidelityThreshold;
-  }
-  void setMaxSims(std::size_t sims) {
-    if (sims == 0U) {
-      configuration.execution.runSimulationChecker = false;
-    }
-    configuration.simulation.maxSims = sims;
-  }
-  void setStateType(StateType stateType) {
-    configuration.simulation.stateType = stateType;
-  }
-  void setSeed(std::size_t seed) {
-    configuration.simulation.seed = seed;
-    stateGenerator.seedGenerator(seed);
-  }
-  void storeCEXinput(bool store) {
-    configuration.simulation.storeCEXinput = store;
-  }
-  void storeCEXoutput(bool store) {
-    configuration.simulation.storeCEXoutput = store;
+    configuration.application.constructionScheme =
+        ApplicationSchemeType::GateCost;
+    configuration.application.simulationScheme =
+        ApplicationSchemeType::GateCost;
+    configuration.application.alternatingScheme =
+        ApplicationSchemeType::GateCost;
+    configuration.application.costFunction = costFunction;
   }
 
 protected:

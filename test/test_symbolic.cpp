@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
@@ -75,7 +80,7 @@ TEST_F(SymbolicTest, Timeout) {
 
 TEST_F(SymbolicTest, InvalidCircuit) {
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1_pc, 2_pc, 3_pc}, 0);
+  qc.mcy({1_pc, 2_pc, 3_pc}, 0);
   qc.rx(xMonom, 0);
   auto ecm = ec::EquivalenceCheckingManager(qc, qc);
   ecm.run();

@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
@@ -88,9 +93,9 @@ operator<<(std::ostream& out, const ApplicationSchemeType& applicationScheme) {
 // Given the current state of the check (tracked by two task managers), an
 // application scheme describes how to proceed with the check, i.e., how many
 // operations to apply from either circuit.
-template <class DDType, class Config> class ApplicationScheme {
+template <class DDType> class ApplicationScheme {
 protected:
-  using TM = TaskManager<DDType, Config>;
+  using TM = TaskManager<DDType>;
 
 public:
   ApplicationScheme(TM& tm1, TM& tm2) noexcept

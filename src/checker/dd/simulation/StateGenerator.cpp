@@ -1,17 +1,23 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "checker/dd/simulation/StateGenerator.hpp"
 
-#include "Definitions.hpp"
 #include "algorithms/RandomCliffordCircuit.hpp"
-#include "checker/dd/DDPackageConfigs.hpp"
 #include "checker/dd/simulation/StateType.hpp"
 #include "dd/DDDefinitions.hpp"
 #include "dd/Package.hpp"
 #include "dd/Simulation.hpp"
+#include "dd/StateGeneration.hpp"
+#include "ir/Definitions.hpp"
+#include "ir/QuantumComputation.hpp" // NOLINT(misc-include-cleaner)
 
 #include <algorithm>
 #include <array>
@@ -27,13 +33,13 @@
 
 namespace ec {
 
-qc::VectorDD StateGenerator::generateRandomState(
-    dd::Package<SimulationDDPackageConfig>& dd, const std::size_t totalQubits,
+dd::VectorDD StateGenerator::generateRandomState(
+    dd::Package& dd, const std::size_t totalQubits,
     const std::size_t ancillaryQubits, const StateType type) {
   switch (type) {
-  case ec::StateType::Random1QBasis:
+  case StateType::Random1QBasis:
     return generateRandom1QBasisState(dd, totalQubits, ancillaryQubits);
-  case ec::StateType::Stabilizer:
+  case StateType::Stabilizer:
     return generateRandomStabilizerState(dd, totalQubits, ancillaryQubits);
   default:
     return generateRandomComputationalBasisState(dd, totalQubits,
@@ -41,8 +47,8 @@ qc::VectorDD StateGenerator::generateRandomState(
   }
 }
 
-qc::VectorDD StateGenerator::generateRandomComputationalBasisState(
-    dd::Package<SimulationDDPackageConfig>& dd, const std::size_t totalQubits,
+dd::VectorDD StateGenerator::generateRandomComputationalBasisState(
+    dd::Package& dd, const std::size_t totalQubits,
     const std::size_t ancillaryQubits) {
   // determine how many qubits truly are random
   const std::size_t randomQubits = totalQubits - ancillaryQubits;
@@ -88,12 +94,13 @@ qc::VectorDD StateGenerator::generateRandomComputationalBasisState(
   }
 
   // return the appropriate decision diagram
-  return dd.makeBasisState(totalQubits, stimulusBits);
+  return dd::makeBasisState(totalQubits, stimulusBits, dd);
 }
 
-qc::VectorDD StateGenerator::generateRandom1QBasisState(
-    dd::Package<SimulationDDPackageConfig>& dd, const std::size_t totalQubits,
-    const std::size_t ancillaryQubits) {
+dd::VectorDD
+StateGenerator::generateRandom1QBasisState(dd::Package& dd,
+                                           const std::size_t totalQubits,
+                                           const std::size_t ancillaryQubits) {
   // determine how many qubits truly are random
   const std::size_t randomQubits = totalQubits - ancillaryQubits;
 
@@ -121,16 +128,16 @@ qc::VectorDD StateGenerator::generateRandom1QBasisState(
       randomBasisState[i] = dd::BasisStates::left;
       break;
     default:
-      break;
+      qc::unreachable();
     }
   }
 
   // return the appropriate decision diagram
-  return dd.makeBasisState(totalQubits, randomBasisState);
+  return dd::makeBasisState(totalQubits, randomBasisState, dd);
 }
 
-qc::VectorDD StateGenerator::generateRandomStabilizerState(
-    dd::Package<SimulationDDPackageConfig>& dd, const std::size_t totalQubits,
+dd::VectorDD StateGenerator::generateRandomStabilizerState(
+    dd::Package& dd, const std::size_t totalQubits,
     const std::size_t ancillaryQubits) {
   // determine how many qubits truly are random
   const std::size_t randomQubits = totalQubits - ancillaryQubits;
@@ -142,15 +149,15 @@ qc::VectorDD StateGenerator::generateRandomStabilizerState(
 
   // generate the associated stabilizer state by simulating the Clifford
   // circuit
-  const auto stabilizer = simulate(rcs, dd.makeZeroState(randomQubits), dd);
+  const auto stabilizer =
+      simulate(rcs, dd::makeZeroState(randomQubits, dd), dd);
 
   // add |0> edges for all the ancillary qubits
   auto initial = stabilizer;
   for (std::size_t p = randomQubits; p < totalQubits; ++p) {
     initial = dd.makeDDNode(static_cast<dd::Qubit>(p),
-                            std::array{initial, qc::VectorDD::zero()});
+                            std::array{initial, dd::VectorDD::zero()});
   }
-  // properly set the reference count for the state
   dd.incRef(initial);
   dd.decRef(stabilizer);
 
@@ -164,7 +171,7 @@ void StateGenerator::seedGenerator(const std::size_t s) {
     std::array<std::mt19937_64::result_type, std::mt19937_64::state_size>
         randomData{};
     std::random_device rd;
-    std::generate(std::begin(randomData), std::end(randomData), std::ref(rd));
+    std::ranges::generate(randomData, std::ref(rd));
     std::seed_seq seeds(std::begin(randomData), std::end(randomData));
     mt.seed(seeds);
   } else {

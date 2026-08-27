@@ -1,11 +1,19 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Test the construction of the EquivalenceCheckingManager class."""
 
 from __future__ import annotations
 
 import pytest
-
-from mqt import qcec
 from mqt.core.ir import QuantumComputation
+
+from mqt.qcec.pyqcec import Configuration, EquivalenceCheckingManager
 
 
 @pytest.fixture
@@ -18,10 +26,10 @@ def example_circuit() -> QuantumComputation:
 
 def test_default_constructor_with_quantum_computation(example_circuit: QuantumComputation) -> None:
     """Test constructing an instance from two qiskit circuits with all default arguments."""
-    qcec.EquivalenceCheckingManager(circ1=example_circuit, circ2=example_circuit)
+    EquivalenceCheckingManager(circ1=example_circuit, circ2=example_circuit)
 
 
 def test_constructor_with_configuration(example_circuit: QuantumComputation) -> None:
     """Test constructing an instance from circuits and a configuration object."""
-    config = qcec.Configuration()
-    qcec.EquivalenceCheckingManager(circ1=example_circuit, circ2=example_circuit, config=config)
+    config = Configuration()
+    EquivalenceCheckingManager(circ1=example_circuit, circ2=example_circuit, config=config)

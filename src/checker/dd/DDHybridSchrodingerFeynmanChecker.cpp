@@ -1,12 +1,22 @@
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 
-#include "Definitions.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
 #include "dd/ComplexValue.hpp"
 #include "dd/GateMatrixDefinitions.hpp"
 #include "dd/Operations.hpp"
 #include "dd/Package.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "ir/operations/OpType.hpp"
@@ -184,7 +194,7 @@ bool DDHybridSchrodingerFeynmanChecker::Slice::apply(
     const auto& param = op->getParameter();
     qc::StandardOperation newOp(opControls, opTargets, op->getType(), param);
     auto tmp = matrix;
-    matrix = sliceDD->multiply(dd::getDD(&newOp, *sliceDD), matrix);
+    matrix = sliceDD->multiply(dd::getDD(newOp, *sliceDD), matrix);
     sliceDD->incRef(matrix);
     sliceDD->decRef(tmp);
   }

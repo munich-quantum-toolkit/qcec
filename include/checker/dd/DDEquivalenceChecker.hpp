@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
@@ -10,6 +15,7 @@
 #include "TaskManager.hpp"
 #include "applicationscheme/ApplicationScheme.hpp"
 #include "checker/EquivalenceChecker.hpp"
+#include "dd/DDpackageConfig.hpp"
 #include "dd/Package.hpp"
 #include "ir/QuantumComputation.hpp"
 
@@ -19,32 +25,26 @@
 #include <utility>
 
 namespace ec {
-template <class DDType, class Config>
-class DDEquivalenceChecker : public EquivalenceChecker {
+template <class DDType> class DDEquivalenceChecker : public EquivalenceChecker {
 public:
-  DDEquivalenceChecker(const qc::QuantumComputation& circ1,
-                       const qc::QuantumComputation& circ2,
-                       Configuration config)
+  DDEquivalenceChecker(
+      const qc::QuantumComputation& circ1, const qc::QuantumComputation& circ2,
+      Configuration config,
+      const dd::DDPackageConfig& packageConfig = dd::DDPackageConfig{})
       : EquivalenceChecker(circ1, circ2, std::move(config)),
-        dd(std::make_unique<dd::Package<Config>>(nqubits)),
-        taskManager1(TaskManager<DDType, Config>(circ1, *dd)),
-        taskManager2(TaskManager<DDType, Config>(circ2, *dd)) {}
+        dd(std::make_unique<dd::Package>(nqubits, packageConfig)),
+        taskManager1(TaskManager<DDType>(circ1, *dd)),
+        taskManager2(TaskManager<DDType>(circ2, *dd)) {}
 
   EquivalenceCriterion run() override;
 
-  void json(nlohmann::json& j) const noexcept override;
-
 protected:
-  using DDPackage = typename dd::Package<Config>;
+  std::unique_ptr<dd::Package> dd;
 
-  std::unique_ptr<DDPackage> dd;
+  TaskManager<DDType> taskManager1;
+  TaskManager<DDType> taskManager2;
 
-  TaskManager<DDType, Config> taskManager1;
-  TaskManager<DDType, Config> taskManager2;
-
-  std::unique_ptr<ApplicationScheme<DDType, Config>> applicationScheme;
-
-  std::size_t maxActiveNodes{};
+  std::unique_ptr<ApplicationScheme<DDType>> applicationScheme;
 
   void initializeApplicationScheme(ApplicationSchemeType scheme);
 
@@ -52,11 +52,11 @@ protected:
   // in some form
   EquivalenceCriterion equals(const DDType& e, const DDType& f);
 
-  virtual void initializeTask(TaskManager<DDType, Config>& taskManager);
+  virtual void initializeTask(TaskManager<DDType>& taskManager);
   virtual void initialize();
   virtual void execute();
   virtual void finish();
-  virtual void postprocessTask(TaskManager<DDType, Config>& task);
+  virtual void postprocessTask(TaskManager<DDType>& task);
   virtual void postprocess();
   virtual EquivalenceCriterion checkEquivalence();
 };

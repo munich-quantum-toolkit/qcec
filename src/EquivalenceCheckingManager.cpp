@@ -1,11 +1,15 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "EquivalenceCheckingManager.hpp"
 
-#include "Definitions.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "ThreadSafeQueue.hpp"
 #include "checker/dd/DDAlternatingChecker.hpp"
@@ -13,11 +17,14 @@
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/simulation/StateType.hpp"
+#include "checker/zx/FunctionalityConstruction.hpp"
 #include "checker/zx/ZXChecker.hpp"
 #include "circuit_optimizer/CircuitOptimizer.hpp"
+#include "dd/ComplexNumbers.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "zx/FunctionalityConstruction.hpp"
+#include "optimizer/EquivalenceCheckingOptimizer.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -29,6 +36,7 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -36,6 +44,7 @@
 
 namespace ec {
 
+namespace {
 // Decrement logical qubit indices in the layout that exceed logicalQubitIndex
 void decrementLogicalQubitsInLayoutAboveIndex(
     qc::Permutation& layout, const qc::Qubit logicalQubitIndex) {
@@ -45,6 +54,7 @@ void decrementLogicalQubitsInLayoutAboveIndex(
     }
   }
 }
+} // namespace
 
 void EquivalenceCheckingManager::stripIdleQubits() {
   auto& largerCircuit = qc1.getNqubits() > qc2.getNqubits() ? qc1 : qc2;
@@ -55,9 +65,9 @@ void EquivalenceCheckingManager::stripIdleQubits() {
 
   // Iterate over the initialLayout of largerCircuit and remove an idle logical
   // qubit together with the physical qubit it is mapped to
-  for (auto physicalQubitIt = largerCircuitLayoutCopy.rbegin();
-       physicalQubitIt != largerCircuitLayoutCopy.rend(); ++physicalQubitIt) {
-    const auto physicalQubitIndex = physicalQubitIt->first;
+  for (auto& physicalQubitIt :
+       std::ranges::reverse_view(largerCircuitLayoutCopy)) {
+    const auto physicalQubitIndex = physicalQubitIt.first;
 
     if (!largerCircuit.isIdleQubit(physicalQubitIndex)) {
       continue;
@@ -76,11 +86,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
           largerCircuit.outputPermutation.find(physicalQubitIndex) !=
           largerCircuit.outputPermutation.end();
       const bool logicalUsedInOutputPermutation =
-          std::any_of(largerCircuit.outputPermutation.begin(),
-                      largerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(largerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       // a qubit can only be removed if it is not used in the output permutation
       // or if it is used in the output permutation and the logical qubit index
@@ -103,11 +112,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
       // Remove logical qubit that is idle in both circuits
 
       // find the corresponding logical qubit in the smaller circuit
-      const auto it = std::find_if(smallerCircuit.initialLayout.begin(),
-                                   smallerCircuit.initialLayout.end(),
-                                   [logicalQubitIndex](const auto& pair) {
-                                     return pair.second == logicalQubitIndex;
-                                   });
+      const auto it = std::ranges::find_if(
+          smallerCircuit.initialLayout, [logicalQubitIndex](const auto& pair) {
+            return pair.second == logicalQubitIndex;
+          });
       // the logical qubit has to be present in the smaller circuit, otherwise
       // this would indicate a bug in the circuit IO initialization.
       assert(it != smallerCircuit.initialLayout.end());
@@ -124,11 +132,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
            largerCircuit.outputPermutation.end());
 
       const bool logicalLargerUsedInOutputPermutation =
-          std::any_of(largerCircuit.outputPermutation.begin(),
-                      largerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(largerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       const bool safeToRemoveInLargerCircuit =
           (!physicalLargerUsedInOutputPermutation &&
@@ -145,11 +152,10 @@ void EquivalenceCheckingManager::stripIdleQubits() {
            smallerCircuit.outputPermutation.end());
 
       const bool logicalSmallerUsedInOutputPermutation =
-          std::any_of(smallerCircuit.outputPermutation.begin(),
-                      smallerCircuit.outputPermutation.end(),
-                      [logicalQubitIndex](const auto& pair) {
-                        return pair.second == logicalQubitIndex;
-                      });
+          std::ranges::any_of(smallerCircuit.outputPermutation,
+                              [logicalQubitIndex](const auto& pair) {
+                                return pair.second == logicalQubitIndex;
+                              });
 
       const bool safeToRemoveInSmallerCircuit =
           (!physicalSmallerUsedInOutputPermutation &&
@@ -236,12 +242,12 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
   if (isDynamicCircuit1 || isDynamicCircuit2) {
     if (configuration.optimizations.transformDynamicCircuit) {
       if (isDynamicCircuit1) {
-        qc::CircuitOptimizer::eliminateResets(qc1);
-        qc::CircuitOptimizer::deferMeasurements(qc1);
+        detail::eliminateResets(qc1);
+        detail::deferMeasurements(qc1);
       }
       if (isDynamicCircuit2) {
-        qc::CircuitOptimizer::eliminateResets(qc2);
-        qc::CircuitOptimizer::deferMeasurements(qc2);
+        detail::eliminateResets(qc2);
+        detail::deferMeasurements(qc2);
       }
     } else {
       throw std::runtime_error(
@@ -254,21 +260,21 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 
   // first, make sure any potential SWAPs are reconstructed
   if (configuration.optimizations.reconstructSWAPs) {
-    qc::CircuitOptimizer::swapReconstruction(qc1);
-    qc::CircuitOptimizer::swapReconstruction(qc2);
+    detail::swapReconstruction(qc1);
+    detail::swapReconstruction(qc2);
   }
 
   // then, optionally backpropagate the output permutation
   if (configuration.optimizations.backpropagateOutputPermutation) {
-    qc::CircuitOptimizer::backpropagateOutputPermutation(qc1);
-    qc::CircuitOptimizer::backpropagateOutputPermutation(qc2);
+    detail::backpropagateOutputPermutation(qc1);
+    detail::backpropagateOutputPermutation(qc2);
   }
 
   // based on the above, all SWAPs should be reconstructed and accounted for,
   // so we can elide them.
   if (configuration.optimizations.elidePermutations) {
-    qc::CircuitOptimizer::elidePermutations(qc1);
-    qc::CircuitOptimizer::elidePermutations(qc2);
+    detail::elidePermutations(qc1);
+    detail::elidePermutations(qc2);
   }
 
   // fuse consecutive single qubit gates into compound operations (includes some
@@ -280,8 +286,8 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 
   // optionally remove diagonal gates before measurements
   if (configuration.optimizations.removeDiagonalGatesBeforeMeasure) {
-    qc::CircuitOptimizer::removeDiagonalGatesBeforeMeasure(qc1);
-    qc::CircuitOptimizer::removeDiagonalGatesBeforeMeasure(qc2);
+    detail::removeDiagonalGatesBeforeMeasure(qc1);
+    detail::removeDiagonalGatesBeforeMeasure(qc2);
   }
 
   if (configuration.optimizations.reorderOperations) {
@@ -297,19 +303,6 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 
 void EquivalenceCheckingManager::run() {
   done = false;
-
-  results.name1 = qc1.getName();
-  results.name2 = qc2.getName();
-  results.numQubits1 = qc1.getNqubits();
-  results.numQubits2 = qc2.getNqubits();
-  results.numMeasuredQubits1 = qc1.getNmeasuredQubits();
-  results.numMeasuredQubits2 = qc2.getNmeasuredQubits();
-  results.numAncillae1 = qc1.getNancillae();
-  results.numAncillae2 = qc2.getNancillae();
-  results.numGates1 = qc1.getNops();
-  results.numGates2 = qc2.getNops();
-
-  results.configuration = configuration;
 
   results.equivalence = EquivalenceCriterion::NoInformation;
 
@@ -348,11 +341,12 @@ void EquivalenceCheckingManager::run() {
   if (!configuration.functionality.checkPartialEquivalence &&
       garbageQubitsPresent &&
       equivalence() == EquivalenceCriterion::NotEquivalent) {
-    std::clog << "[QCEC] Warning: at least one of the circuits has garbage "
-                 "qubits, but partial equivalence checking is turned off. In "
-                 "order to take into account the garbage qubits, enable partial"
-                 " equivalence checking. Consult the documentation for more"
-                 "information.\n";
+    std::clog
+        << "[QCEC] Warning: at least one of the circuits has garbage "
+           "qubits, but partial equivalence checking is turned off. In "
+           "order to take into account the garbage qubits, enable partial "
+           "equivalence checking. Consult the documentation for more "
+           "information.\n";
   }
 }
 
@@ -365,7 +359,7 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
   const auto start = std::chrono::steady_clock::now();
 
   // set numeric tolerance used throughout the check
-  setTolerance(configuration.execution.numericalTolerance);
+  dd::ComplexNumbers::setTolerance(configuration.execution.numericalTolerance);
 
   if (qc1.isVariableFree() && qc2.isVariableFree() &&
       !configuration.execution.runHSFChecker) {
@@ -393,6 +387,19 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
       this->qc2.getNqubitsWithoutAncillae()) {
     std::clog << "[QCEC] Warning: circuits have different number of primary "
                  "inputs! Proceed with caution!\n";
+  }
+
+  if (configuration.execution.setAllAncillaeGarbage) {
+    for (qc::Qubit q = 0; q < qc1.getNqubits(); ++q) {
+      if (qc1.logicalQubitIsAncillary(q)) {
+        qc1.setLogicalQubitGarbage(q);
+      }
+    }
+    for (qc::Qubit q = 0; q < qc2.getNqubits(); ++q) {
+      if (qc2.logicalQubitIsAncillary(q)) {
+        qc2.setLogicalQubitGarbage(q);
+      }
+    }
   }
 
   if (!configuration.functionality.checkApproximateEquivalence &&
@@ -497,17 +504,11 @@ void EquivalenceCheckingManager::checkSequential() {
       results.equivalence = EquivalenceCriterion::ProbablyEquivalent;
     }
 
-    // Circuits have been shown to be non-equivalent
+    // Circuits are non-equivalent
     if (results.equivalence == EquivalenceCriterion::NotEquivalent) {
-      if (configuration.simulation.storeCEXinput) {
-        results.cexInput = simulationChecker->getInitialVector();
-      }
-      if (configuration.simulation.storeCEXoutput) {
-        results.cexOutput1 = simulationChecker->getInternalVector1();
-        results.cexOutput2 = simulationChecker->getInternalVector2();
-      }
-
-      // everything is done
+      results.cexInput = simulationChecker->getInitialState();
+      results.cexOutput1 = simulationChecker->getInternalState1();
+      results.cexOutput2 = simulationChecker->getInternalState2();
       done = true;
       doneCond.notify_one();
     }
@@ -576,8 +577,7 @@ void EquivalenceCheckingManager::checkSequential() {
   }
 
   if (configuration.execution.runZXChecker && !done) {
-    if (zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-        zx::FunctionalityConstruction::transformableToZX(&qc2)) {
+    if (ZXEquivalenceChecker::canHandle(qc1, qc2)) {
       checkers.emplace_back(
           std::make_unique<ZXEquivalenceChecker>(qc1, qc2, configuration));
       const auto& zxChecker = checkers.back();
@@ -664,22 +664,12 @@ void EquivalenceCheckingManager::checkParallel() {
     ++tasksToExecute;
   }
   if (configuration.execution.runSimulationChecker) {
-    if (configuration.simulation.maxSims > 0U) {
-      tasksToExecute += configuration.simulation.maxSims;
-    } else {
-      configuration.execution.runSimulationChecker = false;
-    }
+    tasksToExecute += configuration.simulation.maxSims;
   }
   if (configuration.execution.runZXChecker) {
-    if (zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-        zx::FunctionalityConstruction::transformableToZX(&qc2)) {
+    if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+        ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
       ++tasksToExecute;
-    } else if (configuration.onlyZXCheckerConfigured()) {
-      std::clog
-          << "Only ZX checker specified, but one of the circuits contains "
-             "operations not supported by this checker! Exiting!\n";
-      setAndSignalDone();
-      results.equivalence = EquivalenceCriterion::NoInformation;
     } else {
       configuration.execution.runZXChecker = false;
     }
@@ -792,14 +782,9 @@ void EquivalenceCheckingManager::checkParallel() {
       if (const auto* const simulationChecker =
               dynamic_cast<const DDSimulationChecker*>(checker)) {
         ++results.performedSimulations;
-
-        if (configuration.simulation.storeCEXinput) {
-          results.cexInput = simulationChecker->getInitialVector();
-        }
-        if (configuration.simulation.storeCEXoutput) {
-          results.cexOutput1 = simulationChecker->getInternalVector1();
-          results.cexOutput2 = simulationChecker->getInternalVector2();
-        }
+        results.cexInput = simulationChecker->getInitialState();
+        results.cexOutput1 = simulationChecker->getInternalState1();
+        results.cexOutput2 = simulationChecker->getInternalState2();
       }
       break;
     }
@@ -928,8 +913,8 @@ void EquivalenceCheckingManager::checkSymbolic() {
   }
 
   if (!done) {
-    if (zx::FunctionalityConstruction::transformableToZX(&qc1) &&
-        zx::FunctionalityConstruction::transformableToZX(&qc2)) {
+    if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+        ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
       checkers.emplace_back(
           std::make_unique<ZXEquivalenceChecker>(qc1, qc2, configuration));
       const auto& zxChecker = checkers.back();
@@ -957,61 +942,8 @@ void EquivalenceCheckingManager::checkSymbolic() {
   }
 }
 
-void EquivalenceCheckingManager::fuseSingleQubitGates() {
-  if (!configuration.optimizations.fuseSingleQubitGates) {
-    qc::CircuitOptimizer::singleQubitGateFusion(qc1);
-    qc::CircuitOptimizer::singleQubitGateFusion(qc2);
-    configuration.optimizations.fuseSingleQubitGates = true;
-  }
-}
-
-void EquivalenceCheckingManager::reconstructSWAPs() {
-  if (!configuration.optimizations.reconstructSWAPs) {
-    qc::CircuitOptimizer::swapReconstruction(qc1);
-    qc::CircuitOptimizer::swapReconstruction(qc2);
-    configuration.optimizations.reconstructSWAPs = true;
-  }
-}
-
-void EquivalenceCheckingManager::reorderOperations() {
-  if (!configuration.optimizations.reorderOperations) {
-    qc1.reorderOperations();
-    qc2.reorderOperations();
-    configuration.optimizations.reorderOperations = true;
-  }
-}
-
-void EquivalenceCheckingManager::backpropagateOutputPermutation() {
-  if (!configuration.optimizations.backpropagateOutputPermutation) {
-    qc::CircuitOptimizer::backpropagateOutputPermutation(qc1);
-    qc::CircuitOptimizer::backpropagateOutputPermutation(qc2);
-    configuration.optimizations.backpropagateOutputPermutation = true;
-  }
-}
-
-void EquivalenceCheckingManager::elidePermutations() {
-  if (!configuration.optimizations.elidePermutations) {
-    qc::CircuitOptimizer::elidePermutations(qc1);
-    qc::CircuitOptimizer::elidePermutations(qc2);
-    configuration.optimizations.elidePermutations = true;
-  }
-}
-
 nlohmann::json EquivalenceCheckingManager::Results::json() const {
   nlohmann::json res{};
-
-  auto& circuit1 = res["circuit1"];
-  circuit1["name"] = name1;
-  circuit1["num_qubits"] = numQubits1;
-  circuit1["num_gates"] = numGates1;
-
-  auto& circuit2 = res["circuit2"];
-  circuit2["name"] = name2;
-  circuit2["num_qubits"] = numQubits2;
-  circuit2["num_gates"] = numGates2;
-
-  res["configuration"] = configuration.json();
-
   res["preprocessing_time"] = preprocessingTime;
   res["check_time"] = checkTime;
   res["equivalence"] = ec::toString(equivalence);
@@ -1020,19 +952,6 @@ nlohmann::json EquivalenceCheckingManager::Results::json() const {
     auto& sim = res["simulations"];
     sim["started"] = startedSimulations;
     sim["performed"] = performedSimulations;
-
-    if (!cexInput.empty() || !cexOutput1.empty() || !cexOutput2.empty()) {
-      auto& cex = sim["verification_cex"];
-      if (!cexInput.empty()) {
-        toJson(cex["input"], cexInput);
-      }
-      if (!cexOutput1.empty()) {
-        toJson(cex["output1"], cexOutput1);
-      }
-      if (!cexOutput2.empty()) {
-        toJson(cex["output2"], cexOutput2);
-      }
-    }
   }
   auto& par = res["parameterized"];
   par["performed_instantiations"] = performedInstantiations;

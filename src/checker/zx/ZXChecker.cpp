@@ -1,24 +1,29 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "checker/zx/ZXChecker.hpp"
 
 #include "Configuration.hpp"
-#include "Definitions.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
+#include "checker/zx/FunctionalityConstruction.hpp"
+#include "checker/zx/Simplify.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "checker/zx/ZXDiagram.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "zx/FunctionalityConstruction.hpp"
-#include "zx/Rules.hpp"
-#include "zx/ZXDefinitions.hpp"
-#include "zx/ZXDiagram.hpp"
 
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -27,9 +32,10 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
                                            const qc::QuantumComputation& circ2,
                                            Configuration config) noexcept
     : EquivalenceChecker(circ1, circ2, std::move(config)),
-      miter(zx::FunctionalityConstruction::buildFunctionality(qc1)),
+      miter(::ec::zx::FunctionalityConstruction::buildFunctionality(qc1)),
       tolerance(configuration.functionality.traceThreshold) {
-  zx::ZXDiagram dPrime = zx::FunctionalityConstruction::buildFunctionality(qc2);
+  ::ec::zx::ZXDiagram dPrime =
+      ::ec::zx::FunctionalityConstruction::buildFunctionality(qc2);
 
   if ((qc1->getNancillae() != 0U) || (qc2->getNancillae() != 0U)) {
     ancilla = true;
@@ -38,24 +44,48 @@ ZXEquivalenceChecker::ZXEquivalenceChecker(const qc::QuantumComputation& circ1,
   const auto& p1 = invertPermutations(*qc1);
   const auto& p2 = invertPermutations(*qc2);
 
-  // fix ancillaries to |0>
-  const auto nQubitsWithoutAncillae =
-      static_cast<zx::Qubit>(qc1->getNqubitsWithoutAncillae());
-  for (auto anc = static_cast<zx::Qubit>(qc1->getNqubits() - 1U);
-       anc >= nQubitsWithoutAncillae; --anc) {
-    miter.makeAncilla(
-        anc, static_cast<zx::Qubit>(p1.at(static_cast<qc::Qubit>(anc))));
-    dPrime.makeAncilla(
-        anc, static_cast<zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
+  /*
+   * The ZX diagram is built with the assumption that all ancilla qubits are
+   * garbage. Garbage ancilla qubits are initialized and post-selected to |0>.
+   * Consequently, if there are no data qubits, the ZX-diagram is equivalent to
+   * the empty diagram.
+   */
+  if (qc1->getNqubitsWithoutAncillae() == 0) {
+    this->miter = ::ec::zx::ZXDiagram();
+  } else {
+    const auto numQubits1 = static_cast<::ec::zx::Qubit>(qc1->getNqubits());
+    for (::ec::zx::Qubit i = 0; std::cmp_less(i, qc1->getNancillae()); ++i) {
+      const auto anc = numQubits1 - i - 1;
+      miter.makeAncilla(anc, static_cast<::ec::zx::Qubit>(
+                                 p1.at(static_cast<qc::Qubit>(anc))));
+    }
+    miter.invert();
   }
-  miter.invert();
+
+  if (qc2->getNqubitsWithoutAncillae() == 0) {
+    return;
+  }
+  const auto numQubits2 = static_cast<::ec::zx::Qubit>(qc2->getNqubits());
+  for (::ec::zx::Qubit i = 0; std::cmp_less(i, qc2->getNancillae()); ++i) {
+    const auto anc = numQubits2 - i - 1;
+    dPrime.makeAncilla(
+        anc, static_cast<::ec::zx::Qubit>(p2.at(static_cast<qc::Qubit>(anc))));
+  }
   miter.concat(dPrime);
 }
 
 EquivalenceCriterion ZXEquivalenceChecker::run() {
   const auto start = std::chrono::steady_clock::now();
-
-  fullReduceApproximate();
+  if (miter.getNQubits() == 0) {
+    if (miter.globalPhaseIsZero()) {
+      equivalence = EquivalenceCriterion::Equivalent;
+    } else {
+      equivalence = EquivalenceCriterion::EquivalentUpToGlobalPhase;
+    }
+    return equivalence;
+  }
+  ::ec::zx::fullReduceApproximate(miter, tolerance,
+                                  [this] { return isDone(); });
 
   bool equivalent = true;
 
@@ -73,7 +103,7 @@ EquivalenceCriterion ZXEquivalenceChecker::run() {
       const auto& in = miter.getInput(i);
       const auto& edge = miter.incidentEdge(in, 0U);
 
-      if (edge.type == zx::EdgeType::Hadamard) {
+      if (edge.type == ::ec::zx::EdgeType::Hadamard) {
         equivalent = false;
         break;
       }
@@ -133,123 +163,56 @@ qc::Permutation concat(const qc::Permutation& p1,
   return pComb;
 }
 
-qc::Permutation complete(const qc::Permutation& p, const std::size_t n) {
-  if (p.size() == n) {
+qc::Permutation complete(const qc::Permutation& p,
+                         const qc::Permutation& reference) {
+  if (p.size() == reference.size()) {
     return p;
   }
 
   qc::Permutation pComp = p;
 
-  std::vector<bool> mappedTo(n, false);
-  std::unordered_map<std::size_t, bool> mappedFrom;
-  for (const auto [k, v] : p) {
-    mappedFrom[k] = true;
-    mappedTo[v] = true;
+  std::unordered_set<qc::Qubit> usedLogicals;
+  usedLogicals.reserve(p.size());
+  for (const auto& [physical, logical] : p) {
+    usedLogicals.insert(logical);
   }
 
-  // Map qubits greedily
-  for (std::size_t i = 0; i < n; ++i) {
-    // If qubit is already mapped, skip
-    if (mappedTo[i]) {
-      continue;
+  std::vector<qc::Qubit> unmappedPhysicals;
+  unmappedPhysicals.reserve(reference.size() - p.size());
+  for (const auto& [physical, logical] : reference) {
+    if (pComp.find(physical) == pComp.end()) {
+      unmappedPhysicals.emplace_back(physical);
     }
+  }
 
-    for (std::size_t j = 0; j < n; ++j) {
-      if (mappedFrom.find(j) == mappedFrom.end()) {
-        pComp[static_cast<qc::Qubit>(j)] = static_cast<qc::Qubit>(i);
-        mappedTo[i] = true;
-        mappedFrom[j] = true;
-        break;
-      }
+  std::vector<qc::Qubit> unusedLogicals;
+  unusedLogicals.reserve(reference.size() - p.size());
+  for (const auto& [physical, logical] : reference) {
+    if (!usedLogicals.contains(logical)) {
+      unusedLogicals.emplace_back(logical);
     }
+  }
+
+  assert(unmappedPhysicals.size() == unusedLogicals.size());
+  for (std::size_t i = 0; i < unmappedPhysicals.size(); ++i) {
+    pComp[unmappedPhysicals[i]] = unusedLogicals[i];
   }
   return pComp;
 }
 
 qc::Permutation invertPermutations(const qc::QuantumComputation& qc) {
-  return concat(invert(complete(qc.outputPermutation, qc.getNqubits())),
-                complete(qc.initialLayout, qc.getNqubits()));
+  return concat(invert(complete(qc.outputPermutation, qc.initialLayout)),
+                qc.initialLayout);
 }
 
-bool ZXEquivalenceChecker::fullReduceApproximate() {
-  auto simplified = fullReduce();
-  while (!isDone()) {
-    miter.approximateCliffords(tolerance);
-    if (!fullReduce()) {
-      break;
-    }
-    simplified = true;
+bool ZXEquivalenceChecker::canHandle(const qc::QuantumComputation& qc1,
+                                     const qc::QuantumComputation& qc2) {
+  // no non-garbage ancillas allowed
+  if (qc1.getNancillae() - qc1.getNgarbageQubits() != 0U ||
+      qc2.getNancillae() - qc2.getNgarbageQubits() != 0U) {
+    return false;
   }
-  return simplified;
+  return ::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
+         ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2);
 }
-
-bool ZXEquivalenceChecker::fullReduce() {
-  if (!isDone()) {
-    miter.toGraphlike();
-  }
-  auto simplified = interiorCliffordSimp();
-  while (!isDone()) {
-    auto moreSimplified = cliffordSimp();
-    moreSimplified |= gadgetSimp();
-    moreSimplified |= interiorCliffordSimp();
-    moreSimplified |= pivotGadgetSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  if (!isDone()) {
-    miter.removeDisconnectedSpiders();
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::gadgetSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = false;
-    for (const auto& [v, _] : miter.getVertices()) {
-      if (miter.isDeleted(v)) {
-        continue;
-      }
-      if (checkAndFuseGadget(miter, v)) {
-        moreSimplified = true;
-      }
-    }
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::interiorCliffordSimp() {
-  auto simplified = spiderSimp();
-  while (!isDone()) {
-    auto moreSimplified = idSimp();
-    moreSimplified |= spiderSimp();
-    moreSimplified |= pivotPauliSimp();
-    moreSimplified |= localCompSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
-bool ZXEquivalenceChecker::cliffordSimp() {
-  auto simplified = false;
-  while (!isDone()) {
-    auto moreSimplified = interiorCliffordSimp();
-    moreSimplified |= pivotSimp();
-    if (!moreSimplified) {
-      break;
-    }
-    simplified = true;
-  }
-  return simplified;
-}
-
 } // namespace ec

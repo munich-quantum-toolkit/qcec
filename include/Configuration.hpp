@@ -1,7 +1,12 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
@@ -13,6 +18,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iosfwd>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
 #include <thread>
@@ -34,6 +40,7 @@ public:
     bool runAlternatingChecker = true;
     bool runZXChecker = true;
     bool runHSFChecker = false;
+    bool setAllAncillaeGarbage = false;
   };
 
   // configuration options for pre-check optimizations
@@ -58,7 +65,9 @@ public:
 
     // options for the gate cost application scheme
     std::string profile;
-    CostFunction costFunction = &legacyCostFunction;
+    CostFunction costFunction = [](const GateCostLookupTableKeyType& /*key*/) {
+      return 1U;
+    };
   };
 
   struct Functionality {
@@ -74,8 +83,6 @@ public:
     std::size_t maxSims = computeMaxSims();
     StateType stateType = StateType::ComputationalBasis;
     std::size_t seed = 0U;
-    bool storeCEXinput = false;
-    bool storeCEXoutput = false;
 
     // this function makes sure that the maximum number of simulations is
     // configured properly.
@@ -116,5 +123,8 @@ public:
   [[nodiscard]] nlohmann::json json() const;
 
   [[nodiscard]] std::string toString() const;
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const Configuration& config);
 };
 } // namespace ec

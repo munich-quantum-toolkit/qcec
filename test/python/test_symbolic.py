@@ -1,13 +1,22 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Test symbolic equivalence checking."""
 
 from __future__ import annotations
 
 import pytest
-from qiskit import QuantumCircuit, transpile
-from qiskit.circuit import Parameter
+from qiskit import transpile
+from qiskit.circuit import Parameter, QuantumCircuit
 
-from mqt import qcec
+from mqt.qcec import verify, verify_compilation
 from mqt.qcec.compilation_flow_profiles import AncillaMode
+from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 alpha = Parameter("alpha")
 beta = Parameter("beta")
@@ -120,66 +129,66 @@ def original_circuit() -> QuantumCircuit:
 
 def test_equivalent_rz_commute(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_correct: QuantumCircuit) -> None:
     """Test an RZ commutation rule."""
-    result = qcec.verify(rz_commute_lhs, rz_commute_rhs_correct)
-    assert result.equivalence == qcec.EquivalenceCriterion.equivalent
+    result = verify(rz_commute_lhs, rz_commute_rhs_correct)
+    assert result.equivalence == EquivalenceCriterion.equivalent
 
 
 def test_non_equivalent_rz_commute(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: QuantumCircuit) -> None:
     """Test an invalid RZ commutation rule."""
-    result = qcec.verify(rz_commute_lhs, rz_commute_rhs_incorrect, timeout=3600)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rz_commute_lhs, rz_commute_rhs_incorrect, timeout=3600)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_non_equivalent_phase_rz_commute(
     rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: QuantumCircuit
 ) -> None:
     """Test an invalid RZ commutation rule with additional instantiations.."""
-    result = qcec.verify(rz_commute_lhs, rz_commute_rhs_incorrect, additional_instantiations=2, timeout=3600)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rz_commute_lhs, rz_commute_rhs_incorrect, additional_instantiations=2, timeout=3600)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_equivalent_rotation_gate_fuse(
     rotation_gate_fuse_lhs: QuantumCircuit, rotation_gate_fuse_rhs_correct: QuantumCircuit
 ) -> None:
     """Test a rotation gate fusion rule."""
-    result = qcec.verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_correct)
-    assert result.equivalence == qcec.EquivalenceCriterion.equivalent
+    result = verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_correct)
+    assert result.equivalence == EquivalenceCriterion.equivalent
 
 
 def test_non_equivalent_rotation_gate_fuse(
     rotation_gate_fuse_lhs: QuantumCircuit, rotation_gate_fuse_rhs_incorrect: QuantumCircuit
 ) -> None:
     """Test an invalid rotation gate fusion rule."""
-    result = qcec.verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_incorrect)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_incorrect)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_almost_zero_non_equ(
     rotation_gate_fuse_lhs: QuantumCircuit, rotation_gate_fuse_rhs_approximate: QuantumCircuit
 ) -> None:
     """Test an invalid rotation gate fusion rule with some small deviation."""
-    result = qcec.verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_approximate)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_approximate)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_almost_zero_non_equ_random(
     rotation_gate_fuse_lhs: QuantumCircuit, rotation_gate_fuse_rhs_approximate: QuantumCircuit
 ) -> None:
     """Test an invalid rotation gate fusion rule with some small deviation."""
-    result = qcec.verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_approximate, parameterized_tolerance=1e-9)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rotation_gate_fuse_lhs, rotation_gate_fuse_rhs_approximate, parameterized_tolerance=1e-9)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_cnot_rx_non_equ(cnot_rx: QuantumCircuit, cnot_rx_flipped: QuantumCircuit) -> None:
     """Test an invalid CNOT-RX rule."""
-    result = qcec.verify(cnot_rx, cnot_rx_flipped)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(cnot_rx, cnot_rx_flipped)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 def test_cnot_rx_non_equ_approx(cnot_rx: QuantumCircuit, cnot_rx_flipped_approx: QuantumCircuit) -> None:
     """Test an invalid CNOT-RX rule with some small deviation."""
-    result = qcec.verify(cnot_rx, cnot_rx_flipped_approx)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(cnot_rx, cnot_rx_flipped_approx)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
 
 
 @pytest.mark.parametrize("optimization_level", [0, 1, 2, 3])
@@ -191,10 +200,10 @@ def test_verify_compilation_on_optimization_levels(original_circuit: QuantumCirc
         basis_gates=["cx", "x", "id", "u3", "measure", "u2", "rz", "u1", "reset", "sx"],
         optimization_level=optimization_level,
     )
-    result = qcec.verify_compilation(original_circuit, compiled_circuit, optimization_level, timeout=3600)
+    result = verify_compilation(original_circuit, compiled_circuit, optimization_level, timeout=3600)
     assert result.equivalence in {
-        qcec.EquivalenceCriterion.equivalent,
-        qcec.EquivalenceCriterion.equivalent_up_to_global_phase,
+        EquivalenceCriterion.equivalent,
+        EquivalenceCriterion.equivalent_up_to_global_phase,
     }
 
 
@@ -203,7 +212,7 @@ def test_verify_compilation_on_optimization_levels_config(
     original_circuit: QuantumCircuit, optimization_level: int
 ) -> None:
     """Test the verification of the compilation of a circuit to the 5-qubit IBMQ Athens architecture with various optimization levels."""
-    config = qcec.Configuration()
+    config = Configuration()
     config.execution.run_zx_checker = False
     compiled_circuit = transpile(
         original_circuit,
@@ -211,19 +220,17 @@ def test_verify_compilation_on_optimization_levels_config(
         basis_gates=["cx", "x", "id", "u3", "measure", "u2", "rz", "u1", "reset", "sx"],
         optimization_level=optimization_level,
     )
-    result = qcec.verify_compilation(
-        original_circuit, compiled_circuit, optimization_level, AncillaMode.NO_ANCILLA, config
-    )
+    result = verify_compilation(original_circuit, compiled_circuit, optimization_level, AncillaMode.NO_ANCILLA, config)
     assert result.equivalence in {
-        qcec.EquivalenceCriterion.equivalent,
-        qcec.EquivalenceCriterion.equivalent_up_to_global_phase,
+        EquivalenceCriterion.equivalent,
+        EquivalenceCriterion.equivalent_up_to_global_phase,
     }
 
 
 def test_performed_instantiations(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: QuantumCircuit) -> None:
     """Test the number of performed instantiations."""
-    result = qcec.verify(rz_commute_lhs, rz_commute_rhs_incorrect, additional_instantiations=10)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rz_commute_lhs, rz_commute_rhs_incorrect, additional_instantiations=10)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
     min_instantiations = 1
     max_instantiations = 10
     assert min_instantiations < result.performed_instantiations < max_instantiations
@@ -231,10 +238,10 @@ def test_performed_instantiations(rz_commute_lhs: QuantumCircuit, rz_commute_rhs
 
 def test_with_config(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: QuantumCircuit) -> None:
     """Test the number of performed instantiations via a configuration object."""
-    config = qcec.Configuration()
+    config = Configuration()
     config.parameterized.additional_instantiations = 10
-    result = qcec.verify(rz_commute_lhs, rz_commute_rhs_incorrect, config)
-    assert result.equivalence == qcec.EquivalenceCriterion.not_equivalent
+    result = verify(rz_commute_lhs, rz_commute_rhs_incorrect, config)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
     min_instantiations = 1
     max_instantiations = 10
     assert min_instantiations < result.performed_instantiations < max_instantiations

@@ -1,8 +1,15 @@
+# Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+# Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 if(NOT TARGET MQT::QCEC)
   # collect headers and source files
   file(GLOB_RECURSE QCEC_HEADERS ${MQT_QCEC_INCLUDE_BUILD_DIR}/*.hpp)
   file(GLOB_RECURSE QCEC_SOURCES **.cpp)
-  list(FILTER QCEC_SOURCES EXCLUDE REGEX ".*/python/.*$")
 
   # add QCEC Package library
   add_library(${PROJECT_NAME} ${QCEC_HEADERS} ${QCEC_SOURCES})
@@ -10,12 +17,15 @@ if(NOT TARGET MQT::QCEC)
   # set include directories
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<BUILD_INTERFACE:${MQT_QCEC_INCLUDE_BUILD_DIR}>)
+  target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
 
-  # link to the MQT::Core libraries
+  # link to the MQT::Core and nlohmann_json libraries
   target_link_libraries(
     ${PROJECT_NAME}
-    PUBLIC MQT::CoreDD MQT::CoreZX Taskflow
-    PRIVATE MQT::CoreCircuitOptimizer MQT::CoreAlgorithms MQT::ProjectWarnings MQT::ProjectOptions)
+    PUBLIC MQT::CoreDD nlohmann_json::nlohmann_json
+    PRIVATE Boost::multiprecision MQT::CoreCircuitOptimizer MQT::CoreAlgorithms
+            MQT::ProjectWarnings MQT::ProjectOptions Taskflow)
 
   set_target_properties(
     Taskflow PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
@@ -23,8 +33,4 @@ if(NOT TARGET MQT::QCEC)
 
   # add MQT alias
   add_library(MQT::QCEC ALIAS ${PROJECT_NAME})
-endif()
-
-if(BUILD_MQT_QCEC_BINDINGS)
-  add_subdirectory(python)
 endif()

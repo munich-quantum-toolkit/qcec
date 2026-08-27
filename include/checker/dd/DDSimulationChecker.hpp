@@ -1,41 +1,50 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #pragma once
 
-#include "Configuration.hpp"
 #include "DDEquivalenceChecker.hpp"
-#include "DDPackageConfigs.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/dd/TaskManager.hpp"
-#include "dd/DDDefinitions.hpp"
-#include "dd/Package_fwd.hpp"
-#include "ir/QuantumComputation.hpp"
+#include "dd/Node.hpp"
 
 #include <nlohmann/json_fwd.hpp>
 
+namespace qc {
+class QuantumComputation;
+}
+
 namespace ec {
+class Configuration;
 class StateGenerator;
 
-class DDSimulationChecker final
-    : public DDEquivalenceChecker<qc::VectorDD, SimulationDDPackageConfig> {
+class DDSimulationChecker final : public DDEquivalenceChecker<dd::VectorDD> {
 public:
   DDSimulationChecker(const qc::QuantumComputation& circ1,
                       const qc::QuantumComputation& circ2,
-                      Configuration configuration);
+                      Configuration config);
 
   void setRandomInitialState(StateGenerator& generator);
 
-  [[nodiscard]] dd::CVec getInitialVector() const {
-    return initialState.getVector();
+  /// Returns the initial state used for simulation
+  [[nodiscard]] auto getInitialState() const -> const auto& {
+    return initialState;
   }
-  [[nodiscard]] dd::CVec getInternalVector1() const {
-    return taskManager1.getInternalState().getVector();
+  /// Returns the internal state of the first task manager
+  [[nodiscard]] auto getInternalState1() const -> const auto& {
+    return taskManager1.getInternalState();
   }
-  [[nodiscard]] dd::CVec getInternalVector2() const {
-    return taskManager2.getInternalState().getVector();
+
+  /// Returns the internal state of the second task manager
+  [[nodiscard]] auto getInternalState2() const -> const auto& {
+    return taskManager2.getInternalState();
   }
 
   void json(nlohmann::basic_json<>& j) const noexcept override;
@@ -43,10 +52,9 @@ public:
 private:
   // the initial state used for simulation. defaults to the all-zero state
   // |0...0>
-  qc::VectorDD initialState{};
+  dd::VectorDD initialState{};
 
-  void initializeTask(TaskManager<qc::VectorDD, SimulationDDPackageConfig>&
-                          taskManager) override;
+  void initializeTask(TaskManager<dd::VectorDD>& taskManager) override;
   EquivalenceCriterion checkEquivalence() override;
 };
 } // namespace ec

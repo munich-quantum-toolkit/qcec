@@ -1,19 +1,23 @@
-//
-// This file is part of the MQT QCEC library released under the MIT license.
-// See README.md or go to https://github.com/cda-tum/qcec for more information.
-//
+/*
+ * Copyright (c) 2023 - 2026 Chair for Design Automation, TUM
+ * Copyright (c) 2025 - 2026 Munich Quantum Software Company GmbH
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
 #include "Configuration.hpp"
-#include "Definitions.hpp"
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
+#include "checker/zx/ZXDefinitions.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "qasm3/Importer.hpp"
-#include "zx/ZXDefinitions.hpp"
 
-#include <algorithm>
 #include <gtest/gtest.h>
 #include <iostream>
 #include <memory>
@@ -189,6 +193,8 @@ TEST_F(ZXTest, Ancilla) {
   qc2.cx(1, 0);
   qc2.setLogicalQubitAncillary(1);
 
+  config.execution.setAllAncillaeGarbage = true;
+
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
   ecm->run();
 
@@ -206,6 +212,8 @@ TEST_F(ZXTest, ZXWrongAncilla) {
   qc2.cx(1_nc, 0);
   qc2.setLogicalQubitAncillary(1);
 
+  config.execution.setAllAncillaeGarbage = true;
+
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
   ecm->run();
 
@@ -214,10 +222,8 @@ TEST_F(ZXTest, ZXWrongAncilla) {
 }
 
 TEST_F(ZXTest, ZXConfiguredForInvalidCircuitParallel) {
-  using namespace qc::literals;
-
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1, 2, 3}, 0);
+  qc.mcy({1, 2, 3}, 0);
 
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qc, config);
   ecm->run();
@@ -227,10 +233,8 @@ TEST_F(ZXTest, ZXConfiguredForInvalidCircuitParallel) {
 }
 
 TEST_F(ZXTest, ZXConfiguredForInvalidCircuitSequential) {
-  using namespace qc::literals;
-
   auto qc = qc::QuantumComputation(4);
-  qc.mcx({1, 2, 3}, 0);
+  qc.mcy({1, 2, 3}, 0);
 
   config.execution.parallel = false;
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qc, config);
@@ -242,60 +246,16 @@ TEST_F(ZXTest, ZXConfiguredForInvalidCircuitSequential) {
 
 TEST_F(ZXTest, GlobalPhase) {
   auto qc = qc::QuantumComputation(1);
-  qc.rz(zx::PI / 8, 0);
+  qc.rz(::ec::zx::PI / 8, 0);
 
   auto qcPrime = qc::QuantumComputation(1);
-  qcPrime.p(zx::PI / 8, 0);
+  qcPrime.p(::ec::zx::PI / 8, 0);
 
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc, qcPrime, config);
   ecm->run();
 
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::EquivalentUpToGlobalPhase);
-}
-
-class ZXTestCompFlow : public testing::TestWithParam<std::string> {
-protected:
-  qc::QuantumComputation qcOriginal;
-  qc::QuantumComputation qcTranspiled;
-  ec::Configuration config{};
-
-  std::unique_ptr<ec::EquivalenceCheckingManager> ecm;
-
-  std::string testOriginalDir = "./circuits/original/";
-  std::string testTranspiledDir = "./circuits/transpiled/";
-
-  void SetUp() override {
-    config.execution.parallel = false;
-    config.execution.runConstructionChecker = false;
-    config.execution.runAlternatingChecker = false;
-    config.execution.runSimulationChecker = false;
-    config.execution.runHSFChecker = false;
-    config.execution.runZXChecker = true;
-
-    qcOriginal =
-        qasm3::Importer::importf(testOriginalDir + GetParam() + ".qasm");
-    qcTranspiled = qasm3::Importer::importf(testTranspiledDir + GetParam() +
-                                            "_transpiled.qasm");
-  }
-};
-
-INSTANTIATE_TEST_SUITE_P(
-    ZXTestCompFlow, ZXTestCompFlow,
-    testing::Values("c2_181", "rd73_312", "sym9_317", "mod5adder_306",
-                    "rd84_313"),
-    [](const testing::TestParamInfo<ZXTestCompFlow::ParamType>& inf) {
-      auto s = inf.param;
-      std::replace(s.begin(), s.end(), '-', '_');
-      return s;
-    });
-
-TEST_P(ZXTestCompFlow, EquivalenceCompilationFlow) {
-  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qcOriginal,
-                                                         qcTranspiled, config);
-  ecm->run();
-  std::cout << ecm->getResults() << "\n";
-  EXPECT_TRUE(ecm->getResults().consideredEquivalent());
 }
 
 TEST(ZXTestsMisc, IdentityNotHadamard) {
@@ -305,7 +265,7 @@ TEST(ZXTestsMisc, IdentityNotHadamard) {
 
   auto ecm = ec::EquivalenceCheckingManager(qc1, qc2);
   ecm.disableAllCheckers();
-  ecm.setZXChecker(true);
+  ecm.getConfiguration().execution.runZXChecker = true;
   ecm.run();
 
   EXPECT_EQ(ecm.getResults().equivalence,
@@ -326,7 +286,7 @@ TEST_F(ZXTest, NonEquivalentAncillaryCircuit) {
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NoInformation);
 
-  ecm->setParallel(true);
+  ecm->getConfiguration().execution.parallel = true;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
@@ -334,14 +294,14 @@ TEST_F(ZXTest, NonEquivalentAncillaryCircuit) {
 
   // ensure that enabling another checker allows to detect non-equivalence and
   // does not abort the computation.
-  ecm->setAlternatingChecker(true);
-  ecm->setParallel(false);
+  ecm->getConfiguration().execution.runAlternatingChecker = true;
+  ecm->getConfiguration().execution.parallel = false;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);
 
-  ecm->setParallel(true);
+  ecm->getConfiguration().execution.parallel = true;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
@@ -364,7 +324,7 @@ TEST_F(ZXTest, NonEquivalentCircuit) {
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::ProbablyNotEquivalent);
 
-  ecm->setParallel(true);
+  ecm->getConfiguration().execution.parallel = true;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
@@ -372,14 +332,14 @@ TEST_F(ZXTest, NonEquivalentCircuit) {
 
   // ensure that enabling another checker allows to detect non-equivalence and
   // does not abort the computation.
-  ecm->setAlternatingChecker(true);
-  ecm->setParallel(false);
+  ecm->getConfiguration().execution.runAlternatingChecker = true;
+  ecm->getConfiguration().execution.parallel = false;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);
 
-  ecm->setParallel(true);
+  ecm->getConfiguration().execution.parallel = true;
   ecm->reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
@@ -450,6 +410,54 @@ TEST_F(ZXTest, TwoQubitRotations) {
   config.execution.runAlternatingChecker = false;
   config.execution.runConstructionChecker = false;
   config.execution.runHSFChecker = false;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::Equivalent);
+}
+
+TEST_F(ZXTest, EmptyCircuitWithAncillas) {
+  auto qc1 = qc::QuantumComputation(0U);
+  qc1.addAncillaryRegister(1);
+  qc1.x(0);
+
+  auto qc2 = qc::QuantumComputation(0U);
+  qc2.addAncillaryRegister(1);
+
+  config.execution.runZXChecker = true;
+  config.execution.parallel = false;
+  config.execution.runSimulationChecker = false;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runConstructionChecker = false;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::NoInformation);
+
+  config.execution.setAllAncillaeGarbage = true;
+  ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
+  ecm->run();
+  EXPECT_EQ(ecm->getResults().equivalence,
+            ec::EquivalenceCriterion::Equivalent);
+}
+
+TEST_F(ZXTest, EmptyCircuitWithAncillasAndGarbage) {
+  auto qc1 = qc::QuantumComputation(1U);
+  qc1.addAncillaryRegister(1);
+  qc1.setLogicalQubitGarbage(1);
+  qc1.h(1);
+
+  auto qc2 = qc::QuantumComputation(1U);
+  qc2.addAncillaryRegister(1);
+  qc2.setLogicalQubitGarbage(1);
+
+  config.execution.runZXChecker = true;
+  config.execution.parallel = false;
+  config.execution.runSimulationChecker = false;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runConstructionChecker = false;
   ecm = std::make_unique<ec::EquivalenceCheckingManager>(qc1, qc2, config);
 
   ecm->run();
