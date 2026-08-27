@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <nlohmann/json.hpp>
 #include <optional>
 #include <stdexcept>
 
