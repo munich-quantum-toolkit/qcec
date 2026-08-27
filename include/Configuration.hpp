@@ -40,6 +40,7 @@ public:
     bool runAlternatingChecker = true;
     bool runZXChecker = true;
     bool setAllAncillaeGarbage = false;
+    bool runHSFChecker = false;
   };
 
   // configuration options for pre-check optimizations

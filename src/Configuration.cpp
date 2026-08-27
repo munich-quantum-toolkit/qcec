@@ -20,25 +20,27 @@ namespace ec {
 bool Configuration::anythingToExecute() const noexcept {
   return (execution.runSimulationChecker && simulation.maxSims > 0U) ||
          execution.runAlternatingChecker || execution.runConstructionChecker ||
-         execution.runZXChecker;
+         execution.runZXChecker || execution.runHSFChecker;
 }
 
 bool Configuration::onlySingleTask() const noexcept {
   // only a single simulation shall be performed
   if (execution.runSimulationChecker && (simulation.maxSims == 1U) &&
       !execution.runAlternatingChecker && !execution.runConstructionChecker &&
-      !execution.runZXChecker) {
+      !execution.runZXChecker && !execution.runHSFChecker) {
     return true;
   }
 
   // no simulations and only one of the other checks shall be performed
   if (!execution.runSimulationChecker &&
       ((execution.runAlternatingChecker && !execution.runConstructionChecker &&
-        !execution.runZXChecker) ||
+        !execution.runZXChecker && !execution.runHSFChecker) ||
        (!execution.runAlternatingChecker && execution.runConstructionChecker &&
-        !execution.runZXChecker) ||
+        !execution.runZXChecker && !execution.runHSFChecker) ||
        (!execution.runAlternatingChecker && !execution.runConstructionChecker &&
-        execution.runZXChecker))) {
+        execution.runZXChecker && !execution.runHSFChecker) ||
+       (!execution.runAlternatingChecker && !execution.runConstructionChecker &&
+        !execution.runZXChecker && execution.runHSFChecker))) {
     return true;
   }
 
@@ -47,12 +49,14 @@ bool Configuration::onlySingleTask() const noexcept {
 
 bool Configuration::onlyZXCheckerConfigured() const noexcept {
   return !execution.runConstructionChecker && !execution.runSimulationChecker &&
-         !execution.runAlternatingChecker && execution.runZXChecker;
+         !execution.runAlternatingChecker && execution.runZXChecker &&
+         !execution.runHSFChecker;
 }
 
 bool Configuration::onlySimulationCheckerConfigured() const noexcept {
   return !execution.runConstructionChecker && execution.runSimulationChecker &&
-         !execution.runAlternatingChecker && !execution.runZXChecker;
+         !execution.runAlternatingChecker && !execution.runZXChecker &&
+         !execution.runHSFChecker;
 }
 
 nlohmann::basic_json<> Configuration::json() const {
@@ -65,6 +69,7 @@ nlohmann::basic_json<> Configuration::json() const {
   exe["run_simulation_checker"] = execution.runSimulationChecker;
   exe["run_alternating_checker"] = execution.runAlternatingChecker;
   exe["run_zx_checker"] = execution.runZXChecker;
+  exe["run_hsf_checker"] = execution.runHSFChecker;
   exe["timeout"] = execution.timeout;
   auto& opt = config["optimizations"];
   opt["fuse_consecutive_single_qubit_gates"] =
