@@ -21,9 +21,11 @@
 #include "checker/dd/applicationscheme/SequentialApplicationScheme.hpp"
 #include "dd/Node.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <stdexcept>
 
 namespace ec {
@@ -51,41 +53,41 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
   // might create a scenario where two nodes differ besides their underlying
   // decision diagrams being extremely close (for some definition of `close`).
   if constexpr (std::is_same_v<DDType, dd::MatrixDD>) {
-    // for matrices this can be resolved by calculating their Frobenius inner
-    // product trace(U V^-1) and comparing it to some threshold.
-    if (configuration.functionality.checkApproximateEquivalence) {
-      auto g = dd->multiply(e, dd->conjugateTranspose(f));
-      auto trace = dd->trace(g, nqubits).mag();
-      if (std::abs(trace - 1.) <
-          configuration.functionality.approximateCheckingThreshold) {
-        return EquivalenceCriterion::Equivalent;
-      }
+    // First check exact equivalence using the regular numerical tolerance. This
+    // preserves the distinction between exact equivalence and exact
+    // equivalence up to a global phase in approximate mode.
+    std::optional<dd::MatrixDD> functionality{};
+    bool isClose{};
+    const bool eIsClose =
+        dd->isCloseToIdentity(e, configuration.functionality.traceThreshold);
+    const bool fIsClose =
+        dd->isCloseToIdentity(f, configuration.functionality.traceThreshold);
+    if (eIsClose || fIsClose) {
+      // if any of the DDs is close to the identity (structure), the result can
+      // be decided by whether both DDs are close enough to the identity.
+      isClose = eIsClose && fIsClose;
     } else {
-      // in a similar fashion, we can simply compare U V^-1 with the identity,
-      // which results in a much simpler check that is not prone to overflow.
-      bool isClose{};
-      const bool eIsClose =
-          dd->isCloseToIdentity(e, configuration.functionality.traceThreshold);
-      const bool fIsClose =
-          dd->isCloseToIdentity(f, configuration.functionality.traceThreshold);
-      if (eIsClose || fIsClose) {
-        // if any of the DDs is close to the identity (structure), the result
-        // can be decided by whether both DDs are close enough to the identity.
-        isClose = eIsClose && fIsClose;
-      } else {
-        // otherwise, one DD needs to be inverted before multiplying both of
-        // them together and checking whether the resulting DD is close enough
-        // to the identity.
-        auto g = dd->multiply(e, dd->conjugateTranspose(f));
-        isClose = dd->isCloseToIdentity(
-            g, configuration.functionality.traceThreshold);
+      // otherwise, one DD needs to be inverted before multiplying both of them
+      // together and checking whether the resulting DD is close enough to the
+      // identity.
+      functionality = dd->multiply(e, dd->conjugateTranspose(f));
+      isClose = dd->isCloseToIdentity(
+          *functionality, configuration.functionality.traceThreshold);
+    }
+    if (isClose) {
+      // whenever the top edge weights differ, both decision diagrams are only
+      // equivalent up to a global phase
+      if (!e.w.approximatelyEquals(f.w)) {
+        return EquivalenceCriterion::EquivalentUpToGlobalPhase;
       }
-      if (isClose) {
-        // whenever the top edge weights differ, both decision diagrams are only
-        // equivalent up to a global phase
-        if (!e.w.approximatelyEquals(f.w)) {
-          return EquivalenceCriterion::EquivalentUpToGlobalPhase;
-        }
+      return EquivalenceCriterion::Equivalent;
+    }
+
+    if (configuration.functionality.checkApproximateEquivalence) {
+      if (!functionality.has_value()) {
+        functionality = dd->multiply(e, dd->conjugateTranspose(f));
+      }
+      if (projectiveHilbertSchmidtDistanceWithinThreshold(*functionality)) {
         return EquivalenceCriterion::Equivalent;
       }
     }
@@ -111,6 +113,21 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
   }
 
   return EquivalenceCriterion::NotEquivalent;
+}
+
+template <class DDType>
+bool DDEquivalenceChecker<DDType>::
+    projectiveHilbertSchmidtDistanceWithinThreshold(
+        const dd::MatrixDD& functionality) const {
+  // MQT Core returns the trace normalized by the matrix dimension. Clamping
+  // guards against small floating-point excursions outside the theoretical
+  // interval [0, 1]. Compare squared values to avoid an unnecessary square
+  // root: D_HS(U, V)^2 = 1 - |Tr(U V^dagger) / d|^2.
+  const auto normalizedOverlapSquared =
+      std::clamp(dd->trace(functionality, nqubits).mag2(), 0., 1.);
+  const auto threshold =
+      configuration.functionality.approximateCheckingThreshold;
+  return 1. - normalizedOverlapSquared <= threshold * threshold;
 }
 
 template <class DDType>

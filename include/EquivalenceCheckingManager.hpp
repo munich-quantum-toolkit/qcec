@@ -188,6 +188,9 @@ protected:
   /// Run all configured optimization passes
   void runOptimizationPasses();
 
+  /// Validate and normalize the configuration used for the upcoming run
+  void validateAndNormalizeConfiguration();
+
   /// Sequential Equivalence Check (TCAD'21)
   /// First, a couple of simulations with various stimuli are conducted.
   /// If any of those stimuli produce output states with a fidelity not close to

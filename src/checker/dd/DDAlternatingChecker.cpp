@@ -19,7 +19,6 @@
 #include "ir/Definitions.hpp"
 
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
@@ -112,32 +111,29 @@ EquivalenceCriterion DDAlternatingChecker::checkEquivalence() {
     garbage[static_cast<std::size_t>(q)] =
         qc1->logicalQubitIsGarbage(q) && qc2->logicalQubitIsGarbage(q);
   }
-  // For approximate equivalence checking, calculate the Frobenius inner
-  // product trace(U V^-1) and compare it to some threshold.
-  if (configuration.functionality.checkApproximateEquivalence) {
-    auto trace = dd->trace(functionality, nqubits).mag();
-    if (std::abs(trace - 1.) <
-        configuration.functionality.approximateCheckingThreshold) {
-      return EquivalenceCriterion::Equivalent;
-    }
-  } else {
-    // Otherwise, we can simply compare U V^-1 with the identity
-    const bool isClose =
-        configuration.functionality.checkPartialEquivalence
-            ? dd->isCloseToIdentity(functionality,
-                                    configuration.functionality.traceThreshold,
-                                    garbage, false)
-            : dd->isCloseToIdentity(functionality,
-                                    configuration.functionality.traceThreshold);
+  // First check exact equivalence using the regular numerical tolerance. This
+  // preserves the distinction between exact equivalence and exact equivalence
+  // up to a global phase in approximate mode.
+  const bool isClose =
+      configuration.functionality.checkPartialEquivalence
+          ? dd->isCloseToIdentity(functionality,
+                                  configuration.functionality.traceThreshold,
+                                  garbage, false)
+          : dd->isCloseToIdentity(functionality,
+                                  configuration.functionality.traceThreshold);
 
-    if (isClose) {
-      // whenever the top edge weight is not one, both decision diagrams are
-      // only equivalent up to a global phase
-      if (!functionality.w.approximatelyEquals(dd::Complex::one())) {
-        return EquivalenceCriterion::EquivalentUpToGlobalPhase;
-      }
-      return EquivalenceCriterion::Equivalent;
+  if (isClose) {
+    // whenever the top edge weight is not one, both decision diagrams are only
+    // equivalent up to a global phase
+    if (!functionality.w.approximatelyEquals(dd::Complex::one())) {
+      return EquivalenceCriterion::EquivalentUpToGlobalPhase;
     }
+    return EquivalenceCriterion::Equivalent;
+  }
+
+  if (configuration.functionality.checkApproximateEquivalence &&
+      projectiveHilbertSchmidtDistanceWithinThreshold(functionality)) {
+    return EquivalenceCriterion::Equivalent;
   }
   return EquivalenceCriterion::NotEquivalent;
 }
