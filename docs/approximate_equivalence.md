@@ -17,29 +17,35 @@ by determining whether $UV^\dagger$ is the identity up to global phase.
 
 In approximate synthesis and optimization, it is often useful to accept a
 circuit that is sufficiently close to the original. QCEC quantifies this using
-the normalized-trace distance
+the projective Hilbert--Schmidt distance
 
 $$
-\Delta(U, V) = 1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|,
+D_\mathrm{HS}(U, V) =
+\sqrt{1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|^2},
 $$
 
 where $n$ is the number of qubits. The distance is invariant under global phase
 and ranges from zero to one for unitary matrices. QCEC considers two circuits
-approximately equivalent when their distance is smaller than the configured
-threshold $\epsilon$.
+approximately equivalent when their distance is at most the configured threshold
+$\epsilon$.
 
 ## Supported checkers
 
 Set `check_approximate_equivalence` to `True` to enable approximate checking.
 The `approximate_checking_threshold` option controls the accepted distance and
-defaults to `1e-8`.
+defaults to `1e-8`. It must be finite and lie in the closed interval `[0, 1]`.
 
 The construction and alternating checkers compute the normalized trace using
-decision diagrams. The simulation checker compares individual output states, so
-its fidelity threshold is not an approximate process-distance threshold. Disable
-the simulation checker when using approximate equivalence checking. The
-ZX-calculus checker does not directly support approximate equivalence and may
-return `no_information` for circuits that are close but not exactly equivalent.
+decision diagrams. At least one of these two checkers must be enabled. The
+simulation checker compares individual output states, so its fidelity threshold
+does not represent the configured process distance; QCEC disables it
+automatically in approximate mode. QCEC also disables the ZX-calculus checker
+because it cannot establish approximate non-equivalence.
+
+Approximate checking currently supports fixed, full-unitary circuits without
+ancillary or garbage qubits. Parameterized circuits and partial equivalence use
+different equivalence relations and are rejected when approximate checking is
+enabled.
 
 +++
 
@@ -59,29 +65,31 @@ qc_rhs.id(range(3))
 qc_lhs.draw(output="mpl", style="iqp")
 ```
 
-The normalized trace of the Toffoli matrix is $0.75$, so its normalized-trace
-distance from the identity is $0.25$. A threshold of $0.3$ therefore accepts the
-pair:
+The normalized trace magnitude of the Toffoli matrix is $0.75$, so its
+projective Hilbert--Schmidt distance from the identity is
+$\sqrt{1 - 0.75^2} = \sqrt{7}/4 \approx 0.6614$. A threshold of $0.7$ therefore
+accepts the pair:
 
 ```{code-cell} ipython3
 from mqt.qcec import verify
 from mqt.qcec.pyqcec import Configuration
 
 config = Configuration()
-config.execution.run_simulation_checker = False
 config.functionality.check_approximate_equivalence = True
-config.functionality.approximate_checking_threshold = 0.3
+config.functionality.approximate_checking_threshold = 0.7
 
 verify(qc_lhs, qc_rhs, configuration=config)
 ```
 
-A threshold below $0.25$ rejects the same pair:
+A threshold below $\sqrt{7}/4$ rejects the same pair:
 
 ```{code-cell} ipython3
-config.functionality.approximate_checking_threshold = 0.2
+config.functionality.approximate_checking_threshold = 0.6
 verify(qc_lhs, qc_rhs, configuration=config)
 ```
 
-The approach is inspired by work on
+This is the unitary distance used by
+[BQSKit](https://bqskit.readthedocs.io/en/latest/intro/synthesis.html). The
+approach is also inspired by work on
 [approximate equivalence checking](https://arxiv.org/abs/2103.11595) and
 [approximate quantum-circuit synthesis](https://doi.org/10.1145/3503222.3507739).
