@@ -12,6 +12,11 @@ releases may include breaking changes.
 
 ### Changed
 
+- 💥 Drop support for x86 macOS and stop publishing the respective wheels
+  ([#1041]) ([**@denialhaag**])
+- ⬆️ Raise the macOS deployment target to 13.3 to enable `std::format` in libc++
+  ([#1041]) ([**@denialhaag**])
+- 💥 Require Python 3.11 or newer ([#1041]) ([**@denialhaag**])
 - ♻️ Move the equivalence-checking-specific circuit transformations from MQT
   Core into QCEC ([#1040]) ([**@simon1hofmann**])
 
@@ -243,6 +248,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
+[#1040]: https://github.com/munich-quantum-toolkit/qcec/pull/1040
 [#1030]: https://github.com/munich-quantum-toolkit/qcec/pull/1030
 [#1021]: https://github.com/munich-quantum-toolkit/qcec/pull/1021
 [#1019]: https://github.com/munich-quantum-toolkit/qcec/pull/1019
@@ -276,7 +283,6 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pull/566
 [#512]: https://github.com/munich-quantum-toolkit/qcec/pull/512
 [#432]: https://github.com/munich-quantum-toolkit/qcec/pull/432
-[#1040]: https://github.com/munich-quantum-toolkit/qcec/pull/1040
 
 <!-- Contributor -->
 

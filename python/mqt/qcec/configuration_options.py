@@ -10,10 +10,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, Unpack
 
 if TYPE_CHECKING:
-    from ._compat.typing import Unpack
     from .pyqcec import ApplicationScheme, Configuration, StateType
 
 

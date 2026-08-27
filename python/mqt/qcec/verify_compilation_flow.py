@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import warnings
 from importlib import resources
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Unpack
 
 from mqt.core import load
 
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from mqt.core.ir import QuantumComputation
     from qiskit.circuit import QuantumCircuit
 
-    from ._compat.typing import Unpack
     from .configuration_options import ConfigurationOptions
     from .pyqcec import EquivalenceCheckingManager
 

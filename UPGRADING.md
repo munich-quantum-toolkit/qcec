@@ -6,9 +6,21 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+### Equivalence-checking optimizations
+
 MQT QCEC now owns the circuit transformations used only by its equivalence
 checking flow. This ownership change does not change the QCEC API or its
 configuration.
+
+### macOS support
+
+MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
+newer. The new deployment target enables `std::format` in libc++.
+
+### Python support
+
+MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment
+before installing this release.
 
 ## [3.9.0]
 
