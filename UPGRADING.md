@@ -10,7 +10,14 @@ of changes including minor and patch releases, please refer to the
 
 MQT QCEC now owns the circuit transformations used only by its equivalence
 checking flow. This ownership change does not change the QCEC API or its
-configuration.
+configuration. The migrated dynamic-circuit transformations handle nested
+compound operations, identical repeated measurements, and non-contiguous
+physical layouts. They reject non-bijective qubit-to-classical-bit measurement
+mappings, targeting a measured qubit without an intervening reset, and
+unsupported one-bit comparisons instead of silently changing circuit semantics.
+Using the measured qubit only as a compatible quantum control remains supported.
+Reset elimination rejects conditional resets and circuits that already contain
+ancillary qubits.
 
 ### macOS support
 

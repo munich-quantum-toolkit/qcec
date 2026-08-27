@@ -12,7 +12,9 @@ releases may include breaking changes.
 
 ### Changed
 
-- ♻️ Move single-qubit gate fusion from MQT Core into QCEC ([#1042])
+- ♻️ Move single-qubit gate fusion from MQT Core into QCEC and harden migrated
+  dynamic-circuit transformations for nested compounds, repeated measurements,
+  measurement-mapping validation, and non-contiguous layouts ([#1042])
   ([**@simon1hofmann**])
 - 💥 Drop support for x86 macOS and stop publishing the respective wheels
   ([#1041]) ([**@denialhaag**])
