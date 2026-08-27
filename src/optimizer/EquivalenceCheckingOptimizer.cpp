@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -90,6 +91,82 @@ DAG constructDAG(QuantumComputation& qc) {
 }
 
 } // namespace
+
+void singleQubitGateFusion(QuantumComputation& qc) {
+  static const std::map<OpType, OpType> INVERSE_MAP = {
+      {I, I},   {X, X},   {Y, Y},   {Z, Z},     {H, H},     {S, Sdg},
+      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier}};
+
+  auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1U);
+
+  for (auto& operation : qc) {
+    if (!operation->isStandardOperation() || operation->isControlled() ||
+        operation->getTargets().size() != 1U) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    const auto target = operation->getTargets().at(0);
+    if (dag.at(target).empty()) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    auto* previous = dag.at(target).back();
+    if (!(*previous)->isCompoundOperation() &&
+        ((*previous)->isControlled() ||
+         (*previous)->getTargets().size() != 1U)) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    if ((*previous)->isCompoundOperation()) {
+      auto* compound = dynamic_cast<CompoundOperation*>(previous->get());
+      if (compound->getUsedQubits().size() > 1U) {
+        addToDag(dag, &operation);
+        continue;
+      }
+
+      if (compound->empty()) {
+        compound->emplace_back(operation->clone());
+        operation->setGate(I);
+        continue;
+      }
+
+      const auto last = std::prev(compound->end());
+      const auto inverse = INVERSE_MAP.find((*last)->getType());
+      if (inverse != INVERSE_MAP.end() &&
+          operation->getType() == inverse->second) {
+        compound->pop_back();
+      } else {
+        compound->emplace_back<StandardOperation>(target, operation->getType(),
+                                                  operation->getParameter());
+      }
+      operation->setGate(I);
+      continue;
+    }
+
+    const auto inverse = INVERSE_MAP.find((*previous)->getType());
+    if (inverse != INVERSE_MAP.end() &&
+        operation->getType() == inverse->second) {
+      (*previous)->setGate(I);
+      operation->setGate(I);
+      continue;
+    }
+
+    auto compound = std::make_unique<CompoundOperation>();
+    compound->emplace_back<StandardOperation>((*previous)->getTargets().at(0),
+                                              (*previous)->getType(),
+                                              (*previous)->getParameter());
+    compound->emplace_back<StandardOperation>(target, operation->getType(),
+                                              operation->getParameter());
+    operation->setGate(I);
+    *previous = std::move(compound);
+    dag.at(target).push_back(previous);
+  }
+
+  removeIdentities(qc);
+}
 
 void swapReconstruction(QuantumComputation& qc) {
   auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1);

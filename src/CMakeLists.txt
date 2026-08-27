@@ -24,8 +24,7 @@ if(NOT TARGET MQT::QCEC)
   target_link_libraries(
     ${PROJECT_NAME}
     PUBLIC MQT::CoreDD nlohmann_json::nlohmann_json
-    PRIVATE Boost::multiprecision MQT::CoreCircuitOptimizer MQT::CoreAlgorithms
-            MQT::ProjectWarnings MQT::ProjectOptions)
+    PRIVATE Boost::multiprecision MQT::CoreAlgorithms MQT::ProjectWarnings MQT::ProjectOptions)
 
   # add MQT alias
   add_library(MQT::QCEC ALIAS ${PROJECT_NAME})
