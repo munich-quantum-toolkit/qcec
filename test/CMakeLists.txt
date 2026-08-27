@@ -14,4 +14,5 @@ package_add_test(mqt-qcec-test MQT::QCEC ${TEST_FILES})
 
 # link additional test dependencies
 target_link_libraries(mqt-qcec-test PRIVATE Boost::multiprecision MQT::CoreAlgorithms MQT::CoreQASM)
+target_include_directories(mqt-qcec-test PRIVATE ${PROJECT_SOURCE_DIR}/src)
 target_include_directories(mqt-qcec-test SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
