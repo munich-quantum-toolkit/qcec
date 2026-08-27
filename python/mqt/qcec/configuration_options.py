@@ -41,6 +41,7 @@ class ConfigurationOptions(TypedDict, total=False):
     parallel: bool
     run_alternating_checker: bool
     run_construction_checker: bool
+    run_hsf_checker: bool
     run_simulation_checker: bool
     run_zx_checker: bool
     timeout: float
