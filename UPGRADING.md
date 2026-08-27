@@ -6,6 +6,12 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+### Equivalence-checking optimizations
+
+MQT QCEC now owns the circuit transformations used only by its equivalence
+checking flow. This ownership change does not change the QCEC API or its
+configuration.
+
 ### macOS support
 
 MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
