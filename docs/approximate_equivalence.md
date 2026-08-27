@@ -36,16 +36,37 @@ The `approximate_checking_threshold` option controls the accepted distance and
 defaults to `1e-8`. It must be finite and lie in the closed interval `[0, 1]`.
 
 The construction and alternating checkers compute the normalized trace using
-decision diagrams. At least one of these two checkers must be enabled. The
-simulation checker compares individual output states, so its fidelity threshold
-does not represent the configured process distance; QCEC disables it
-automatically in approximate mode. QCEC also disables the ZX-calculus checker
-because it cannot establish approximate non-equivalence.
+decision diagrams. At least one of these checkers or the HSF checker described
+below must be enabled. The simulation checker compares individual output states,
+so its fidelity threshold does not represent the configured process distance;
+QCEC disables it automatically in approximate mode. QCEC also disables the
+ZX-calculus checker because it cannot establish approximate non-equivalence.
 
 Approximate checking currently supports fixed, full-unitary circuits without
 ancillary or garbage qubits. Parameterized circuits and partial equivalence use
 different equivalence relations and are rejected when approximate checking is
 enabled.
+
+The optional hybrid Schrödinger--Feynman (HSF) checker computes the same
+projective Hilbert--Schmidt distance by cutting each circuit into two horizontal
+slices. Cross-cut controlled gates are decomposed into sums of tensor products,
+allowing the slices and summands to be evaluated independently. Enable it with
+`run_hsf_checker=True` in addition to `check_approximate_equivalence=True`.
+
+HSF is a standalone alternative to the alternating and construction checkers.
+When it is enabled, QCEC disables those checkers as well as simulation, ZX, and
+outer checker parallelism. HSF uses up to `nthreads` workers internally. For $k$
+cross-cut gates, it evaluates $2^k$ summands; although at most 63 decisions can
+be represented, the practical limit is typically much smaller. The checker is
+therefore intended for sufficiently shallow circuits with few cross-cut gates.
+
+Normal circuit optimization and layout processing still run before HSF. QCEC
+normalizes initial layouts and output permutations, materializing any remaining
+permutation as supported gates; incomplete mappings are rejected. A nontrivial
+HSF check requires at least two qubits after idle-qubit removal and does not
+support gates with targets on both sides of the cut or multiple controls on the
+control side of a cross-cut gate. Unsupported circuits are rejected instead of
+falling back to another checker.
 
 +++
 

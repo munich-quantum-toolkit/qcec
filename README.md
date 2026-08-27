@@ -30,7 +30,7 @@ backbone of the MQT.
 
 ## Key Features
 
-- Comprehensive equivalence checking engines:
+- Complementary equivalence checking engines:
   [Decision-diagram construction](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#construction-equivalence-checker-using-decision-diagrams),
   [Alternating DD](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#alternating-equivalence-checker-using-decision-diagrams),
   [Simulation-based falsification](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#simulation-equivalence-checker-using-decision-diagrams),
@@ -39,6 +39,10 @@ backbone of the MQT.
   in an automated
   [equivalence checking flow](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#resulting-equivalence-checking-flow)
   to prove equivalence or quickly find counterexamples.
+- Approximate equivalence checking with the projective Hilbert--Schmidt
+  distance, including a standalone hybrid Schrödinger--Feynman checker for
+  shallow circuits with few cross-cut gates.
+  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/approximate_equivalence.html)
 - Compilation flow verification: validate transpiled/compiled circuits incl.
   layout permutations and measurements.
   [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/compilation_flow_verification.html)

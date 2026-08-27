@@ -141,11 +141,22 @@ checker cannot prove non-equivalence. Furthermore, multi-controlled gates have
 to be decomposed prior to the equivalence check, which can quickly lead to large
 ZX-diagrams and slow runtimes.
 
+## Approximate Equivalence Checking
+
+QCEC can also compare circuits using the projective Hilbert--Schmidt distance.
+The construction and alternating checkers support this mode directly. For
+shallow circuits with few gates crossing a horizontal circuit cut, the hybrid
+Schrödinger--Feynman checker provides a standalone alternative that evaluates
+the decomposed summands in parallel. See {doc}`approximate_equivalence` for the
+metric, configuration, and current limitations.
+
 ## Resulting Equivalence Checking Flow
 
 QCEC implements and expands upon the flow proposed in
 {cite:p}`burgholzer2021advanced` as illustrated in the following figure that
-orchestrates all the above equivalence checkers.
+orchestrates the construction, alternating, simulation, and ZX-calculus
+equivalence checkers described above. The hybrid Schrödinger--Feynman checker
+runs as a standalone alternative flow.
 
 ```{image} /images/verification_flow.png
 :align: center
