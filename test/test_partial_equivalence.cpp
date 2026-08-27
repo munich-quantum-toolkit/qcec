@@ -370,7 +370,6 @@ class PartialEquivalenceTest : public testing::Test {
     config.execution.runAlternatingChecker = false;
     config.execution.runConstructionChecker = false;
     config.execution.runZXChecker = false;
-    config.execution.runHSFChecker = false;
     config.execution.nthreads = 1;
 
     config.functionality.checkPartialEquivalence = true;

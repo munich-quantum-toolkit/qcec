@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <atomic>
 #include <cstddef>
-#include <memory>
 #include <nlohmann/json_fwd.hpp>
 #include <utility>
 
@@ -28,13 +27,6 @@ public:
                      const qc::QuantumComputation& circ2,
                      Configuration config) noexcept
       : qc1(&circ1), qc2(&circ2),
-        nqubits(std::max(qc1->getNqubits(), qc2->getNqubits())),
-        configuration(std::move(config)) {};
-
-  EquivalenceChecker(const qc::QuantumComputation& circ1,
-                     std::unique_ptr<qc::QuantumComputation> circ2,
-                     ec::Configuration config) noexcept
-      : qc1(&circ1), qc2(circ2.release()),
         nqubits(std::max(qc1->getNqubits(), qc2->getNqubits())),
         configuration(std::move(config)) {};
 

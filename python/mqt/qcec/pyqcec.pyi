@@ -159,15 +159,6 @@ class Configuration:
         @run_zx_checker.setter
         def run_zx_checker(self, arg: bool, /) -> None: ...
         @property
-        def run_hsf_checker(self) -> bool:
-            """Set whether the hybrid Schrödinger-Feynman checker should be executed.
-
-            Defaults to :code:`False`. The checker requires approximate equivalence checking to be enabled and only supports gates that can be split across the circuit cut.
-            """
-
-        @run_hsf_checker.setter
-        def run_hsf_checker(self, arg: bool, /) -> None: ...
-        @property
         def numerical_tolerance(self) -> float:
             """Set the numerical tolerance of the underlying decision diagram package.
 

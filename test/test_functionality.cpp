@@ -44,7 +44,6 @@ protected:
     config.execution.runAlternatingChecker = false;
     config.execution.runSimulationChecker = false;
     config.execution.runZXChecker = false;
-    config.execution.runHSFChecker = false;
     config.simulation.maxSims = 16;
     config.application.constructionScheme =
         ec::ApplicationSchemeType::Sequential;

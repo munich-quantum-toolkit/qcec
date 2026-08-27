@@ -39,7 +39,6 @@ public:
     bool runSimulationChecker = true;
     bool runAlternatingChecker = true;
     bool runZXChecker = true;
-    bool runHSFChecker = false;
     bool setAllAncillaeGarbage = false;
   };
 

@@ -41,15 +41,6 @@ the simulation checker when using approximate equivalence checking. The
 ZX-calculus checker does not directly support approximate equivalence and may
 return `no_information` for circuits that are close but not exactly equivalent.
 
-The optional hybrid Schrödinger-Feynman (HSF) checker computes the same trace by
-cutting the circuit into two horizontal slices. Cross-cut controlled gates are
-decomposed into sums of tensor products, allowing the slices and summands to be
-evaluated independently. Enable it with `run_hsf_checker=True` in addition to
-`check_approximate_equivalence=True`. Its runtime grows exponentially with the
-number of gates crossing the cut, and it currently does not support gates with
-targets on both sides of the cut or multiple controls on the control side of a
-cross-cut gate.
-
 +++
 
 ## Example

@@ -25,11 +25,7 @@ if(NOT TARGET MQT::QCEC)
     ${PROJECT_NAME}
     PUBLIC MQT::CoreDD nlohmann_json::nlohmann_json
     PRIVATE Boost::multiprecision MQT::CoreCircuitOptimizer MQT::CoreAlgorithms
-            MQT::ProjectWarnings MQT::ProjectOptions Taskflow)
-
-  set_target_properties(
-    Taskflow PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
-                        $<TARGET_PROPERTY:Taskflow,INTERFACE_INCLUDE_DIRECTORIES>)
+            MQT::ProjectWarnings MQT::ProjectOptions)
 
   # add MQT alias
   add_library(MQT::QCEC ALIAS ${PROJECT_NAME})

@@ -133,12 +133,6 @@ Defaults to :code:`True` since staying close to the identity can quickly show th
 Defaults to :code:`True` but arbitrary multi-controlled operations are only partially supported.)pb")
 
       .def_rw(
-          "run_hsf_checker", &Configuration::Execution::runHSFChecker,
-          R"pb(Set whether the hybrid Schrödinger-Feynman checker should be executed.
-
-Defaults to :code:`False`. The checker requires approximate equivalence checking to be enabled and only supports gates that can be split across the circuit cut.)pb")
-
-      .def_rw(
           "numerical_tolerance", &Configuration::Execution::numericalTolerance,
           R"pb(Set the numerical tolerance of the underlying decision diagram package.
 

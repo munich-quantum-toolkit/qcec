@@ -117,7 +117,6 @@ public:
     configuration.execution.runZXChecker = false;
     configuration.execution.runSimulationChecker = false;
     configuration.execution.runAlternatingChecker = false;
-    configuration.execution.runHSFChecker = false;
   }
 
   /**

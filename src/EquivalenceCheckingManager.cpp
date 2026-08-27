@@ -14,7 +14,6 @@
 #include "ThreadSafeQueue.hpp"
 #include "checker/dd/DDAlternatingChecker.hpp"
 #include "checker/dd/DDConstructionChecker.hpp"
-#include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/simulation/StateType.hpp"
 #include "checker/zx/FunctionalityConstruction.hpp"
@@ -361,19 +360,9 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
   // set numeric tolerance used throughout the check
   dd::ComplexNumbers::setTolerance(configuration.execution.numericalTolerance);
 
-  if (qc1.isVariableFree() && qc2.isVariableFree() &&
-      !configuration.execution.runHSFChecker) {
+  if (qc1.isVariableFree() && qc2.isVariableFree()) {
     // run all configured optimization passes
     runOptimizationPasses();
-  }
-
-  // If the HSF checker is enabled, flatten the operations in the circuits and
-  // remove the final measurements
-  if (configuration.execution.runHSFChecker) {
-    qc::CircuitOptimizer::flattenOperations(qc1);
-    qc::CircuitOptimizer::flattenOperations(qc2);
-    qc::CircuitOptimizer::removeFinalMeasurements(qc1);
-    qc::CircuitOptimizer::removeFinalMeasurements(qc2);
   }
 
   // strip away qubits that are not acted upon
@@ -400,24 +389,6 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
         qc2.setLogicalQubitGarbage(q);
       }
     }
-  }
-
-  if (!configuration.functionality.checkApproximateEquivalence &&
-      configuration.execution.runHSFChecker) {
-    std::clog << "[QCEC] Warning: The HSF checker performs approximate "
-                 "equivalence checking. The HSF checker has been disabled. Set "
-                 "'checkApproximateEquivalence' to True to enable it.\n";
-    this->configuration.execution.runHSFChecker = false;
-  }
-
-  // Check whether the hsf checker is configured and can handle the circuits
-  if (configuration.execution.runHSFChecker &&
-      !DDHybridSchrodingerFeynmanChecker::canHandle(this->qc1, this->qc2)) {
-    std::clog
-        << "[QCEC] Warning: Hsf checker cannot handle the "
-           "circuits. Falling back to alternating or construction checker.\n";
-    this->configuration.execution.runHSFChecker = false;
-    this->configuration.execution.runAlternatingChecker = true;
   }
 
   // check whether the alternating checker is configured and can handle the
@@ -558,24 +529,6 @@ void EquivalenceCheckingManager::checkSequential() {
     }
   }
 
-  if (configuration.execution.runHSFChecker && !done) {
-    checkers.emplace_back(std::make_unique<DDHybridSchrodingerFeynmanChecker>(
-        qc1, qc2, configuration));
-    const auto& hsfChecker = checkers.back();
-    if (!done) {
-      const auto result = hsfChecker->run();
-
-      // if the hsf check produces a result, this is final
-      if (result != EquivalenceCriterion::NoInformation) {
-        results.equivalence = result;
-
-        // everything is done
-        done = true;
-        doneCond.notify_one();
-      }
-    }
-  }
-
   if (configuration.execution.runZXChecker && !done) {
     if (ZXEquivalenceChecker::canHandle(qc1, qc2)) {
       checkers.emplace_back(
@@ -660,9 +613,6 @@ void EquivalenceCheckingManager::checkParallel() {
   if (configuration.execution.runConstructionChecker) {
     ++tasksToExecute;
   }
-  if (configuration.execution.runHSFChecker) {
-    ++tasksToExecute;
-  }
   if (configuration.execution.runSimulationChecker) {
     tasksToExecute += configuration.simulation.maxSims;
   }
@@ -698,13 +648,6 @@ void EquivalenceCheckingManager::checkParallel() {
   if (configuration.execution.runConstructionChecker && !done) {
     // start a new thread that constructs and runs the construction check
     futures.emplace_back(asyncRunChecker<DDConstructionChecker>(id, queue));
-    ++id;
-  }
-
-  if (configuration.execution.runHSFChecker && !done) {
-    // start a new thread that constructs and runs the HSF check
-    futures.emplace_back(
-        asyncRunChecker<DDHybridSchrodingerFeynmanChecker>(id, queue));
     ++id;
   }
 
@@ -789,12 +732,10 @@ void EquivalenceCheckingManager::checkParallel() {
       break;
     }
 
-    // the alternating, the construction and the HSF checker provide definitive
-    // answers once they finish
+    // the alternating and the construction checker provide definitive answers
+    // once they finish
     if ((dynamic_cast<const DDAlternatingChecker*>(checker) != nullptr) ||
-        (dynamic_cast<const DDConstructionChecker*>(checker) != nullptr) ||
-        (dynamic_cast<const DDHybridSchrodingerFeynmanChecker*>(checker) !=
-         nullptr)) {
+        (dynamic_cast<const DDConstructionChecker*>(checker) != nullptr)) {
       setAndSignalDone();
       results.equivalence = result;
       break;

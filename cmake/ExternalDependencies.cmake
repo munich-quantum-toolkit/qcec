@@ -83,22 +83,6 @@ if(BUILD_MQT_QCEC_TESTS)
   list(APPEND FETCH_PACKAGES googletest)
 endif()
 
-set(TF_BUILD_TESTS
-    OFF
-    CACHE INTERNAL "")
-set(TF_BUILD_EXAMPLES
-    OFF
-    CACHE INTERNAL "")
-set(TF_BUILD_PROFILER
-    OFF
-    CACHE INTERNAL "")
-set(TF_VERSION
-    3.6.0
-    CACHE STRING "Taskflow version")
-set(TF_URL https://github.com/taskflow/taskflow/archive/refs/tags/v${TF_VERSION}.tar.gz)
-FetchContent_Declare(taskflow URL ${TF_URL} FIND_PACKAGE_ARGS ${TF_VERSION})
-list(APPEND FETCH_PACKAGES taskflow)
-
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
 
