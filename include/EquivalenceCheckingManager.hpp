@@ -143,7 +143,6 @@ public:
         ApplicationSchemeType::GateCost;
     configuration.application.profile = profileLocation;
   }
-
   /**
    * @brief Set the gate cost function for all checkers that support schemes.
    * @details This also sets the application scheme to GateCost.
@@ -188,6 +187,9 @@ protected:
 
   /// Run all configured optimization passes
   void runOptimizationPasses();
+
+  /// Validate and normalize the configuration used for the upcoming run
+  void validateAndNormalizeConfiguration();
 
   /// Sequential Equivalence Check (TCAD'21)
   /// First, a couple of simulations with various stimuli are conducted.

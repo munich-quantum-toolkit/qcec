@@ -28,6 +28,7 @@ self
 installation
 quickstart
 equivalence_checking
+approximate_equivalence
 compilation_flow_verification
 parametrized_circuits
 partial_equivalence

@@ -111,6 +111,9 @@ EquivalenceCriterion DDAlternatingChecker::checkEquivalence() {
     garbage[static_cast<std::size_t>(q)] =
         qc1->logicalQubitIsGarbage(q) && qc2->logicalQubitIsGarbage(q);
   }
+  // First check exact equivalence using the regular numerical tolerance. This
+  // preserves the distinction between exact equivalence and exact equivalence
+  // up to a global phase in approximate mode.
   const bool isClose =
       configuration.functionality.checkPartialEquivalence
           ? dd->isCloseToIdentity(functionality,
@@ -125,6 +128,11 @@ EquivalenceCriterion DDAlternatingChecker::checkEquivalence() {
     if (!functionality.w.approximatelyEquals(dd::Complex::one())) {
       return EquivalenceCriterion::EquivalentUpToGlobalPhase;
     }
+    return EquivalenceCriterion::Equivalent;
+  }
+
+  if (configuration.functionality.checkApproximateEquivalence &&
+      projectiveHilbertSchmidtDistanceWithinThreshold(functionality)) {
     return EquivalenceCriterion::Equivalent;
   }
   return EquivalenceCriterion::NotEquivalent;

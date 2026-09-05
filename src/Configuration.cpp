@@ -66,7 +66,6 @@ nlohmann::basic_json<> Configuration::json() const {
   exe["run_alternating_checker"] = execution.runAlternatingChecker;
   exe["run_zx_checker"] = execution.runZXChecker;
   exe["timeout"] = execution.timeout;
-
   auto& opt = config["optimizations"];
   opt["fuse_consecutive_single_qubit_gates"] =
       optimizations.fuseSingleQubitGates;
@@ -95,7 +94,11 @@ nlohmann::basic_json<> Configuration::json() const {
 
   auto& fun = config["functionality"];
   fun["trace_threshold"] = functionality.traceThreshold;
+  fun["approximate_checking_threshold"] =
+      functionality.approximateCheckingThreshold;
   fun["check_partial_equivalence"] = functionality.checkPartialEquivalence;
+  fun["check_approximate_equivalence"] =
+      functionality.checkApproximateEquivalence;
 
   auto& sim = config["simulation"];
   sim["fidelity_threshold"] = simulation.fidelityThreshold;

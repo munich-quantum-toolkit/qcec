@@ -237,6 +237,16 @@ Whenever any decision diagram node differs from this structure by more than the 
 Defaults to :code:`1e-8`.)pb")
 
       .def_rw(
+          "approximate_checking_threshold",
+          &Configuration::Functionality::approximateCheckingThreshold,
+          R"pb(Set the maximum projective Hilbert--Schmidt distance for approximate equivalence checking.
+
+For two :math:`n`-qubit unitaries :math:`U` and :math:`V`, this distance is :math:`\sqrt{1 - |\operatorname{Tr}(UV^\dagger) / 2^n|^2}`.
+The threshold must be finite and lie in the closed interval :math:`[0, 1]`.
+
+Defaults to :code:`1e-8`.)pb")
+
+      .def_rw(
           "check_partial_equivalence",
           &Configuration::Functionality::checkPartialEquivalence,
           R"pb(Two circuits are partially equivalent if, for each possible initial input state, they have the same probability for each measurement outcome.
@@ -244,6 +254,18 @@ Defaults to :code:`1e-8`.)pb")
 If set to :code:`True`, a check for partial equivalence will be performed and the contributions of garbage qubits to the circuit are ignored.
 If set to :code:`False`, the checker will output 'not equivalent' for circuits that are partially equivalent but not totally equivalent.
 In particular, garbage qubits will be treated as if they were measured qubits.
+
+Defaults to :code:`False`.)pb");
+
+  functionality.def_rw(
+      "check_approximate_equivalence",
+      &Configuration::Functionality::checkApproximateEquivalence,
+      R"pb(Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
+
+Approximate checking requires the alternating or construction checker.
+The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
+The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+Parameterized circuits, partial equivalence, and circuits with ancillary or garbage qubits are not supported.
 
 Defaults to :code:`False`.)pb");
 

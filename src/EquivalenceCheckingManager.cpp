@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <future>
 #include <iostream>
@@ -300,10 +301,69 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
   qc::CircuitOptimizer::removeFinalMeasurements(qc2);
 }
 
+void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
+  if (!configuration.functionality.checkApproximateEquivalence) {
+    return;
+  }
+
+  const auto threshold =
+      configuration.functionality.approximateCheckingThreshold;
+  if (!std::isfinite(threshold) || threshold < 0. || threshold > 1.) {
+    throw std::invalid_argument(
+        "The approximate equivalence checking threshold must be finite and "
+        "within [0, 1].");
+  }
+
+  if (configuration.functionality.checkPartialEquivalence) {
+    throw std::invalid_argument(
+        "Approximate and partial equivalence checking cannot be combined.");
+  }
+
+  if (!qc1.isVariableFree() || !qc2.isVariableFree()) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking does not support symbolic "
+        "circuits.");
+  }
+
+  // Idle qubits have already been stripped during preprocessing. Any remaining
+  // ancillary or garbage qubit therefore represents a restricted input or an
+  // ignored output, for which a full-space unitary process distance is not the
+  // appropriate equivalence criterion.
+  if (qc1.getNancillae() > 0U || qc2.getNancillae() > 0U ||
+      qc1.getNgarbageQubits() > 0U || qc2.getNgarbageQubits() > 0U) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking does not support ancillary or "
+        "garbage qubits that remain after preprocessing.");
+  }
+
+  if (!configuration.execution.runAlternatingChecker &&
+      !configuration.execution.runConstructionChecker) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking requires the alternating or "
+        "construction decision diagram checker.");
+  }
+
+  if (configuration.execution.runSimulationChecker) {
+    std::clog
+        << "[QCEC] Warning: the simulation checker does not implement the "
+           "unitary process distance used for approximate equivalence "
+           "checking and will be disabled.\n";
+    configuration.execution.runSimulationChecker = false;
+  }
+
+  if (configuration.execution.runZXChecker) {
+    std::clog << "[QCEC] Warning: the ZX checker cannot establish approximate "
+                 "non-equivalence and will be disabled.\n";
+    configuration.execution.runZXChecker = false;
+  }
+}
+
 void EquivalenceCheckingManager::run() {
   done = false;
 
   results.equivalence = EquivalenceCriterion::NoInformation;
+
+  validateAndNormalizeConfiguration();
 
   const bool garbageQubitsPresent =
       qc1.getNgarbageQubits() > 0 || qc2.getNgarbageQubits() > 0;

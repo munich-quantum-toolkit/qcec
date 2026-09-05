@@ -305,6 +305,18 @@ class Configuration:
         @trace_threshold.setter
         def trace_threshold(self, arg: float, /) -> None: ...
         @property
+        def approximate_checking_threshold(self) -> float:
+            """Set the maximum projective Hilbert--Schmidt distance for approximate equivalence checking.
+
+            For two :math:`n`-qubit unitaries :math:`U` and :math:`V`, this distance is :math:`\\sqrt{1 - |\\operatorname{Tr}(UV^\\dagger) / 2^n|^2}`.
+            The threshold must be finite and lie in the closed interval :math:`[0, 1]`.
+
+            Defaults to :code:`1e-8`.
+            """
+
+        @approximate_checking_threshold.setter
+        def approximate_checking_threshold(self, arg: float, /) -> None: ...
+        @property
         def check_partial_equivalence(self) -> bool:
             """Two circuits are partially equivalent if, for each possible initial input state, they have the same probability for each measurement outcome.
 
@@ -317,6 +329,20 @@ class Configuration:
 
         @check_partial_equivalence.setter
         def check_partial_equivalence(self, arg: bool, /) -> None: ...
+        @property
+        def check_approximate_equivalence(self) -> bool:
+            """Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
+
+            Approximate checking requires the alternating or construction checker.
+            The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
+            The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+            Parameterized circuits, partial equivalence, and circuits with ancillary or garbage qubits are not supported.
+
+            Defaults to :code:`False`.
+            """
+
+        @check_approximate_equivalence.setter
+        def check_approximate_equivalence(self, arg: bool, /) -> None: ...
 
     class Simulation:
         """Options that influence the simulation checker."""
