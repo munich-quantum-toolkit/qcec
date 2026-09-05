@@ -14,23 +14,23 @@ releases may include breaking changes.
 
 - ⬆️ Update `mqt-core` to version 3.10.0 ([#1060]) ([**@denialhaag**])
 - ⬆️ Update `nanobind` to version 3.0.1 ([#1060]) ([**@denialhaag**])
+- 💥 Require Python 3.11 or newer ([#1041]) ([**@denialhaag**])
 - 📦 Publish one split-mode `cp311-abi3` wheel for GIL-enabled CPython 3.11 and
   newer ([#1060]) ([**@denialhaag**])
 - 📦 Publish one `cp315-abi3t` wheel for free-threaded CPython 3.15 and newer
   ([#1060]) ([**@denialhaag**])
 - 💥 Raise the minimum Qiskit version from 1.0.0 to 2.1.0 ([#1060])
   ([**@denialhaag**])
-- ♻️ Move single-qubit gate fusion from MQT Core into QCEC and harden migrated
-  dynamic-circuit transformations for nested compounds, repeated measurements,
+- ♻️ Own single-qubit gate fusion and harden migrated dynamic-circuit
+  transformations for nested compounds, repeated measurements,
   measurement-mapping validation, and non-contiguous layouts ([#1060])
   ([**@simon1hofmann**])
 - 💥 Drop support for x86 macOS and stop publishing the respective wheels
   ([#1041]) ([**@denialhaag**])
 - ⬆️ Raise the macOS deployment target to 13.3 to enable `std::format` in libc++
   ([#1041]) ([**@denialhaag**])
-- 💥 Require Python 3.11 or newer ([#1041]) ([**@denialhaag**])
-- ♻️ Move the equivalence-checking-specific circuit transformations from MQT
-  Core into QCEC ([#1040]) ([**@simon1hofmann**])
+- ♻️ Own the equivalence-checking-specific circuit transformations ([#1040])
+  ([**@simon1hofmann**])
 
 ### Fixed
 
