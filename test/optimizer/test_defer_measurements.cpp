@@ -186,6 +186,31 @@ TEST(DeferMeasurements, errorOnMeasuredQubitReuse) {
   EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
 }
 
+TEST(DeferMeasurements, ignoreIdentityAfterMeasurement) {
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.i(0);
+
+  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc));
+  ASSERT_EQ(qc.size(), 2);
+  EXPECT_EQ(qc.front()->getType(), I);
+  EXPECT_EQ(qc.back()->getType(), Measure);
+}
+
+TEST(DeferMeasurements, ignoreIdentityInCompoundAfterMeasurement) {
+  QuantumComputation compound(1);
+  compound.i(0);
+
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.emplace_back(compound.asCompoundOperation());
+
+  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc));
+  ASSERT_EQ(qc.size(), 2);
+  EXPECT_TRUE(qc.front()->isCompoundOperation());
+  EXPECT_EQ(qc.back()->getType(), Measure);
+}
+
 TEST(DeferMeasurements, errorOnMeasuredQubitReuseBeforeIfElse) {
   QuantumComputation qc(2, 1);
   qc.measure(0, 0);

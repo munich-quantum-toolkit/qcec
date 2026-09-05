@@ -487,6 +487,10 @@ void changeQubits(Operation& operation,
 }
 
 bool targetsQubit(const Operation& operation, const Qubit qubit) {
+  if (operation.getType() == I) {
+    return false;
+  }
+
   if (const auto* compound =
           dynamic_cast<const CompoundOperation*>(&operation)) {
     return std::ranges::any_of(*compound, [&](const auto& nestedOperation) {
