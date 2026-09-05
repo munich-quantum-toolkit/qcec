@@ -20,6 +20,8 @@ releases may include breaking changes.
   ([#1060]) ([**@denialhaag**])
 - 💥 Raise the minimum Qiskit version from 1.0.0 to 2.1.0 ([#1060])
   ([**@denialhaag**])
+- ♻️ Move single-qubit gate fusion from MQT Core into QCEC ([#1060])
+  ([**@simon1hofmann**])
 - 💥 Drop support for x86 macOS and stop publishing the respective wheels
   ([#1041]) ([**@denialhaag**])
 - ⬆️ Raise the macOS deployment target to 13.3 to enable `std::format` in libc++
