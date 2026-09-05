@@ -6,7 +6,8 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
-This release updates the minimum required `mqt-core` version to 3.10.0.
+This release updates the minimum required `mqt-core` version to 3.10.0 and
+`nanobind` to 3.0.1.
 
 ### Equivalence-checking optimizations
 
@@ -26,6 +27,19 @@ before installing this release.
 
 The minimum Qiskit version increases from 1.0.0 to 2.1.0. Upgrade Qiskit to
 2.1.0 or newer.
+
+MQT QCEC now publishes one `cp311-abi3` wheel for GIL-enabled CPython 3.11 and
+newer. Free-threaded support starts with CPython 3.15 in a separate
+`cp315-abi3t` wheel. MQT QCEC no longer publishes free-threaded CPython 3.13 or
+3.14 wheels.
+
+This release updates `nanobind` to 3.0.1, which changes the `nanobind` ABI.
+Rebuild downstream native Python extensions that use MQT QCEC's `nanobind`-bound
+C++ types. Pure Python consumers do not need to recompile anything.
+
+The Python bindings depend on `nanobind-backend`, which supplies the
+interpreter-specific `nanobind` runtime. This dependency does not change the C++
+API or the Python import paths.
 
 ## [3.9.0]
 
