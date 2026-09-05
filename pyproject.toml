@@ -119,7 +119,6 @@ if.python-version = ">=3.15"
 if.abi-flags = "t"
 wheel.py-api = "cp315t"
 
-
 [[tool.dynamic-metadata]]
 provider = "vcs_versioning"
 
@@ -325,7 +324,6 @@ environment = { DEPLOY="ON" }
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
 --exclude libmqt-core-ir.so.3.10 \
 --exclude libmqt-core-qasm.so.3.10 \
---exclude libmqt-core-algorithms.so.3.10 \
 --exclude libmqt-core-dd.so.3.10"""
 
 [tool.cibuildwheel.macos]
@@ -336,7 +334,6 @@ repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest
 repair-wheel-command = """delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mqt \
 --exclude mqt-core-ir.dll \
 --exclude mqt-core-qasm.dll \
---exclude mqt-core-algorithms.dll \
 --exclude mqt-core-dd.dll"""
 # cibuildwheel 4.2 passes expanded dependency groups through cmd.exe, which interprets version
 # operators as redirections. Let uv resolve the group itself.

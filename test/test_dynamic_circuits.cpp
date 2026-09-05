@@ -49,12 +49,12 @@ protected:
 
     dd = std::make_unique<dd::Package>(precision + 1);
 
-    qpe = qc::createQPE(precision);
+    qpe = ec::test::createQPE(precision);
 
     // extract lambda from QPE global phase
     const auto lambda = qpe.getGlobalPhase();
 
-    iqpe = qc::createIterativeQPE(lambda, precision);
+    iqpe = ec::test::createIterativeQPE(lambda, precision);
 
     std::cout << "Estimating lambda = " << lambda << "π up to " << precision
               << "-bit precision.\n";
@@ -142,12 +142,12 @@ protected:
 
     dd = std::make_unique<dd::Package>(precision + 1);
 
-    qpe = qc::createQPE(precision);
+    qpe = ec::test::createQPE(precision);
 
     // extract lambda from QPE global phase
     const auto lambda = qpe.getGlobalPhase();
 
-    iqpe = qc::createIterativeQPE(lambda, precision);
+    iqpe = ec::test::createIterativeQPE(lambda, precision);
 
     std::cout << "Estimating lambda = " << lambda << "π up to " << precision
               << "-bit precision.\n";
@@ -242,11 +242,11 @@ protected:
 
     dd = std::make_unique<dd::Package>(bitwidth + 1);
 
-    bv = qc::createBernsteinVazirani(bitwidth);
+    bv = ec::test::createBernsteinVazirani(bitwidth);
 
     const auto expected = bv.getName().substr(3);
-    dbv = qc::createIterativeBernsteinVazirani(qc::BVBitString(expected),
-                                               bitwidth);
+    dbv = ec::test::createIterativeBernsteinVazirani(
+        ec::test::BVBitString(expected), bitwidth);
 
     std::cout << "Hidden bitstring: " << expected << " (" << bitwidth
               << " qubits)\n";
@@ -292,9 +292,9 @@ protected:
 
     dd = std::make_unique<dd::Package>(precision);
 
-    qft = qc::createQFT(precision);
+    qft = ec::test::createQFT(precision);
 
-    dqft = qc::createIterativeQFT(precision);
+    dqft = ec::test::createIterativeQFT(precision);
 
     config.optimizations.transformDynamicCircuit = true;
     config.optimizations.backpropagateOutputPermutation = true;
@@ -322,9 +322,9 @@ TEST_P(DynamicCircuitTestQFT, UnitaryEquivalence) {
 }
 
 TEST(GeneralDynamicCircuitTest, DynamicCircuit) {
-  constexpr auto s = qc::BVBitString(15U);
-  const auto bv = qc::createBernsteinVazirani(s);
-  const auto dbv = qc::createIterativeBernsteinVazirani(s);
+  constexpr auto s = ec::test::BVBitString(15U);
+  const auto bv = ec::test::createBernsteinVazirani(s);
+  const auto dbv = ec::test::createIterativeBernsteinVazirani(s);
 
   auto config = ec::Configuration{};
   EXPECT_THROW(ec::EquivalenceCheckingManager(bv, dbv, config),
