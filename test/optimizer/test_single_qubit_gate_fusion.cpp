@@ -11,10 +11,13 @@
 #include "dd/FunctionalityConstruction.hpp"
 #include "dd/Package.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "ir/operations/OpType.hpp"
+#include "ir/operations/StandardOperation.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
 
 #include <cstddef>
 #include <gtest/gtest.h>
+#include <vector>
 
 namespace ec::detail {
 namespace {
@@ -123,6 +126,17 @@ TEST(SingleQubitGateFusion, PreserveOperationCounts) {
   EXPECT_EQ(circuit.getNops(), 4U);
   EXPECT_EQ(circuit.getNindividualOps(), 5U);
   EXPECT_EQ(circuit.getNsingleQubitOps(), 3U);
+}
+
+TEST(SingleQubitGateFusion, PreserveZeroTargetOperation) {
+  qc::QuantumComputation circuit(1U);
+  circuit.emplace_back<qc::StandardOperation>(qc::Targets{}, qc::GPhase,
+                                              std::vector{0.5});
+
+  singleQubitGateFusion(circuit);
+
+  ASSERT_EQ(circuit.size(), 1U);
+  EXPECT_EQ(circuit.front()->getType(), qc::GPhase);
 }
 
 TEST(SingleQubitGateFusion, PreserveTwoGateFunctionality) {

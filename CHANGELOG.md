@@ -20,7 +20,9 @@ releases may include breaking changes.
   ([#1060]) ([**@denialhaag**])
 - 💥 Raise the minimum Qiskit version from 1.0.0 to 2.1.0 ([#1060])
   ([**@denialhaag**])
-- ♻️ Move single-qubit gate fusion from MQT Core into QCEC ([#1060])
+- ♻️ Move single-qubit gate fusion from MQT Core into QCEC and harden migrated
+  dynamic-circuit transformations for nested compounds, repeated measurements,
+  measurement-mapping validation, and non-contiguous layouts ([#1060])
   ([**@simon1hofmann**])
 - 💥 Drop support for x86 macOS and stop publishing the respective wheels
   ([#1041]) ([**@denialhaag**])
