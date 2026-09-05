@@ -20,6 +20,7 @@ class QuantumComputation;
 
 namespace ec::detail {
 
+void singleQubitGateFusion(qc::QuantumComputation& qc);
 void swapReconstruction(qc::QuantumComputation& qc);
 void removeDiagonalGatesBeforeMeasure(qc::QuantumComputation& qc);
 void eliminateResets(qc::QuantumComputation& qc);

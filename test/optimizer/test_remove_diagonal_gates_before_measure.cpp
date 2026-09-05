@@ -8,7 +8,6 @@
  * Licensed under the MIT License
  */
 
-#include "circuit_optimizer/CircuitOptimizer.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/OpType.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
@@ -33,7 +32,7 @@ TEST(RemoveDiagonalGateBeforeMeasure, removeDiagonalCompoundOpBeforeMeasure) {
   qc.z(0);
   qc.t(0);
   qc.measure(0, 0);
-  CircuitOptimizer::singleQubitGateFusion(qc);
+  ec::detail::singleQubitGateFusion(qc);
   ec::detail::removeDiagonalGatesBeforeMeasure(qc);
   EXPECT_EQ(qc.getNops(), 1);
   EXPECT_EQ(qc.begin()->get()->getType(), qc::Measure);
@@ -82,7 +81,7 @@ TEST(RemoveDiagonalGateBeforeMeasure, removeSimpleCompoundOpBeforeMeasure) {
   qc.x(0);
   qc.t(0);
   qc.measure(0, 0);
-  CircuitOptimizer::singleQubitGateFusion(qc);
+  ec::detail::singleQubitGateFusion(qc);
   ec::detail::removeDiagonalGatesBeforeMeasure(qc);
   EXPECT_EQ(qc.getNops(), 2);
 }
@@ -94,7 +93,7 @@ TEST(RemoveDiagonalGateBeforeMeasure, removePartOfCompoundOpBeforeMeasure) {
   qc.x(0);
   qc.t(0);
   qc.measure(0, 0);
-  CircuitOptimizer::singleQubitGateFusion(qc);
+  ec::detail::singleQubitGateFusion(qc);
   ec::detail::removeDiagonalGatesBeforeMeasure(qc);
   EXPECT_EQ(qc.getNops(), 2);
 }
