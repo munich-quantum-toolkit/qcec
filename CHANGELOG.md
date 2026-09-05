@@ -12,6 +12,9 @@ releases may include breaking changes.
 
 ### Changed
 
+- ⬆️ Update `mqt-core` to version 3.10.0 ([#1060]) ([**@denialhaag**])
+- 💥 Raise the minimum Qiskit version from 1.0.0 to 2.1.0 ([#1060])
+  ([**@denialhaag**])
 - 💥 Drop support for x86 macOS and stop publishing the respective wheels
   ([#1041]) ([**@denialhaag**])
 - ⬆️ Raise the macOS deployment target to 13.3 to enable `std::format` in libc++
@@ -248,6 +251,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
 [#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
 [#1040]: https://github.com/munich-quantum-toolkit/qcec/pull/1040
 [#1030]: https://github.com/munich-quantum-toolkit/qcec/pull/1030

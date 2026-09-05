@@ -6,6 +6,8 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+This release updates the minimum required `mqt-core` version to 3.10.0.
+
 ### Equivalence-checking optimizations
 
 MQT QCEC now owns the circuit transformations used only by its equivalence
@@ -21,6 +23,9 @@ newer. The new deployment target enables `std::format` in libc++.
 
 MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment
 before installing this release.
+
+The minimum Qiskit version increases from 1.0.0 to 2.1.0. Upgrade Qiskit to
+2.1.0 or newer.
 
 ## [3.9.0]
 

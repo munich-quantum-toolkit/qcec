@@ -11,7 +11,7 @@ requires = [
   "nanobind~=2.15.0",
   "scikit-build-core>=1.0.3",
   "vcs-versioning>=2.3.0",
-  "mqt.core~=3.9.0",
+  "mqt.core~=3.10.0",
 ]
 build-backend = "scikit_build_core.build"
 
@@ -50,7 +50,7 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "mqt.core~=3.9.0",
+    "mqt.core~=3.10.0",
     "numpy>=1.24",
     "numpy>=1.26; python_version >= '3.12'",
     "numpy>=2.1; python_version >= '3.13'",
@@ -59,7 +59,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-qiskit = ["qiskit[qasm3-import]>=1.0.0"]
+qiskit = ["qiskit[qasm3-import]>=2.1.0"]
 
 [project.urls]
 Homepage = "https://github.com/munich-quantum-toolkit/qcec"
@@ -320,11 +320,11 @@ test-skip = [
 environment = { DEPLOY="ON" }
 # The SOVERSION needs to be updated when the shared libraries are updated.
 repair-wheel-command = """auditwheel repair -w {dest_dir} {wheel} \
---exclude libmqt-core-ir.so.3.9 \
---exclude libmqt-core-qasm.so.3.9 \
---exclude libmqt-core-circuit-optimizer.so.3.9 \
---exclude libmqt-core-algorithms.so.3.9 \
---exclude libmqt-core-dd.so.3.9"""
+--exclude libmqt-core-ir.so.3.10 \
+--exclude libmqt-core-qasm.so.3.10 \
+--exclude libmqt-core-circuit-optimizer.so.3.10 \
+--exclude libmqt-core-algorithms.so.3.10 \
+--exclude libmqt-core-dd.so.3.10"""
 
 [tool.cibuildwheel.macos]
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.3" }
@@ -355,7 +355,7 @@ build = [
   "nanobind~=2.15.0",
   "scikit-build-core>=1.0.3",
   "vcs-versioning>=2.3.0",
-  "mqt.core~=3.9.0",
+  "mqt.core~=3.10.0",
 ]
 docs = [
   "furo>=2025.09.25",
@@ -367,14 +367,14 @@ docs = [
   "sphinx-llm>=0.4.1",
   "sphinxcontrib-bibtex>=2.6.5",
   "sphinxext-opengraph>=0.13.0",
-  "qiskit[qasm3-import,visualization]>=1.0.0"
+  "qiskit[qasm3-import,visualization]>=2.1.0"
 ]
 test = [
   "pytest>=9.0.3",
   "pytest-cov>=7.1.0",
   "pytest-sugar>=1.1.1",
   "pytest-xdist>=3.8.0",
-  "qiskit[qasm3-import]>=1.0.0",
+  "qiskit[qasm3-import]>=2.1.0",
 ]
 dev = [
   {include-group = "build"},
