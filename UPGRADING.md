@@ -6,21 +6,46 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+This release updates the minimum required `mqt-core` version to 3.10.0.
+
 ### Equivalence-checking optimizations
 
 MQT QCEC now owns the circuit transformations used only by its equivalence
 checking flow. This ownership change does not change the QCEC API or its
-configuration.
+configuration. The migrated dynamic-circuit transformations handle nested
+compound operations, identical repeated measurements, and non-contiguous
+physical layouts. They reject non-bijective qubit-to-classical-bit measurement
+mappings, targeting a measured qubit without an intervening reset, and
+unsupported one-bit comparisons instead of silently changing circuit semantics.
+Using the measured qubit only as a compatible quantum control remains supported.
+Reset elimination rejects conditional resets and circuits that already contain
+ancillary qubits.
 
 ### macOS support
 
 MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
 newer. The new deployment target enables `std::format` in libc++.
 
-### Python support
+### Qiskit 2.1 minimum
+
+The minimum Qiskit version increases from **1.0.0 to 2.1.0**, dropping support
+for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
+
+### Python 3.11 and Stable ABI wheels
 
 MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment
 before installing this release.
+
+MQT QCEC now publishes one `cp311-abi3` wheel for GIL-enabled CPython 3.11 and
+newer. Free-threaded support starts with CPython 3.15 in a separate
+`cp315-abi3t` wheel. MQT QCEC no longer publishes free-threaded CPython 3.13 or
+3.14 wheels.
+
+This release updates `nanobind` to 3.0.1, which changes the `nanobind` ABI.
+
+The Python bindings depend on `nanobind-backend`, which supplies the
+interpreter-specific `nanobind` runtime. This dependency does not change the C++
+API or the Python import paths.
 
 ## [3.9.0]
 

@@ -10,14 +10,19 @@
 
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "ir/operations/IfElseOperation.hpp"
 #include "ir/operations/NonUnitaryOperation.hpp"
 #include "ir/operations/OpType.hpp"
 #include "ir/operations/StandardOperation.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
 
+#include <algorithm>
+#include <cstddef>
 #include <gtest/gtest.h>
 #include <memory>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace qc {
 
@@ -153,154 +158,89 @@ TEST(DeferMeasurements, basicTestIfElse) {
   EXPECT_EQ(classics.at(0), 0);
 }
 
-TEST(DeferMeasurements, measurementBetweenMeasurementAndIfElse) {
-  // Input:
-  // i:   0   1
-  // 1:   h   |
-  // 2:   0   |
-  // 3:   h   |
-  // 4:   |   x  c[0] == 1
-  // o:   0   1
+TEST(DeferMeasurements, multipleIfElseOperationsWithElseBranches) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
+  for (std::size_t i = 0; i < 3; ++i) {
+    qc.ifElse(std::make_unique<StandardOperation>(1, X),
+              std::make_unique<StandardOperation>(1, Z), 0);
+  }
+  qc.shrink_to_fit();
 
-  // Expected Output:
-  // i:   0   1
-  // 1:   h   |
-  // 2:   c   x
-  // 3:   h   |
-  // 4:   0   |
-  // o:   0   |
+  ec::detail::deferMeasurements(qc);
 
-  QuantumComputation qc{};
-  qc.addQubitRegister(2);
-  qc.addClassicalRegister(1);
-  qc.h(0);
-  qc.measure(0, 0U);
+  ASSERT_EQ(qc.getNops(), 7);
+  for (std::size_t i = 0; i < 6; ++i) {
+    ASSERT_TRUE(qc.at(i)->isStandardOperation());
+    EXPECT_EQ(qc.at(i)->getControls().size(), 1);
+    EXPECT_TRUE(qc.at(i)->getControls().contains(0));
+  }
+  EXPECT_EQ(qc.back()->getType(), Measure);
+}
+
+TEST(DeferMeasurements, errorOnMeasuredQubitReuse) {
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.x(0);
+
+  ASSERT_TRUE(qc.isDynamic());
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, ignoreIdentityAfterMeasurement) {
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.i(0);
+
+  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc));
+  ASSERT_EQ(qc.size(), 2);
+  EXPECT_EQ(qc.front()->getType(), I);
+  EXPECT_EQ(qc.back()->getType(), Measure);
+}
+
+TEST(DeferMeasurements, ignoreIdentityInCompoundAfterMeasurement) {
+  QuantumComputation compound(1);
+  compound.i(0);
+
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.emplace_back(compound.asCompoundOperation());
+
+  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc));
+  ASSERT_EQ(qc.size(), 2);
+  EXPECT_TRUE(qc.front()->isCompoundOperation());
+  EXPECT_EQ(qc.back()->getType(), Measure);
+}
+
+TEST(DeferMeasurements, errorOnMeasuredQubitReuseBeforeIfElse) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
   qc.h(0);
   qc.if_(X, 1, 0);
 
-  EXPECT_TRUE(qc.isDynamic());
-
-  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc););
-
-  EXPECT_FALSE(qc.isDynamic());
-
-  ASSERT_EQ(qc.getNqubits(), 2);
-  ASSERT_EQ(qc.getNindividualOps(), 4);
-  const auto& op0 = qc.at(0);
-  const auto& op1 = qc.at(1);
-  const auto& op2 = qc.at(2);
-  const auto& op3 = qc.at(3);
-
-  EXPECT_TRUE(op0->getType() == qc::H);
-  const auto& targets0 = op0->getTargets();
-  EXPECT_EQ(targets0.size(), 1);
-  EXPECT_EQ(targets0.at(0), static_cast<Qubit>(0));
-  EXPECT_TRUE(op0->getControls().empty());
-
-  EXPECT_TRUE(op1->getType() == qc::X);
-  const auto& targets1 = op1->getTargets();
-  EXPECT_EQ(targets1.size(), 1);
-  EXPECT_EQ(targets1.at(0), static_cast<Qubit>(1));
-  const auto& controls1 = op1->getControls();
-  EXPECT_EQ(controls1.size(), 1);
-  EXPECT_EQ(controls1.count(0), 1);
-
-  EXPECT_TRUE(op2->getType() == qc::H);
-  const auto& targets2 = op2->getTargets();
-  EXPECT_EQ(targets2.size(), 1);
-  EXPECT_EQ(targets2.at(0), static_cast<Qubit>(0));
-  EXPECT_TRUE(op2->getControls().empty());
-
-  ASSERT_TRUE(op3->getType() == qc::Measure);
-  const auto& targets3 = op3->getTargets();
-  EXPECT_EQ(targets3.size(), 1);
-  EXPECT_EQ(targets3.at(0), static_cast<Qubit>(0));
-  auto* measure0 = dynamic_cast<qc::NonUnitaryOperation*>(op3.get());
-  ASSERT_NE(measure0, nullptr);
-  const auto& classics0 = measure0->getClassics();
-  EXPECT_EQ(classics0.size(), 1);
-  EXPECT_EQ(classics0.at(0), 0);
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
 }
 
-TEST(DeferMeasurements, twoIfElse) {
-  // Input:
-  // i:   0   1
-  // 1:   h   |
-  // 2:   0   |
-  // 3:   h   |
-  // 4:   |   x  c[0] == 1
-  // 5:   |   z  c[0] == 1
-  // o:   0   1
-
-  // Expected Output:
-  // i:   0   1
-  // 1:   h   |
-  // 2:   c   x
-  // 3:   c   z
-  // 4:   h   |
-  // 5:   0   |
-  // o:   0   |
-
-  QuantumComputation qc{};
-  qc.addQubitRegister(2);
-  qc.addClassicalRegister(1);
-  qc.h(0);
-  qc.measure(0, 0U);
+TEST(DeferMeasurements, errorOnMeasuredQubitReuseBeforeTwoIfElseOperations) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
   qc.h(0);
   qc.if_(X, 1, 0);
   qc.if_(Z, 1, 0);
 
-  EXPECT_TRUE(qc.isDynamic());
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
 
-  EXPECT_NO_THROW(ec::detail::deferMeasurements(qc););
+TEST(DeferMeasurements, errorOnMeasuredQubitReuseInCompoundOperation) {
+  QuantumComputation compound(1);
+  compound.x(0);
+  compound.z(0);
 
-  EXPECT_FALSE(qc.isDynamic());
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.emplace_back(compound.asCompoundOperation());
 
-  ASSERT_EQ(qc.getNqubits(), 2);
-  ASSERT_EQ(qc.getNindividualOps(), 5);
-  const auto& op0 = qc.at(0);
-  const auto& op1 = qc.at(1);
-  const auto& op2 = qc.at(2);
-  const auto& op3 = qc.at(3);
-  const auto& op4 = qc.at(4);
-
-  EXPECT_TRUE(op0->getType() == qc::H);
-  const auto& targets0 = op0->getTargets();
-  EXPECT_EQ(targets0.size(), 1);
-  EXPECT_EQ(targets0.at(0), static_cast<Qubit>(0));
-  EXPECT_TRUE(op0->getControls().empty());
-
-  EXPECT_TRUE(op1->getType() == qc::X);
-  const auto& targets1 = op1->getTargets();
-  EXPECT_EQ(targets1.size(), 1);
-  EXPECT_EQ(targets1.at(0), static_cast<Qubit>(1));
-  const auto& controls1 = op1->getControls();
-  EXPECT_EQ(controls1.size(), 1);
-  EXPECT_EQ(controls1.count(0), 1);
-
-  EXPECT_TRUE(op2->getType() == qc::Z);
-  const auto& targets2 = op2->getTargets();
-  EXPECT_EQ(targets2.size(), 1);
-  EXPECT_EQ(targets2.at(0), static_cast<Qubit>(1));
-  const auto& controls2 = op2->getControls();
-  EXPECT_EQ(controls2.size(), 1);
-  EXPECT_EQ(controls2.count(0), 1);
-
-  EXPECT_TRUE(op3->getType() == qc::H);
-  const auto& targets3 = op3->getTargets();
-  EXPECT_EQ(targets3.size(), 1);
-  EXPECT_EQ(targets3.at(0), static_cast<Qubit>(0));
-  EXPECT_TRUE(op3->getControls().empty());
-
-  ASSERT_TRUE(op4->getType() == qc::Measure);
-  const auto& targets4 = op4->getTargets();
-  EXPECT_EQ(targets4.size(), 1);
-  EXPECT_EQ(targets4.at(0), static_cast<Qubit>(0));
-  auto* measure0 = dynamic_cast<qc::NonUnitaryOperation*>(op4.get());
-  ASSERT_NE(measure0, nullptr);
-  const auto& classics0 = measure0->getClassics();
-  EXPECT_EQ(classics0.size(), 1);
-  EXPECT_EQ(classics0.at(0), 0);
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
 }
 
 TEST(DeferMeasurements, correctOrder) {
@@ -503,6 +443,25 @@ TEST(DeferMeasurements, errorOnMultiQubitRegister) {
   EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
 }
 
+TEST(DeferMeasurements, errorOnUnsupportedComparison) {
+  QuantumComputation qc(2);
+  const auto& creg = qc.addClassicalRegister(1);
+  qc.measure(0, 0);
+  qc.if_(X, 1, creg, 1U, Neq);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnConflictingQuantumControl) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
+  qc.if_(X, 1, Control{0, Control::Type::Neg}, 0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+  ASSERT_EQ(qc.size(), 1);
+  EXPECT_TRUE(qc.front()->isIfElseOperation());
+}
+
 TEST(DeferMeasurements, preserveOutputPermutationWithoutMeasurements) {
   QuantumComputation qc(2);
   qc.h(0);
@@ -528,19 +487,142 @@ TEST(DeferMeasurements, isDynamicOnRepeatedMeasurements) {
 }
 
 TEST(DeferMeasurements, repeatedMeasurementIsBreakpoint) {
-  QuantumComputation qc(1, 1);
+  QuantumComputation qc(2, 1);
   qc.h(0);
   qc.measure(0, 0);
-  qc.x(0);
+  qc.x(1);
   qc.measure(0, 0);
 
   ec::detail::deferMeasurements(qc);
 
   ASSERT_EQ(qc.getNops(), 4);
   EXPECT_EQ(qc.at(0)->getType(), H);
-  EXPECT_EQ(qc.at(1)->getType(), Measure);
-  EXPECT_EQ(qc.at(2)->getType(), X);
+  EXPECT_EQ(qc.at(1)->getType(), X);
+  EXPECT_EQ(qc.at(2)->getType(), Measure);
   EXPECT_EQ(qc.at(3)->getType(), Measure);
+  EXPECT_FALSE(qc.isDynamic());
+}
+
+TEST(DeferMeasurements, errorOnRepeatedMeasurementIntoDifferentBit) {
+  QuantumComputation qc(2, 2);
+  qc.h(0);
+  qc.measure(0, 0);
+  qc.x(1);
+  qc.measure(0, 1);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+  EXPECT_EQ(qc.getNops(), 4);
+}
+
+TEST(DeferMeasurements, errorOnTargetReuseBeforeRepeatedMeasurement) {
+  QuantumComputation qc(1, 1);
+  qc.measure(0, 0);
+  qc.x(0);
+  qc.measure(0, 0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnOverwrittenClassicalBit) {
+  QuantumComputation qc(3, 1);
+  qc.measure(0, 0);
+  qc.measure(1, 0);
+  qc.if_(X, 2, 0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+  ASSERT_EQ(qc.getNops(), 3);
+  ASSERT_EQ(qc.at(0)->getType(), Measure);
+  EXPECT_EQ(qc.at(0)->getTargets(), Targets{0});
+  ASSERT_EQ(qc.at(1)->getType(), Measure);
+  EXPECT_EQ(qc.at(1)->getTargets(), Targets{1});
+  EXPECT_TRUE(qc.at(2)->isIfElseOperation());
+}
+
+TEST(DeferMeasurements, processesConsecutiveMeasurements) {
+  QuantumComputation qc(3, 2);
+  qc.measure(0, 0);
+  qc.measure(1, 1);
+  qc.if_(X, 2, 0);
+  qc.if_(Y, 2, 1);
+
+  ec::detail::deferMeasurements(qc);
+
+  ASSERT_EQ(qc.getNops(), 4);
+  EXPECT_EQ(qc.at(0)->getType(), X);
+  EXPECT_EQ(qc.at(0)->getControls(), Controls{Control{0}});
+  EXPECT_EQ(qc.at(1)->getType(), Y);
+  EXPECT_EQ(qc.at(1)->getControls(), Controls{Control{1}});
+  EXPECT_FALSE(qc.isDynamic());
+}
+
+TEST(DeferMeasurements, processesMeasurementBeforeLaterBreakpoint) {
+  QuantumComputation qc(3, 2);
+  qc.measure(0, 0);
+  qc.measure(1, 1);
+  qc.measure(0, 0);
+  qc.if_(X, 2, 1);
+
+  ec::detail::deferMeasurements(qc);
+
+  const auto controlledX = std::ranges::find_if(
+      qc, [](const auto& operation) { return operation->getType() == X; });
+  ASSERT_NE(controlledX, qc.end());
+  EXPECT_EQ((*controlledX)->getControls(), Controls{Control{1}});
+  EXPECT_FALSE(qc.isDynamic());
+}
+
+TEST(DeferMeasurements, preserveQuantumControlOnMeasuredQubit) {
+  QuantumComputation controlled(2);
+  controlled.x(1);
+  auto compound = controlled.asCompoundOperation();
+  compound->addControl(Control{0, Control::Type::Neg});
+
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
+  qc.emplace_back(std::move(compound));
+
+  ec::detail::deferMeasurements(qc);
+
+  ASSERT_EQ(qc.getNops(), 2);
+  ASSERT_TRUE(qc.at(0)->isCompoundOperation());
+  EXPECT_EQ(qc.at(0)->getControls(),
+            (Controls{Control{0, Control::Type::Neg}}));
+  EXPECT_EQ(qc.at(1)->getType(), Measure);
+}
+
+TEST(DeferMeasurements, nestedDynamicCompoundOperation) {
+  QuantumComputation inner(2, 1);
+  inner.h(0);
+  inner.measure(0, 0);
+  inner.if_(X, 1, 0);
+
+  QuantumComputation outer(2, 1);
+  outer.emplace_back(inner.asCompoundOperation());
+
+  QuantumComputation qc(2, 1);
+  qc.emplace_back(outer.asCompoundOperation());
+
+  ec::detail::deferMeasurements(qc);
+
+  ASSERT_EQ(qc.getNops(), 3);
+  EXPECT_EQ(qc.at(0)->getType(), H);
+  EXPECT_EQ(qc.at(1)->getType(), X);
+  EXPECT_EQ(qc.at(1)->getControls(), Controls{Control{0}});
+  EXPECT_EQ(qc.at(2)->getType(), Measure);
+}
+
+TEST(DeferMeasurements, preserveStaticCompoundOperation) {
+  QuantumComputation compound(1);
+  compound.x(0);
+  compound.z(0);
+
+  QuantumComputation qc(1);
+  qc.emplace_back(compound.asCompoundOperation());
+
+  ec::detail::deferMeasurements(qc);
+
+  ASSERT_EQ(qc.size(), 1);
+  EXPECT_TRUE(qc.front()->isCompoundOperation());
 }
 
 TEST(DeferMeasurements, errorOnGroupedMeasurement) {
@@ -554,6 +636,21 @@ TEST(DeferMeasurements, errorOnReset) {
   QuantumComputation qc(1, 1);
   qc.measure(0, 0);
   qc.reset(0);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnUnsupportedNonUnitaryOperation) {
+  QuantumComputation qc(2, 1);
+  qc.measure(0, 0);
+  qc.emplace_back<NonUnitaryOperation>(Targets{1}, Barrier);
+
+  EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
+}
+
+TEST(DeferMeasurements, errorOnConditionalWithoutMeasurement) {
+  QuantumComputation qc(1, 1);
+  qc.if_(X, 0, 0);
 
   EXPECT_THROW(ec::detail::deferMeasurements(qc), std::runtime_error);
 }

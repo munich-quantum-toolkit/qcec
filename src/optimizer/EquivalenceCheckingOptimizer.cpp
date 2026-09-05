@@ -25,6 +25,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -90,6 +91,82 @@ DAG constructDAG(QuantumComputation& qc) {
 }
 
 } // namespace
+
+void singleQubitGateFusion(QuantumComputation& qc) {
+  static const std::map<OpType, OpType> INVERSE_MAP = {
+      {I, I},   {X, X},   {Y, Y},   {Z, Z},     {H, H},     {S, Sdg},
+      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier}};
+
+  auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1U);
+
+  for (auto& operation : qc) {
+    if (!operation->isStandardOperation() || operation->isControlled() ||
+        operation->getTargets().size() != 1U) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    const auto target = operation->getTargets().at(0);
+    if (dag.at(target).empty()) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    auto* previous = dag.at(target).back();
+    if (!(*previous)->isCompoundOperation() &&
+        ((*previous)->isControlled() ||
+         (*previous)->getTargets().size() != 1U)) {
+      addToDag(dag, &operation);
+      continue;
+    }
+
+    if ((*previous)->isCompoundOperation()) {
+      auto* compound = dynamic_cast<CompoundOperation*>(previous->get());
+      if (compound->getUsedQubits().size() > 1U) {
+        addToDag(dag, &operation);
+        continue;
+      }
+
+      if (compound->empty()) {
+        compound->emplace_back(operation->clone());
+        operation->setGate(I);
+        continue;
+      }
+
+      const auto last = std::prev(compound->end());
+      const auto inverse = INVERSE_MAP.find((*last)->getType());
+      if (inverse != INVERSE_MAP.end() &&
+          operation->getType() == inverse->second) {
+        compound->pop_back();
+      } else {
+        compound->emplace_back<StandardOperation>(target, operation->getType(),
+                                                  operation->getParameter());
+      }
+      operation->setGate(I);
+      continue;
+    }
+
+    const auto inverse = INVERSE_MAP.find((*previous)->getType());
+    if (inverse != INVERSE_MAP.end() &&
+        operation->getType() == inverse->second) {
+      (*previous)->setGate(I);
+      operation->setGate(I);
+      continue;
+    }
+
+    auto compound = std::make_unique<CompoundOperation>();
+    compound->emplace_back<StandardOperation>((*previous)->getTargets().at(0),
+                                              (*previous)->getType(),
+                                              (*previous)->getParameter());
+    compound->emplace_back<StandardOperation>(target, operation->getType(),
+                                              operation->getParameter());
+    operation->setGate(I);
+    *previous = std::move(compound);
+    dag.at(target).push_back(previous);
+  }
+
+  removeIdentities(qc);
+}
 
 void swapReconstruction(QuantumComputation& qc) {
   auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1);
@@ -369,6 +446,175 @@ void changeControls(Controls& controls,
     }
   }
 }
+
+void addConditionControl(Controls& controls, const Control condition) {
+  if (const auto existing = controls.find(condition.qubit);
+      existing != controls.end() && existing->type != condition.type) {
+    throw std::runtime_error(
+        "A classically controlled operation cannot use the measured qubit "
+        "with the opposite quantum-control polarity.");
+  }
+  controls.emplace(condition);
+}
+
+[[noreturn]] void throwMeasuredQubitTargeted() {
+  throw std::runtime_error(
+      "Deferring a measurement past an operation targeting the measured "
+      "qubit is not supported. Eliminate resets before deferring "
+      "measurements and do not reuse measured qubits without a reset.");
+}
+
+void changeQubits(Operation& operation,
+                  const std::map<Qubit, Qubit>& replacementMap) {
+  if (auto* compound = dynamic_cast<CompoundOperation*>(&operation)) {
+    changeControls(compound->getControls(), replacementMap);
+    for (auto& nestedOperation : *compound) {
+      changeQubits(*nestedOperation, replacementMap);
+    }
+    return;
+  }
+
+  if (auto* ifElse = dynamic_cast<IfElseOperation*>(&operation)) {
+    changeQubits(*ifElse->getThenOp(), replacementMap);
+    if (auto* elseOperation = ifElse->getElseOp()) {
+      changeQubits(*elseOperation, replacementMap);
+    }
+    return;
+  }
+
+  changeTargets(operation.getTargets(), replacementMap);
+  changeControls(operation.getControls(), replacementMap);
+}
+
+bool targetsQubit(const Operation& operation, const Qubit qubit) {
+  if (operation.getType() == I) {
+    return false;
+  }
+
+  if (const auto* compound =
+          dynamic_cast<const CompoundOperation*>(&operation)) {
+    return std::ranges::any_of(*compound, [&](const auto& nestedOperation) {
+      return targetsQubit(*nestedOperation, qubit);
+    });
+  }
+
+  if (const auto* ifElse = dynamic_cast<const IfElseOperation*>(&operation)) {
+    return targetsQubit(*ifElse->getThenOp(), qubit) ||
+           (ifElse->getElseOp() != nullptr &&
+            targetsQubit(*ifElse->getElseOp(), qubit));
+  }
+
+  return std::ranges::find(operation.getTargets(), qubit) !=
+         operation.getTargets().end();
+}
+
+bool containsReset(const Operation& operation) {
+  if (operation.getType() == Reset) {
+    return true;
+  }
+  if (const auto* compound =
+          dynamic_cast<const CompoundOperation*>(&operation)) {
+    return std::ranges::any_of(*compound, [](const auto& nestedOperation) {
+      return containsReset(*nestedOperation);
+    });
+  }
+  if (const auto* ifElse = dynamic_cast<const IfElseOperation*>(&operation)) {
+    return containsReset(*ifElse->getThenOp()) ||
+           (ifElse->getElseOp() != nullptr &&
+            containsReset(*ifElse->getElseOp()));
+  }
+  return false;
+}
+
+bool containsConditionalReset(const Operation& operation) {
+  if (const auto* ifElse = dynamic_cast<const IfElseOperation*>(&operation)) {
+    return containsReset(*ifElse->getThenOp()) ||
+           (ifElse->getElseOp() != nullptr &&
+            containsReset(*ifElse->getElseOp()));
+  }
+  if (const auto* compound =
+          dynamic_cast<const CompoundOperation*>(&operation)) {
+    return std::ranges::any_of(*compound, [](const auto& nestedOperation) {
+      return containsConditionalReset(*nestedOperation);
+    });
+  }
+  return false;
+}
+
+void validateMeasurementMapping(const Operation& operation,
+                                std::unordered_map<Qubit, Bit>& measuredQubits,
+                                std::unordered_map<Bit, Qubit>& writtenBits) {
+  if (const auto* measurement =
+          dynamic_cast<const NonUnitaryOperation*>(&operation);
+      measurement != nullptr && operation.getType() == Measure) {
+    const auto& targets = measurement->getTargets();
+    const auto& classics = measurement->getClassics();
+    if (targets.size() != classics.size()) {
+      throw std::runtime_error(
+          "Measurement targets and classical bits must have equal sizes.");
+    }
+    for (std::size_t i = 0; i < targets.size(); ++i) {
+      const auto [qubitIt, qubitInserted] =
+          measuredQubits.try_emplace(targets[i], classics[i]);
+      const auto [bitIt, bitInserted] =
+          writtenBits.try_emplace(classics[i], targets[i]);
+      if ((!qubitInserted && qubitIt->second != classics[i]) ||
+          (!bitInserted && bitIt->second != targets[i])) {
+        throw std::runtime_error(
+            "Deferring measurements requires a one-to-one mapping between "
+            "measured qubits and classical bits.");
+      }
+    }
+    return;
+  }
+  if (const auto* compound =
+          dynamic_cast<const CompoundOperation*>(&operation)) {
+    for (const auto& nestedOperation : *compound) {
+      validateMeasurementMapping(*nestedOperation, measuredQubits, writtenBits);
+    }
+    return;
+  }
+  if (const auto* ifElse = dynamic_cast<const IfElseOperation*>(&operation)) {
+    if (ifElse->getThenOp() != nullptr) {
+      validateMeasurementMapping(*ifElse->getThenOp(), measuredQubits,
+                                 writtenBits);
+    }
+    if (ifElse->getElseOp() != nullptr) {
+      validateMeasurementMapping(*ifElse->getElseOp(), measuredQubits,
+                                 writtenBits);
+    }
+  }
+}
+
+Qubit addResetReplacement(QuantumComputation& qc) {
+  const auto logical = static_cast<Qubit>(qc.getNqubits());
+  const auto physical = qc.getHighestPhysicalQubitIndex() + 1U;
+  qc.addQubit(logical, physical, logical);
+  return physical;
+}
+
+template <class Container>
+void eliminateResetsImpl(Container& operations, QuantumComputation& qc,
+                         std::map<Qubit, Qubit>& replacementMap) {
+  auto it = operations.begin();
+  while (it != operations.end()) {
+    if ((*it)->getType() == Reset) {
+      for (const auto target : (*it)->getTargets()) {
+        replacementMap.insert_or_assign(target, addResetReplacement(qc));
+      }
+      it = operations.erase(it);
+      continue;
+    }
+
+    if (auto* compound = dynamic_cast<CompoundOperation*>(it->get())) {
+      changeControls(compound->getControls(), replacementMap);
+      eliminateResetsImpl(*compound, qc, replacementMap);
+    } else if (!replacementMap.empty()) {
+      changeQubits(**it, replacementMap);
+    }
+    ++it;
+  }
+}
 } // namespace
 
 void eliminateResets(QuantumComputation& qc) {
@@ -379,97 +625,23 @@ void eliminateResets(QuantumComputation& qc) {
   //            0            1                   ║  ░ └───┘└╥┘
   //                                  c: 2/══════╩══════════╩═
   //                                             0          1
-  auto replacementMap = std::map<Qubit, Qubit>();
-  auto it = qc.begin();
-  while (it != qc.end()) {
-    if ((*it)->getType() == Reset) {
-      for (const auto& target : (*it)->getTargets()) {
-        auto indexAddQubit = static_cast<Qubit>(qc.getNqubits());
-        qc.addQubit(indexAddQubit, indexAddQubit, indexAddQubit);
-        auto oldReset = replacementMap.find(target);
-        if (oldReset != replacementMap.end()) {
-          oldReset->second = indexAddQubit;
-        } else {
-          replacementMap.try_emplace(target, indexAddQubit);
-        }
-      }
-      it = qc.erase(it);
-    } else if ((*it)->isCompoundOperation() || !replacementMap.empty()) {
-      if ((*it)->isCompoundOperation()) {
-        auto& compOp = dynamic_cast<CompoundOperation&>(**it);
-        auto compOpIt = compOp.begin();
-        while (compOpIt != compOp.end()) {
-          if ((*compOpIt)->getType() == Reset) {
-            for (const auto& compTarget : (*compOpIt)->getTargets()) {
-              auto indexAddQubit = static_cast<Qubit>(qc.getNqubits());
-              qc.addQubit(indexAddQubit, indexAddQubit, indexAddQubit);
-              if (auto oldReset = replacementMap.find(compTarget);
-                  oldReset != replacementMap.end()) {
-                oldReset->second = indexAddQubit;
-              } else {
-                replacementMap.try_emplace(compTarget, indexAddQubit);
-              }
-            }
-            compOpIt = compOp.erase(compOpIt);
-          } else {
-            if ((*compOpIt)->isStandardOperation()) {
-              auto& targets = (*compOpIt)->getTargets();
-              auto& controls = (*compOpIt)->getControls();
-              changeTargets(targets, replacementMap);
-              changeControls(controls, replacementMap);
-            } else if (auto* ifElse =
-                           dynamic_cast<IfElseOperation*>(compOpIt->get());
-                       ifElse != nullptr) {
-              auto* thenOp = ifElse->getThenOp();
-              auto& thenControls = thenOp->getControls();
-              changeControls(thenControls, replacementMap);
-              auto& thenTargets = thenOp->getTargets();
-              changeTargets(thenTargets, replacementMap);
-
-              auto* elseOp = ifElse->getElseOp();
-              if (elseOp != nullptr) {
-                auto& elseControls = elseOp->getControls();
-                changeControls(elseControls, replacementMap);
-                auto& elseTargets = elseOp->getTargets();
-                changeTargets(elseTargets, replacementMap);
-              }
-            } else if ((*compOpIt)->isNonUnitaryOperation()) {
-              auto& targets = (*compOpIt)->getTargets();
-              changeTargets(targets, replacementMap);
-            }
-            ++compOpIt;
-          }
-        }
-      }
-      if ((*it)->isStandardOperation()) {
-        auto& targets = (*it)->getTargets();
-        auto& controls = (*it)->getControls();
-        changeTargets(targets, replacementMap);
-        changeControls(controls, replacementMap);
-      } else if (auto* ifElse = dynamic_cast<IfElseOperation*>(it->get());
-                 ifElse != nullptr) {
-        auto* thenOp = ifElse->getThenOp();
-        auto& thenControls = thenOp->getControls();
-        changeControls(thenControls, replacementMap);
-        auto& thenTargets = thenOp->getTargets();
-        changeTargets(thenTargets, replacementMap);
-
-        auto* elseOp = ifElse->getElseOp();
-        if (elseOp != nullptr) {
-          auto& elseControls = elseOp->getControls();
-          changeControls(elseControls, replacementMap);
-          auto& elseTargets = elseOp->getTargets();
-          changeTargets(elseTargets, replacementMap);
-        }
-      } else if ((*it)->isNonUnitaryOperation()) {
-        auto& targets = (*it)->getTargets();
-        changeTargets(targets, replacementMap);
-      }
-      ++it;
-    } else {
-      ++it;
-    }
+  if (std::ranges::any_of(qc, [](const auto& operation) {
+        return containsConditionalReset(*operation);
+      })) {
+    throw std::runtime_error(
+        "Eliminating resets inside classically controlled operations is not "
+        "supported.");
   }
+  if (qc.getNancillae() != 0U &&
+      std::ranges::any_of(qc, [](const auto& operation) {
+        return containsReset(*operation);
+      })) {
+    throw std::runtime_error(
+        "Eliminating resets in circuits that already contain ancillary "
+        "qubits is not supported.");
+  }
+  auto replacementMap = std::map<Qubit, Qubit>();
+  eliminateResetsImpl(qc, qc, replacementMap);
 }
 
 void deferMeasurements(QuantumComputation& qc) {
@@ -481,22 +653,41 @@ void deferMeasurements(QuantumComputation& qc) {
   //            ║ ┌──╨──┐             c: 2/═══════════╩═
   // c: 2/══════╩═╡ = 1 ╞                             0
   //            0 └─────┘
+  auto measuredQubits = std::unordered_map<Qubit, Bit>();
+  auto writtenBits = std::unordered_map<Bit, Qubit>();
+  for (const auto& operation : qc) {
+    validateMeasurementMapping(*operation, measuredQubits, writtenBits);
+  }
+
+  if (std::ranges::any_of(qc, [](const auto& operation) {
+        return operation->isCompoundOperation() &&
+               operation->isNonUnitaryOperation();
+      })) {
+    qc.flattenOperations();
+  }
+
+  // Replacing an if-else operation can add at most one operation. Reserving
+  // twice the current size therefore keeps all unaffected iterators valid.
+  qc.reserve(qc.size() * 2U);
+
   std::unordered_map<Qubit, std::size_t> qubitsToAddMeasurements{};
-  auto it = qc.begin();
-  while (it != qc.end()) {
-    if (const auto* measurement = dynamic_cast<NonUnitaryOperation*>(it->get());
+  std::size_t operationIndex = 0;
+  while (operationIndex < qc.size()) {
+    if (const auto* measurement =
+            dynamic_cast<NonUnitaryOperation*>(qc.at(operationIndex).get());
         measurement != nullptr && measurement->getType() == Measure) {
       const auto targets = measurement->getTargets();
       const auto classics = measurement->getClassics();
 
-      if (targets.size() != 1 && classics.size() != 1) {
+      if (targets.size() != 1 || classics.size() != 1) {
         throw std::runtime_error(
-            "Deferring measurements with more than 1 target is not yet "
-            "supported. Try decomposing your measurements.");
+            "Deferring measurements with anything other than one target and "
+            "one classical bit is not supported. Try decomposing your "
+            "measurements.");
       }
 
       // if this is the last operation, nothing has to be done
-      if (*it == qc.back()) {
+      if (operationIndex + 1U == qc.size()) {
         break;
       }
 
@@ -507,20 +698,21 @@ void deferMeasurements(QuantumComputation& qc) {
       qubitsToAddMeasurements[measurementQubit] = measurementBit;
 
       // remove the measurement from the vector of operations
-      it = qc.erase(it);
+      auto opIt =
+          qc.erase(qc.begin() + static_cast<std::ptrdiff_t>(operationIndex));
 
       // starting from the next operation after the measurement (if there is
       // any)
-      auto opIt = it;
-      auto currentInsertionPoint = it;
+      auto currentInsertionPoint = opIt;
+      bool measuredQubitTargeted = false;
 
       // iterate over all subsequent operations
       while (opIt != qc.end()) {
         const auto* operation = opIt->get();
         if (operation->isUnitary()) {
-          // if an operation does not act on the measured qubit, the insertion
-          // point for potential operations has to be updated
-          if (!operation->actsOn(measurementQubit)) {
+          if (targetsQubit(*operation, measurementQubit)) {
+            measuredQubitTargeted = true;
+          } else if (!measuredQubitTargeted) {
             ++currentInsertionPoint;
           }
           ++opIt;
@@ -538,17 +730,25 @@ void deferMeasurements(QuantumComputation& qc) {
             measurement2 != nullptr && operation->getType() == Measure) {
           const auto& targets2 = measurement2->getTargets();
           const auto& classics2 = measurement2->getClassics();
-
-          // if this is the same measurement a breakpoint has been reached
+          // An identical later measurement is a breakpoint.
           if (targets == targets2 && classics == classics2) {
-            it = qc.insert(
-                currentInsertionPoint,
-                std::make_unique<NonUnitaryOperation>(targets, classics));
+            if (measuredQubitTargeted) {
+              throwMeasuredQubitTargeted();
+            }
+            const auto insertionIndex = static_cast<std::size_t>(
+                std::distance(qc.begin(), currentInsertionPoint));
+            qc.insert(currentInsertionPoint,
+                      std::make_unique<NonUnitaryOperation>(targets, classics));
             qubitsToAddMeasurements.erase(measurementQubit);
+            if (insertionIndex == operationIndex) {
+              ++operationIndex;
+            }
             break;
           }
 
-          ++currentInsertionPoint;
+          if (!measuredQubitTargeted) {
+            ++currentInsertionPoint;
+          }
           ++opIt;
           continue;
         }
@@ -579,11 +779,23 @@ void deferMeasurements(QuantumComputation& qc) {
 
           // continue if the control bit is not the bit being measured
           if (cBit != measurementBit) {
-            if (!operation->actsOn(measurementQubit)) {
+            if (targetsQubit(*operation, measurementQubit)) {
+              measuredQubitTargeted = true;
+            } else if (!measuredQubitTargeted) {
               ++currentInsertionPoint;
             }
             ++opIt;
             continue;
+          }
+
+          if (ifElse->getComparisonKind() != Eq || expectedValue > 1U) {
+            throw std::runtime_error(
+                "Deferring measurements only supports equality comparisons "
+                "of one classical bit against zero or one.");
+          }
+
+          if (measuredQubitTargeted) {
+            throwMeasuredQubitTargeted();
           }
 
           // determine the appropriate control to add
@@ -614,7 +826,8 @@ void deferMeasurements(QuantumComputation& qc) {
             }
           }
           auto thenControls = standardThenOp->getControls();
-          thenControls.emplace(controlQubit, thenControlType);
+          addConditionControl(thenControls,
+                              Control{controlQubit, thenControlType});
           const auto thenType = standardThenOp->getType();
           const auto thenParameters = standardThenOp->getParameter();
 
@@ -645,31 +858,24 @@ void deferMeasurements(QuantumComputation& qc) {
               }
             }
             elseControls = standardElseOp->getControls();
-            elseControls.emplace(controlQubit, elseControlType);
+            addConditionControl(elseControls,
+                                Control{controlQubit, elseControlType});
             elseType = standardElseOp->getType();
             elseParameters = standardElseOp->getParameter();
           }
 
-          // Remove the if-else operation carefully and handle iterator
-          // invalidation. If the current insertion point is the same as the
-          // current iterator, the insertion point has to be updated to the new
-          // operation as well.
-          auto itInvalidated = (it >= opIt);
+          // Remove the if-else operation and preserve the insertion point if
+          // it precedes the erased operation.
           const auto insertionPointInvalidated =
               (currentInsertionPoint >= opIt);
 
           opIt = qc.erase(opIt);
 
-          if (itInvalidated) {
-            it = opIt;
-          }
           if (insertionPointInvalidated) {
             currentInsertionPoint = opIt;
           }
 
           // insert the new operations
-          itInvalidated = (it >= currentInsertionPoint);
-
           currentInsertionPoint = qc.insert(
               currentInsertionPoint,
               std::make_unique<StandardOperation>(thenControls, thenTargets,
@@ -682,28 +888,38 @@ void deferMeasurements(QuantumComputation& qc) {
                                                     elseType, elseParameters));
           }
 
-          if (itInvalidated) {
-            it = currentInsertionPoint;
-          }
-
           // advance just after the currently inserted operation
           ++currentInsertionPoint;
           // the inner loop also has to restart from here due to the
           // invalidation of the iterators
           opIt = currentInsertionPoint;
+          continue;
         }
+
+        throw std::runtime_error(
+            "Unsupported non-unitary operation encountered while deferring "
+            "measurements.");
       }
+      if (measuredQubitTargeted) {
+        throwMeasuredQubitTargeted();
+      }
+      continue;
     }
-    ++it;
+    ++operationIndex;
   }
-  if (qubitsToAddMeasurements.empty()) {
-    return;
+  if (!qubitsToAddMeasurements.empty()) {
+    qc.outputPermutation.clear();
+    for (const auto& [qubit, clbit] : qubitsToAddMeasurements) {
+      qc.measure(qubit, clbit);
+    }
+    qc.initializeIOMapping();
   }
-  qc.outputPermutation.clear();
-  for (const auto& [qubit, clbit] : qubitsToAddMeasurements) {
-    qc.measure(qubit, clbit);
+
+  if (!qc.empty() && qc.isDynamic()) {
+    throw std::runtime_error(
+        "Measurement deferral left unsupported dynamic operations in the "
+        "circuit.");
   }
-  qc.initializeIOMapping();
 }
 
 namespace {

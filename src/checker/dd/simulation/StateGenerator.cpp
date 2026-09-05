@@ -10,7 +10,7 @@
 
 #include "checker/dd/simulation/StateGenerator.hpp"
 
-#include "algorithms/RandomCliffordCircuit.hpp"
+#include "checker/dd/simulation/RandomCliffordCircuit.hpp"
 #include "checker/dd/simulation/StateType.hpp"
 #include "dd/DDDefinitions.hpp"
 #include "dd/Package.hpp"
@@ -143,7 +143,7 @@ dd::VectorDD StateGenerator::generateRandomStabilizerState(
   const std::size_t randomQubits = totalQubits - ancillaryQubits;
 
   // generate a random Clifford circuit with the appropriate depth
-  const auto rcs = qc::createRandomCliffordCircuit(
+  const auto rcs = detail::createRandomCliffordCircuit(
       static_cast<qc::Qubit>(randomQubits),
       static_cast<std::size_t>(std::round(std::log2(randomQubits))), mt());
 
