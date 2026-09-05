@@ -133,6 +133,16 @@ Defaults to :code:`True` since staying close to the identity can quickly show th
 Defaults to :code:`True` but arbitrary multi-controlled operations are only partially supported.)pb")
 
       .def_rw(
+          "run_hsf_checker", &Configuration::Execution::runHSFChecker,
+          R"pb(Set whether the hybrid Schrödinger--Feynman checker should be executed.
+
+Defaults to :code:`False`. The HSF checker is a standalone alternative for approximate equivalence checking and uses the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold` with the same projective Hilbert--Schmidt distance as the alternating and construction checkers.
+
+Enabling it requires :attr:`~.Configuration.Functionality.check_approximate_equivalence`. The other checkers and outer checker parallelism are disabled because HSF parallelizes its summands internally using up to :attr:`~.Configuration.Execution.nthreads` workers. For :math:`k` cross-cut gates, it evaluates :math:`2^k` summands, so the option is intended for shallow circuits with few cross-cut gates.
+
+Nontrivial HSF checks require at least two qubits after idle-qubit removal and gates supported by its horizontal cut. QCEC normalizes initial layouts and output permutations for HSF, but rejects incomplete mappings. A gate may not have targets on both sides of the cut or multiple controls on the control side of a cross-cut gate.)pb")
+
+      .def_rw(
           "numerical_tolerance", &Configuration::Execution::numericalTolerance,
           R"pb(Set the numerical tolerance of the underlying decision diagram package.
 
@@ -237,6 +247,16 @@ Whenever any decision diagram node differs from this structure by more than the 
 Defaults to :code:`1e-8`.)pb")
 
       .def_rw(
+          "approximate_checking_threshold",
+          &Configuration::Functionality::approximateCheckingThreshold,
+          R"pb(Set the maximum projective Hilbert--Schmidt distance for approximate equivalence checking.
+
+For two :math:`n`-qubit unitaries :math:`U` and :math:`V`, this distance is :math:`\sqrt{1 - |\operatorname{Tr}(UV^\dagger) / 2^n|^2}`.
+The threshold must be finite and lie in the closed interval :math:`[0, 1]`.
+
+Defaults to :code:`1e-8`.)pb")
+
+      .def_rw(
           "check_partial_equivalence",
           &Configuration::Functionality::checkPartialEquivalence,
           R"pb(Two circuits are partially equivalent if, for each possible initial input state, they have the same probability for each measurement outcome.
@@ -244,6 +264,19 @@ Defaults to :code:`1e-8`.)pb")
 If set to :code:`True`, a check for partial equivalence will be performed and the contributions of garbage qubits to the circuit are ignored.
 If set to :code:`False`, the checker will output 'not equivalent' for circuits that are partially equivalent but not totally equivalent.
 In particular, garbage qubits will be treated as if they were measured qubits.
+
+Defaults to :code:`False`.)pb");
+
+  functionality.def_rw(
+      "check_approximate_equivalence",
+      &Configuration::Functionality::checkApproximateEquivalence,
+      R"pb(Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
+
+Approximate checking requires the alternating, construction, or HSF checker.
+The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
+The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+The HSF checker is an exclusive alternative and disables the alternating and construction checkers when selected.
+Parameterized circuits, partial equivalence, and circuits with ancillary or garbage qubits are not supported.
 
 Defaults to :code:`False`.)pb");
 

@@ -6,6 +6,23 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+### Approximate equivalence checking
+
+Approximate equivalence checking uses the projective Hilbert--Schmidt distance
+and requires the alternating, construction, or hybrid Schrödinger--Feynman (HSF)
+decision-diagram checker. Its threshold must be finite and lie in the closed
+interval `[0, 1]`. QCEC disables the simulation and ZX-calculus checkers in
+approximate mode and rejects parameterized circuits, partial equivalence, and
+circuits with ancillary or garbage qubits.
+
+Enable the HSF checker with `run_hsf_checker=True`. It is a standalone
+alternative that disables the alternating and construction checkers as well as
+outer checker parallelism, then uses up to `nthreads` workers internally. HSF is
+intended for shallow circuits with few cross-cut gates. Nontrivial checks
+require at least two qubits after idle-qubit removal and operations supported by
+the horizontal circuit cut. QCEC normalizes complete initial layouts and output
+permutations for HSF; incomplete mappings are rejected.
+
 ### Equivalence-checking optimizations
 
 MQT QCEC now owns the circuit transformations used only by its equivalence

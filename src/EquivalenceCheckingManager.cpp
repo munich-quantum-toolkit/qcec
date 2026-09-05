@@ -14,6 +14,7 @@
 #include "ThreadSafeQueue.hpp"
 #include "checker/dd/DDAlternatingChecker.hpp"
 #include "checker/dd/DDConstructionChecker.hpp"
+#include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 #include "checker/dd/DDSimulationChecker.hpp"
 #include "checker/dd/simulation/StateType.hpp"
 #include "checker/zx/FunctionalityConstruction.hpp"
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <future>
 #include <iostream>
@@ -52,6 +54,89 @@ void decrementLogicalQubitsInLayoutAboveIndex(
       --logical;
     }
   }
+}
+
+[[nodiscard]] bool isCompletePermutation(const qc::Permutation& permutation,
+                                         const std::size_t nqubits) {
+  if (permutation.size() != nqubits) {
+    return false;
+  }
+  std::vector<bool> logicalQubits(nqubits, false);
+  for (const auto& [physical, logical] : permutation) {
+    static_cast<void>(physical);
+    if (logical >= nqubits || logicalQubits[logical]) {
+      return false;
+    }
+    logicalQubits[logical] = true;
+  }
+  return true;
+}
+
+[[nodiscard]] bool isIdentityPermutation(const qc::Permutation& permutation,
+                                         const std::size_t nqubits) noexcept {
+  if (permutation.size() != nqubits) {
+    return false;
+  }
+  return std::ranges::all_of(permutation, [](const auto& entry) {
+    return entry.first == entry.second;
+  });
+}
+
+void materializePermutations(qc::QuantumComputation& circuit) {
+  const auto nqubits = circuit.getNqubits();
+  if (!isCompletePermutation(circuit.initialLayout, nqubits) ||
+      !isCompletePermutation(circuit.outputPermutation, nqubits) ||
+      !std::ranges::all_of(circuit.outputPermutation,
+                           [&circuit](const auto& entry) {
+                             return circuit.initialLayout.find(entry.first) !=
+                                    circuit.initialLayout.end();
+                           })) {
+    throw std::invalid_argument(
+        "The HSF checker requires complete initial and output permutations.");
+  }
+
+  // Normalize the initial layout and turn any SWAPs into a tracked output
+  // permutation first. This also makes the normalization independent of the
+  // optimization options that were active when the manager was constructed.
+  detail::elidePermutations(circuit);
+
+  auto current = circuit.initialLayout;
+  for (const auto& [physical, goal] : circuit.outputPermutation) {
+    const auto currentIt = current.find(physical);
+    if (currentIt == current.end()) {
+      throw std::invalid_argument(
+          "The HSF checker cannot normalize an incomplete initial layout.");
+    }
+    if (currentIt->second == goal) {
+      continue;
+    }
+
+    const auto goalIt = std::ranges::find_if(
+        current, [goal](const auto& entry) { return entry.second == goal; });
+    if (goalIt == current.end()) {
+      throw std::invalid_argument(
+          "The HSF checker cannot normalize an incomplete output "
+          "permutation.");
+    }
+
+    const auto otherPhysical = goalIt->first;
+    const auto first = current.at(physical);
+    const auto second = current.at(otherPhysical);
+    circuit.cx(first, second);
+    circuit.cx(second, first);
+    circuit.cx(first, second);
+    std::swap(current.at(physical), current.at(otherPhysical));
+  }
+
+  // The appended CNOT triples implement the same SWAP correction that DD-based
+  // checkers ordinarily apply to their final matrix. Emitting the decomposition
+  // directly preserves any controlled SWAPs already present in the circuit.
+  qc::Permutation identity{};
+  for (const auto& entry : current) {
+    identity.emplace(entry.second, entry.second);
+  }
+  circuit.initialLayout = identity;
+  circuit.outputPermutation = std::move(identity);
 }
 } // namespace
 
@@ -300,10 +385,125 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
   qc::CircuitOptimizer::removeFinalMeasurements(qc2);
 }
 
+void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
+  if (configuration.execution.runHSFChecker &&
+      !configuration.functionality.checkApproximateEquivalence) {
+    throw std::invalid_argument(
+        "The HSF checker requires approximate equivalence checking.");
+  }
+
+  if (!configuration.functionality.checkApproximateEquivalence) {
+    return;
+  }
+
+  const auto threshold =
+      configuration.functionality.approximateCheckingThreshold;
+  if (!std::isfinite(threshold) || threshold < 0. || threshold > 1.) {
+    throw std::invalid_argument(
+        "The approximate equivalence checking threshold must be finite and "
+        "within [0, 1].");
+  }
+
+  if (configuration.functionality.checkPartialEquivalence) {
+    throw std::invalid_argument(
+        "Approximate and partial equivalence checking cannot be combined.");
+  }
+
+  if (!qc1.isVariableFree() || !qc2.isVariableFree()) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking does not support symbolic "
+        "circuits.");
+  }
+
+  // Idle qubits have already been stripped during preprocessing. Any remaining
+  // ancillary or garbage qubit therefore represents a restricted input or an
+  // ignored output, for which a full-space unitary process distance is not the
+  // appropriate equivalence criterion.
+  if (qc1.getNancillae() > 0U || qc2.getNancillae() > 0U ||
+      qc1.getNgarbageQubits() > 0U || qc2.getNgarbageQubits() > 0U) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking does not support ancillary or "
+        "garbage qubits that remain after preprocessing.");
+  }
+
+  if (!configuration.execution.runAlternatingChecker &&
+      !configuration.execution.runConstructionChecker &&
+      !configuration.execution.runHSFChecker) {
+    throw std::invalid_argument(
+        "Approximate equivalence checking requires the alternating, "
+        "construction, or HSF decision diagram checker.");
+  }
+
+  if (configuration.execution.runSimulationChecker) {
+    std::clog
+        << "[QCEC] Warning: the simulation checker does not implement the "
+           "unitary process distance used for approximate equivalence "
+           "checking and will be disabled.\n";
+    configuration.execution.runSimulationChecker = false;
+  }
+
+  if (configuration.execution.runZXChecker) {
+    std::clog << "[QCEC] Warning: the ZX checker cannot establish approximate "
+                 "non-equivalence and will be disabled.\n";
+    configuration.execution.runZXChecker = false;
+  }
+
+  if (!configuration.execution.runHSFChecker) {
+    return;
+  }
+
+  if (configuration.execution.runAlternatingChecker) {
+    std::clog << "[QCEC] Warning: the HSF checker is an exclusive approximate "
+                 "checker; the alternating checker will be disabled.\n";
+    configuration.execution.runAlternatingChecker = false;
+  }
+
+  if (configuration.execution.runConstructionChecker) {
+    std::clog << "[QCEC] Warning: the HSF checker is an exclusive approximate "
+                 "checker; the construction checker will be disabled.\n";
+    configuration.execution.runConstructionChecker = false;
+  }
+
+  if (configuration.execution.parallel) {
+    std::clog << "[QCEC] Warning: the HSF checker manages its own worker "
+                 "threads; outer checker parallelism will be disabled.\n";
+    configuration.execution.parallel = false;
+  }
+
+  materializePermutations(qc1);
+  materializePermutations(qc2);
+
+  if (!isIdentityPermutation(qc1.initialLayout, qc1.getNqubits()) ||
+      !isIdentityPermutation(qc1.outputPermutation, qc1.getNqubits()) ||
+      !isIdentityPermutation(qc2.initialLayout, qc2.getNqubits()) ||
+      !isIdentityPermutation(qc2.outputPermutation, qc2.getNqubits())) {
+    throw std::invalid_argument(
+        "The HSF checker could not normalize the circuits to identity layouts "
+        "and output permutations.");
+  }
+
+  if (qc1.empty() && qc2.empty()) {
+    return;
+  }
+
+  // The regular optimization pipeline may produce compound operations. The
+  // HSF checker operates on the individual standard operations after all
+  // layout, permutation, ancillary, and garbage handling is complete.
+  qc::CircuitOptimizer::flattenOperations(qc1);
+  qc::CircuitOptimizer::flattenOperations(qc2);
+
+  if (!DDHybridSchrodingerFeynmanChecker::canHandle(qc1, qc2)) {
+    throw std::invalid_argument(
+        "The HSF checker does not support the preprocessed circuits.");
+  }
+}
+
 void EquivalenceCheckingManager::run() {
-  done = false;
+  done.store(false);
 
   results.equivalence = EquivalenceCriterion::NoInformation;
+
+  validateAndNormalizeConfiguration();
 
   const bool garbageQubitsPresent =
       qc1.getNgarbageQubits() > 0 || qc2.getNgarbageQubits() > 0;
@@ -315,7 +515,7 @@ void EquivalenceCheckingManager::run() {
 
   if (qc1.empty() && qc2.empty()) {
     results.equivalence = EquivalenceCriterion::Equivalent;
-    done = true;
+    markDone();
     return;
   }
 
@@ -425,13 +625,16 @@ void EquivalenceCheckingManager::checkSequential() {
 
   // in case a timeout is configured, a separate thread is started that sets
   // the `done` flag after the timeout has passed
-  std::thread timeoutThread{};
+  std::jthread timeoutThread{};
   if (configuration.execution.timeout > 0.) {
-    timeoutThread = std::thread([this, timeout = std::chrono::duration<double>(
-                                           configuration.execution.timeout)] {
-      std::unique_lock doneLock(doneMutex);
-      const auto finished =
-          doneCond.wait_for(doneLock, timeout, [this] { return done; });
+    timeoutThread = std::jthread([this, timeout = std::chrono::duration<double>(
+                                            configuration.execution.timeout)] {
+      bool finished{};
+      {
+        std::unique_lock doneLock(doneMutex);
+        finished = doneCond.wait_for(doneLock, timeout,
+                                     [this] { return done.load(); });
+      }
       // if the thread has already finished within the timeout, nothing
       // has to be done
       if (!finished) {
@@ -440,142 +643,153 @@ void EquivalenceCheckingManager::checkSequential() {
     });
   }
 
-  if (configuration.execution.runSimulationChecker) {
-    checkers.emplace_back(
-        std::make_unique<DDSimulationChecker>(qc1, qc2, configuration));
-    auto* const simulationChecker =
-        dynamic_cast<DDSimulationChecker*>(checkers.back().get());
-    while (!simulationsFinished() && !done) {
-      // configure simulation based checker
-      simulationChecker->setRandomInitialState(stateGenerator);
+  try {
+    if (configuration.execution.runSimulationChecker) {
+      auto* const simulationChecker = addChecker<DDSimulationChecker>();
+      while (!simulationsFinished() && !done.load()) {
+        // configure simulation based checker
+        simulationChecker->setRandomInitialState(stateGenerator);
 
-      // run the simulation
-      ++results.startedSimulations;
-      const auto result = simulationChecker->run();
-      ++results.performedSimulations;
+        // run the simulation
+        ++results.startedSimulations;
+        const auto result = simulationChecker->run();
+        ++results.performedSimulations;
 
-      // if the run completed but has not yielded any information this
-      // indicates a timeout
-      if (result == EquivalenceCriterion::NoInformation) {
-        if (!done) {
-          std::clog << "Simulation run returned without any information. "
-                       "Something probably went wrong. Exiting!\n";
+        // if the run completed but has not yielded any information this
+        // indicates a timeout
+        if (result == EquivalenceCriterion::NoInformation) {
+          if (!done.load()) {
+            std::clog << "Simulation run returned without any information. "
+                         "Something probably went wrong. Exiting!\n";
+          }
+          markDone();
+          return;
         }
-        return;
+
+        // break if non-equivalence has been shown
+        if (result == EquivalenceCriterion::NotEquivalent) {
+          results.equivalence = EquivalenceCriterion::NotEquivalent;
+          break;
+        }
+
+        // Otherwise, circuits are probably equivalent and execution can
+        // continue
+        results.equivalence = EquivalenceCriterion::ProbablyEquivalent;
       }
 
-      // break if non-equivalence has been shown
-      if (result == EquivalenceCriterion::NotEquivalent) {
-        results.equivalence = EquivalenceCriterion::NotEquivalent;
-        break;
+      // Circuits are non-equivalent
+      if (results.equivalence == EquivalenceCriterion::NotEquivalent) {
+        results.cexInput = simulationChecker->getInitialState();
+        results.cexOutput1 = simulationChecker->getInternalState1();
+        results.cexOutput2 = simulationChecker->getInternalState2();
+        markDone();
       }
 
-      // Otherwise, circuits are probably equivalent and execution can
-      // continue
-      results.equivalence = EquivalenceCriterion::ProbablyEquivalent;
-    }
-
-    // Circuits are non-equivalent
-    if (results.equivalence == EquivalenceCriterion::NotEquivalent) {
-      results.cexInput = simulationChecker->getInitialState();
-      results.cexOutput1 = simulationChecker->getInternalState1();
-      results.cexOutput2 = simulationChecker->getInternalState2();
-      done = true;
-      doneCond.notify_one();
-    }
-
-    // in case only simulations are performed and every single one is done,
-    // everything is done
-    if (configuration.onlySimulationCheckerConfigured() &&
-        simulationsFinished()) {
-      done = true;
-      doneCond.notify_one();
-    }
-  }
-
-  if (configuration.execution.runAlternatingChecker && !done) {
-    checkers.emplace_back(
-        std::make_unique<DDAlternatingChecker>(qc1, qc2, configuration));
-    const auto& alternatingChecker = checkers.back();
-    if (!done) {
-      const auto result = alternatingChecker->run();
-
-      // if the alternating check produces a result, this is final
-      if (result != EquivalenceCriterion::NoInformation) {
-        results.equivalence = result;
-
-        // everything is done
-        done = true;
-        doneCond.notify_one();
+      // in case only simulations are performed and every single one is done,
+      // everything is done
+      if (configuration.onlySimulationCheckerConfigured() &&
+          simulationsFinished()) {
+        markDone();
       }
     }
-  }
 
-  if (configuration.execution.runConstructionChecker && !done) {
-    checkers.emplace_back(
-        std::make_unique<DDConstructionChecker>(qc1, qc2, configuration));
-    const auto& constructionChecker = checkers.back();
-    if (!done) {
-      const auto result = constructionChecker->run();
+    if (configuration.execution.runAlternatingChecker && !done.load()) {
+      auto* const alternatingChecker = addChecker<DDAlternatingChecker>();
+      if (!done.load()) {
+        const auto result = alternatingChecker->run();
 
-      // if the construction check produces a result, this is final
-      if (result != EquivalenceCriterion::NoInformation) {
-        results.equivalence = result;
-
-        // everything is done
-        done = true;
-        doneCond.notify_one();
-      }
-    }
-  }
-
-  if (configuration.execution.runZXChecker && !done) {
-    if (ZXEquivalenceChecker::canHandle(qc1, qc2)) {
-      checkers.emplace_back(
-          std::make_unique<ZXEquivalenceChecker>(qc1, qc2, configuration));
-      const auto& zxChecker = checkers.back();
-      if (!done) {
-        const auto result = zxChecker->run();
-
-        // no matter the result, everything is done as this is the last check
-        done = true;
-        doneCond.notify_one();
-
-        if (result == EquivalenceCriterion::Equivalent ||
-            result == EquivalenceCriterion::EquivalentUpToGlobalPhase) {
+        // if the alternating check produces a result, this is final
+        if (result != EquivalenceCriterion::NoInformation) {
           results.equivalence = result;
-        } else if (result == EquivalenceCriterion::ProbablyNotEquivalent) {
-          if (results.equivalence == EquivalenceCriterion::ProbablyEquivalent) {
-            std::clog << "The ZX checker suggests that the circuits are not "
-                         "equivalent, but the simulation checker suggests that "
-                         "they are probably equivalent. Thus, no conclusion "
-                         "can be drawn.\n";
-            results.equivalence = EquivalenceCriterion::NoInformation;
-          } else {
-            results.equivalence = result;
-          }
-        } else {
-          assert(result == EquivalenceCriterion::NoInformation);
-          if (results.equivalence == EquivalenceCriterion::NoInformation) {
-            // this can only happen if the ZX checker is the only checker
-            assert(configuration.onlyZXCheckerConfigured());
-            std::clog
-                << "Only ZX checker specified, but it was not able to conclude "
-                   "anything about the equivalence of the circuits!\n"
-                << "This can happen since the ZX checker is not complete in "
-                   "general.\n"
-                << "Consider enabling other checkers to get more "
-                   "information.\n";
-          }
+
+          // everything is done
+          markDone();
         }
       }
-    } else if (configuration.onlyZXCheckerConfigured()) {
-      std::clog
-          << "Only ZX checker specified, but one of the circuits contains "
-             "operations not supported by this checker! Exiting!\n";
-      checkers.clear();
-      results.equivalence = EquivalenceCriterion::NoInformation;
     }
+
+    if (configuration.execution.runConstructionChecker && !done.load()) {
+      auto* const constructionChecker = addChecker<DDConstructionChecker>();
+      if (!done.load()) {
+        const auto result = constructionChecker->run();
+
+        // if the construction check produces a result, this is final
+        if (result != EquivalenceCriterion::NoInformation) {
+          results.equivalence = result;
+
+          // everything is done
+          markDone();
+        }
+      }
+    }
+
+    if (configuration.execution.runHSFChecker && !done.load()) {
+      auto* const hsfChecker = addChecker<DDHybridSchrodingerFeynmanChecker>();
+      if (!done.load()) {
+        const auto result = hsfChecker->run();
+
+        // if the hsf check produces a result, this is final
+        if (result != EquivalenceCriterion::NoInformation) {
+          results.equivalence = result;
+
+          // everything is done
+          markDone();
+        }
+      }
+    }
+
+    if (configuration.execution.runZXChecker && !done.load()) {
+      if (ZXEquivalenceChecker::canHandle(qc1, qc2)) {
+        auto* const zxChecker = addChecker<ZXEquivalenceChecker>();
+        if (!done.load()) {
+          const auto result = zxChecker->run();
+
+          // no matter the result, everything is done as this is the last check
+          markDone();
+
+          if (result == EquivalenceCriterion::Equivalent ||
+              result == EquivalenceCriterion::EquivalentUpToGlobalPhase) {
+            results.equivalence = result;
+          } else if (result == EquivalenceCriterion::ProbablyNotEquivalent) {
+            if (results.equivalence ==
+                EquivalenceCriterion::ProbablyEquivalent) {
+              std::clog
+                  << "The ZX checker suggests that the circuits are not "
+                     "equivalent, but the simulation checker suggests that "
+                     "they are probably equivalent. Thus, no conclusion "
+                     "can be drawn.\n";
+              results.equivalence = EquivalenceCriterion::NoInformation;
+            } else {
+              results.equivalence = result;
+            }
+          } else {
+            assert(result == EquivalenceCriterion::NoInformation);
+            if (results.equivalence == EquivalenceCriterion::NoInformation) {
+              // this can only happen if the ZX checker is the only checker
+              assert(configuration.onlyZXCheckerConfigured());
+              std::clog
+                  << "Only ZX checker specified, but it was not able to "
+                     "conclude "
+                     "anything about the equivalence of the circuits!\n"
+                  << "This can happen since the ZX checker is not complete in "
+                     "general.\n"
+                  << "Consider enabling other checkers to get more "
+                     "information.\n";
+            }
+          }
+        }
+      } else if (configuration.onlyZXCheckerConfigured()) {
+        std::clog
+            << "Only ZX checker specified, but one of the circuits contains "
+               "operations not supported by this checker! Exiting!\n";
+        const std::lock_guard lock(checkersMutex);
+        checkers.clear();
+        results.equivalence = EquivalenceCriterion::NoInformation;
+      }
+    }
+  } catch (...) {
+    markDone();
+    throw;
   }
 
   const auto end = std::chrono::steady_clock::now();
@@ -645,13 +859,13 @@ void EquivalenceCheckingManager::checkParallel() {
     ++id;
   }
 
-  if (configuration.execution.runConstructionChecker && !done) {
+  if (configuration.execution.runConstructionChecker && !done.load()) {
     // start a new thread that constructs and runs the construction check
     futures.emplace_back(asyncRunChecker<DDConstructionChecker>(id, queue));
     ++id;
   }
 
-  if (configuration.execution.runZXChecker && !done) {
+  if (configuration.execution.runZXChecker && !done.load()) {
     // start a new thread that constructs and runs the ZX checker
     futures.emplace_back(asyncRunChecker<ZXEquivalenceChecker>(id, queue));
     ++id;
@@ -662,7 +876,7 @@ void EquivalenceCheckingManager::checkParallel() {
     const auto simulationsToStart =
         std::min(effectiveThreadsLeft, configuration.simulation.maxSims);
     // launch as many simulations as possible
-    for (std::size_t i = 0; i < simulationsToStart && !done; ++i) {
+    for (std::size_t i = 0; i < simulationsToStart && !done.load(); ++i) {
       futures.emplace_back(asyncRunChecker<DDSimulationChecker>(id, queue));
       ++id;
       ++results.startedSimulations;
@@ -670,7 +884,7 @@ void EquivalenceCheckingManager::checkParallel() {
   }
 
   // wait in a loop while no definitive result has been obtained
-  while (!done) {
+  while (!done.load()) {
     std::shared_ptr<std::size_t> completedID{};
     if (configuration.execution.timeout > 0.) {
       completedID = queue.waitAndPopUntil(deadline);
@@ -838,13 +1052,16 @@ void EquivalenceCheckingManager::checkSymbolic() {
   const auto start = std::chrono::steady_clock::now();
   // in case a timeout is configured, a separate thread is started that
   // sets the `done` flag after the timeout has passed
-  std::thread timeoutThread{};
+  std::jthread timeoutThread{};
   if (configuration.execution.timeout > 0.) {
-    timeoutThread = std::thread([this, timeout = std::chrono::duration<double>(
-                                           configuration.execution.timeout)] {
-      std::unique_lock doneLock(doneMutex);
-      auto finished =
-          doneCond.wait_for(doneLock, timeout, [this] { return done; });
+    timeoutThread = std::jthread([this, timeout = std::chrono::duration<double>(
+                                            configuration.execution.timeout)] {
+      bool finished{};
+      {
+        std::unique_lock doneLock(doneMutex);
+        finished = doneCond.wait_for(doneLock, timeout,
+                                     [this] { return done.load(); });
+      }
       // if the thread has already finished within the timeout,
       // nothing has to be done
       if (!finished) {
@@ -853,23 +1070,28 @@ void EquivalenceCheckingManager::checkSymbolic() {
     });
   }
 
-  if (!done) {
+  if (!done.load()) {
     if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
         ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
-      checkers.emplace_back(
-          std::make_unique<ZXEquivalenceChecker>(qc1, qc2, configuration));
-      const auto& zxChecker = checkers.back();
-      if (!done) {
-        const auto result = zxChecker->run();
+      auto* const zxChecker = addChecker<ZXEquivalenceChecker>();
+      if (!done.load()) {
+        EquivalenceCriterion result{};
+        try {
+          result = zxChecker->run();
+        } catch (...) {
+          markDone();
+          throw;
+        }
         results.equivalence = result;
-        done = true;
-        doneCond.notify_one();
+        markDone();
       }
     } else {
       std::clog << "Checking symbolic circuits requires transformation "
                    "to ZX-diagram but one of the circuits contains "
                    "operations not supported by this checker! Exiting!"
                 << '\n';
+      markDone();
+      const std::lock_guard lock(checkersMutex);
       checkers.clear();
       results.equivalence = EquivalenceCriterion::NoInformation;
       return;

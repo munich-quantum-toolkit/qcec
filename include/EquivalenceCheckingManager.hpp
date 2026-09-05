@@ -21,6 +21,7 @@
 #include "dd/Node.hpp"
 #include "ir/QuantumComputation.hpp"
 
+#include <atomic>
 #include <condition_variable>
 #include <cstddef>
 #include <exception>
@@ -80,6 +81,7 @@ public:
   void reset() {
     stateGenerator.clear();
     results = Results();
+    const std::lock_guard lock(checkersMutex);
     checkers.clear();
   }
 
@@ -117,6 +119,7 @@ public:
     configuration.execution.runZXChecker = false;
     configuration.execution.runSimulationChecker = false;
     configuration.execution.runAlternatingChecker = false;
+    configuration.execution.runHSFChecker = false;
   }
 
   /**
@@ -143,7 +146,6 @@ public:
         ApplicationSchemeType::GateCost;
     configuration.application.profile = profileLocation;
   }
-
   /**
    * @brief Set the gate cost function for all checkers that support schemes.
    * @details This also sets the application scheme to GateCost.
@@ -168,9 +170,10 @@ protected:
   StateGenerator stateGenerator;
   std::mutex stateGeneratorMutex;
 
-  bool done{false};
+  std::atomic<bool> done{false};
   std::condition_variable doneCond;
   std::mutex doneMutex;
+  std::mutex checkersMutex;
   std::vector<std::unique_ptr<EquivalenceChecker>> checkers;
 
   Results results{};
@@ -189,6 +192,9 @@ protected:
   /// Run all configured optimization passes
   void runOptimizationPasses();
 
+  /// Validate and normalize the configuration used for the upcoming run
+  void validateAndNormalizeConfiguration();
+
   /// Sequential Equivalence Check (TCAD'21)
   /// First, a couple of simulations with various stimuli are conducted.
   /// If any of those stimuli produce output states with a fidelity not close to
@@ -205,10 +211,19 @@ protected:
   /// orchestrating all configured checks in a parallel fashion
   void checkParallel();
 
+  void markDone() {
+    {
+      const std::lock_guard lock(doneMutex);
+      done.store(true);
+    }
+    doneCond.notify_all();
+  }
+
   /// Signal all checker that they shall abort the computation as soon as
   /// possible since a result has been determined
   void setAndSignalDone() {
-    done = true;
+    markDone();
+    const std::lock_guard lock(checkersMutex);
     for (const auto& checker : checkers) {
       if (checker) {
         checker->signalDone();
@@ -236,27 +251,46 @@ protected:
                   "Checker must be derived from EquivalenceChecker");
     return std::async(std::launch::async, [this, id, &queue]() {
       try {
-        auto& checker = checkers[id];
-        if (!checker) {
-          checker = std::make_unique<Checker>(qc1, qc2, configuration);
+        EquivalenceChecker* checker = nullptr;
+        {
+          const std::lock_guard lock(checkersMutex);
+          checker = checkers[id].get();
+        }
+        if (checker == nullptr) {
+          auto newChecker = std::make_unique<Checker>(qc1, qc2, configuration);
+          const std::lock_guard lock(checkersMutex);
+          auto& checkerSlot = checkers[id];
+          if (!checkerSlot) {
+            checkerSlot = std::move(newChecker);
+          }
+          checker = checkerSlot.get();
         }
 
         if constexpr (std::is_same_v<Checker, DDSimulationChecker>) {
-          auto* const simChecker =
-              dynamic_cast<DDSimulationChecker*>(checker.get());
+          auto* const simChecker = dynamic_cast<DDSimulationChecker*>(checker);
           const std::lock_guard stateGeneratorLock(stateGeneratorMutex);
           simChecker->setRandomInitialState(stateGenerator);
         }
 
-        if (!done) {
+        if (!done.load()) {
           checker->run();
         }
         queue.push(id);
-      } catch (const std::exception& e) {
+      } catch (...) {
         queue.push(id);
         throw;
       }
     });
+  }
+
+  template <class Checker> Checker* addChecker() {
+    static_assert(std::is_base_of_v<EquivalenceChecker, Checker>,
+                  "Checker must be derived from EquivalenceChecker");
+    auto checker = std::make_unique<Checker>(qc1, qc2, configuration);
+    auto* const result = checker.get();
+    const std::lock_guard lock(checkersMutex);
+    checkers.emplace_back(std::move(checker));
+    return result;
   }
 
   [[nodiscard]] bool simulationsFinished() const {

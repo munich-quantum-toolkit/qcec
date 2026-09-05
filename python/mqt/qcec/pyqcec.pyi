@@ -159,6 +159,19 @@ class Configuration:
         @run_zx_checker.setter
         def run_zx_checker(self, arg: bool, /) -> None: ...
         @property
+        def run_hsf_checker(self) -> bool:
+            """Set whether the hybrid Schrödinger--Feynman checker should be executed.
+
+            Defaults to :code:`False`. The HSF checker is a standalone alternative for approximate equivalence checking and uses the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold` with the same projective Hilbert--Schmidt distance as the alternating and construction checkers.
+
+            Enabling it requires :attr:`~.Configuration.Functionality.check_approximate_equivalence`. The other checkers and outer checker parallelism are disabled because HSF parallelizes its summands internally using up to :attr:`~.Configuration.Execution.nthreads` workers. For :math:`k` cross-cut gates, it evaluates :math:`2^k` summands, so the option is intended for shallow circuits with few cross-cut gates.
+
+            Nontrivial HSF checks require at least two qubits after idle-qubit removal and gates supported by its horizontal cut. QCEC normalizes initial layouts and output permutations for HSF, but rejects incomplete mappings. A gate may not have targets on both sides of the cut or multiple controls on the control side of a cross-cut gate.
+            """
+
+        @run_hsf_checker.setter
+        def run_hsf_checker(self, arg: bool, /) -> None: ...
+        @property
         def numerical_tolerance(self) -> float:
             """Set the numerical tolerance of the underlying decision diagram package.
 
@@ -305,6 +318,18 @@ class Configuration:
         @trace_threshold.setter
         def trace_threshold(self, arg: float, /) -> None: ...
         @property
+        def approximate_checking_threshold(self) -> float:
+            """Set the maximum projective Hilbert--Schmidt distance for approximate equivalence checking.
+
+            For two :math:`n`-qubit unitaries :math:`U` and :math:`V`, this distance is :math:`\\sqrt{1 - |\\operatorname{Tr}(UV^\\dagger) / 2^n|^2}`.
+            The threshold must be finite and lie in the closed interval :math:`[0, 1]`.
+
+            Defaults to :code:`1e-8`.
+            """
+
+        @approximate_checking_threshold.setter
+        def approximate_checking_threshold(self, arg: float, /) -> None: ...
+        @property
         def check_partial_equivalence(self) -> bool:
             """Two circuits are partially equivalent if, for each possible initial input state, they have the same probability for each measurement outcome.
 
@@ -317,6 +342,21 @@ class Configuration:
 
         @check_partial_equivalence.setter
         def check_partial_equivalence(self, arg: bool, /) -> None: ...
+        @property
+        def check_approximate_equivalence(self) -> bool:
+            """Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
+
+            Approximate checking requires the alternating, construction, or HSF checker.
+            The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
+            The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+            The HSF checker is an exclusive alternative and disables the alternating and construction checkers when selected.
+            Parameterized circuits, partial equivalence, and circuits with ancillary or garbage qubits are not supported.
+
+            Defaults to :code:`False`.
+            """
+
+        @check_approximate_equivalence.setter
+        def check_approximate_equivalence(self, arg: bool, /) -> None: ...
 
     class Simulation:
         """Options that influence the simulation checker."""
