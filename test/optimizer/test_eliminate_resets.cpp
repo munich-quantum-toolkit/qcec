@@ -19,6 +19,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
 namespace qc {
