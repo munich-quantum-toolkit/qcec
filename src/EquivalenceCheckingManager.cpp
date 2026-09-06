@@ -18,7 +18,6 @@
 #include "checker/dd/simulation/StateType.hpp"
 #include "checker/zx/FunctionalityConstruction.hpp"
 #include "checker/zx/ZXChecker.hpp"
-#include "circuit_optimizer/CircuitOptimizer.hpp"
 #include "dd/ComplexNumbers.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
@@ -280,8 +279,8 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
   // fuse consecutive single qubit gates into compound operations (includes some
   // simple cancellation rules).
   if (configuration.optimizations.fuseSingleQubitGates) {
-    qc::CircuitOptimizer::singleQubitGateFusion(qc1);
-    qc::CircuitOptimizer::singleQubitGateFusion(qc2);
+    detail::singleQubitGateFusion(qc1);
+    detail::singleQubitGateFusion(qc2);
   }
 
   // optionally remove diagonal gates before measurements
@@ -297,8 +296,8 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 
   // remove final measurements from both circuits so that the underlying
   // functionality should be unitary
-  qc::CircuitOptimizer::removeFinalMeasurements(qc1);
-  qc::CircuitOptimizer::removeFinalMeasurements(qc2);
+  qc1.removeFinalMeasurements();
+  qc2.removeFinalMeasurements();
 }
 
 void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
