@@ -8,12 +8,11 @@ of changes including minor and patch releases, please refer to the
 
 ### Approximate equivalence checking
 
-Approximate equivalence checking uses the projective Hilbert--Schmidt distance
-and requires the alternating or construction decision-diagram checker. Its
-threshold must be finite and lie in the closed interval `[0, 1]`. QCEC disables
-the simulation and ZX-calculus checkers in approximate mode and rejects
-parameterized circuits, partial equivalence, and circuits with ancillary or
-garbage qubits.
+MQT QCEC now supports approximate equivalence checking based on the projective
+Hilbert--Schmidt distance. Its usage and limitations are described in the
+[documentation](https://mqt.readthedocs.io/projects/qcec/en/latest/approximate_equivalence_checking.html),
+including that ancillary or garbage qubits remaining after preprocessing are not
+supported.
 
 ### Equivalence-checking optimizations
 

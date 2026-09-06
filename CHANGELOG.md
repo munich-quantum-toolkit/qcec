@@ -13,7 +13,7 @@ releases may include breaking changes.
 ### Added
 
 - ✨ Add approximate equivalence checking based on the projective
-  Hilbert--Schmidt distance ([#443]) ([**@TeWas**])
+  Hilbert--Schmidt distance ([#443]) ([**@TeWas**], [**@denialhaag**])
 
 ### Changed
 

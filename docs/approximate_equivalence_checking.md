@@ -16,18 +16,20 @@ interest. For full unitary equivalence up to global phase, this can be checked
 by determining whether $UV^\dagger$ is the identity up to global phase.
 
 In approximate synthesis and optimization, it is often useful to accept a
-circuit that is sufficiently close to the original. QCEC quantifies this using
-the projective Hilbert--Schmidt distance
+circuit that is sufficiently close to the original. MQT QCEC quantifies this
+using the projective Hilbert--Schmidt distance:
 
-$$
-D_\mathrm{HS}(U, V) =
-\sqrt{1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|^2},
-$$
+```{eval-rst}
+.. math::
+
+   D_\mathrm{HS}(U, V) =
+   \sqrt{1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|^2},
+```
 
 where $n$ is the number of qubits. The distance is invariant under global phase
-and ranges from zero to one for unitary matrices. QCEC considers two circuits
-approximately equivalent when their distance is at most the configured threshold
-$\epsilon$.
+and ranges from zero to one for unitary matrices. MQT QCEC considers two
+circuits approximately equivalent when their distance is at most the configured
+threshold $\epsilon$.
 
 ## Supported checkers
 
@@ -38,14 +40,14 @@ defaults to `1e-8`. It must be finite and lie in the closed interval `[0, 1]`.
 The construction and alternating checkers compute the normalized trace using
 decision diagrams. At least one of these two checkers must be enabled. The
 simulation checker compares individual output states, so its fidelity threshold
-does not represent the configured process distance; QCEC disables it
-automatically in approximate mode. QCEC also disables the ZX-calculus checker
-because it cannot establish approximate non-equivalence.
+does not represent the configured process distance; MQT QCEC disables it
+automatically in approximate mode. MQT QCEC also disables the ZX-calculus
+checker because it cannot establish approximate non-equivalence.
 
-Approximate checking currently supports fixed, full-unitary circuits without
-ancillary or garbage qubits. Parameterized circuits and partial equivalence use
-different equivalence relations and are rejected when approximate checking is
-enabled.
+Approximate checking currently supports fixed, full-unitary circuits for which
+no ancillary or garbage qubits remain after preprocessing. Parameterized
+circuits and partial equivalence use different equivalence relations and are
+rejected when approximate checking is enabled.
 
 +++
 
