@@ -46,17 +46,14 @@ FetchContent_Declare(
   mqt-core
   GIT_REPOSITORY https://github.com/${MQT_CORE_REPO_OWNER}/core.git
   GIT_TAG ${MQT_CORE_REV}
-  FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
+  EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS ${MQT_CORE_MINIMUM_VERSION})
 list(APPEND FETCH_PACKAGES mqt-core)
 
 set(JSON_VERSION
     3.12.0
     CACHE STRING "nlohmann_json version")
 set(JSON_URL https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz)
-set(JSON_SystemInclude
-    ON
-    CACHE INTERNAL "Treat the library headers like system headers")
-FetchContent_Declare(nlohmann_json URL ${JSON_URL} FIND_PACKAGE_ARGS ${JSON_VERSION})
+FetchContent_Declare(nlohmann_json URL ${JSON_URL} SYSTEM FIND_PACKAGE_ARGS ${JSON_VERSION})
 list(APPEND FETCH_PACKAGES nlohmann_json)
 
 set(BOOST_MP_STANDALONE
@@ -68,7 +65,7 @@ set(MQT_QCEC_BOOST_VERSION
 set(MQT_QCEC_BOOST_URL
     https://github.com/boostorg/multiprecision/archive/refs/tags/Boost_${MQT_QCEC_BOOST_VERSION}.tar.gz
 )
-FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL})
+FetchContent_Declare(boost_mp URL ${MQT_QCEC_BOOST_URL} SYSTEM)
 list(APPEND FETCH_PACKAGES boost_mp)
 
 if(BUILD_MQT_QCEC_TESTS)
@@ -85,5 +82,3 @@ endif()
 
 # Make all declared dependencies available.
 FetchContent_MakeAvailable(${FETCH_PACKAGES})
-
-get_target_property(MQT_QCEC_BOOST_INCLUDE_DIRS Boost::multiprecision INTERFACE_INCLUDE_DIRECTORIES)
