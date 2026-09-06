@@ -66,6 +66,7 @@ nlohmann::basic_json<> Configuration::json() const {
   exe["run_alternating_checker"] = execution.runAlternatingChecker;
   exe["run_zx_checker"] = execution.runZXChecker;
   exe["timeout"] = execution.timeout;
+
   auto& opt = config["optimizations"];
   opt["fuse_consecutive_single_qubit_gates"] =
       optimizations.fuseSingleQubitGates;

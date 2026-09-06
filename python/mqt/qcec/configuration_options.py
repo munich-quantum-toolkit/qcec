@@ -46,8 +46,8 @@ class ConfigurationOptions(TypedDict, total=False):
     timeout: float
     # Functionality
     trace_threshold: float
-    approximate_checking_threshold: float
     check_partial_equivalence: bool
+    approximate_checking_threshold: float
     check_approximate_equivalence: bool
     # Optimizations
     backpropagate_output_permutation: bool

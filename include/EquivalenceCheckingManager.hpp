@@ -143,6 +143,7 @@ public:
         ApplicationSchemeType::GateCost;
     configuration.application.profile = profileLocation;
   }
+
   /**
    * @brief Set the gate cost function for all checkers that support schemes.
    * @details This also sets the application scheme to GateCost.
