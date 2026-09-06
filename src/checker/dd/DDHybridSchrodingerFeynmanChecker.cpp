@@ -10,13 +10,15 @@
 
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 
+#include "Configuration.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/EquivalenceChecker.hpp"
 #include "dd/ComplexValue.hpp"
-#include "dd/GateMatrixDefinitions.hpp"
+#include "dd/DDDefinitions.hpp"
 #include "dd/Operations.hpp"
 #include "dd/Package.hpp"
 #include "ir/Definitions.hpp"
+#include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 #include "ir/operations/OpType.hpp"
@@ -34,7 +36,6 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
-#include <ranges>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -43,6 +44,8 @@
 namespace ec {
 namespace {
 constexpr std::size_t MAX_DECISIONS = 63U;
+constexpr dd::GateMatrix MEAS_ZERO_MAT{1, 0, 0, 0};
+constexpr dd::GateMatrix MEAS_ONE_MAT{0, 0, 0, 1};
 
 [[nodiscard]] bool isIdentityPermutation(const qc::Permutation& permutation,
                                          const std::size_t nqubits) noexcept {
@@ -298,16 +301,16 @@ bool DDHybridSchrodingerFeynmanChecker::Slice::apply(
       // The summand selects the physical control state. Gate polarity only
       // determines which summand applies the target operation; it must not
       // swap the projectors on the control slice.
-      auto projMatrix = control
-                            ? sliceDD->makeGateDD(dd::MEAS_ONE_MAT, c.qubit)
-                            : sliceDD->makeGateDD(dd::MEAS_ZERO_MAT, c.qubit);
+      auto projMatrix = control ? sliceDD->makeGateDD(MEAS_ONE_MAT, c.qubit)
+                                : sliceDD->makeGateDD(MEAS_ZERO_MAT, c.qubit);
       matrix = sliceDD->multiply(projMatrix, matrix);
       sliceDD->incRef(matrix);
       sliceDD->decRef(tmp);
     }
   } else if (targetInSplit) { // target slice for split or operation in split
     const auto& param = op->getParameter();
-    qc::StandardOperation newOp(opControls, opTargets, op->getType(), param);
+    const qc::StandardOperation newOp(opControls, opTargets, op->getType(),
+                                      param);
     auto tmp = matrix;
     matrix = sliceDD->multiply(dd::getDD(newOp, *sliceDD), matrix);
     sliceDD->incRef(matrix);
@@ -409,13 +412,18 @@ EquivalenceCriterion DDHybridSchrodingerFeynmanChecker::checkEquivalence() {
   const auto distanceSquared = 1. - normalizedOverlapSquared;
   const auto approximateThreshold =
       configuration.functionality.approximateCheckingThreshold;
+  const auto exactlyEquivalent =
+      differenceToOneSquared <= exactThreshold * exactThreshold;
+  const auto equivalentUpToGlobalPhase =
+      distanceSquared <= exactThreshold * exactThreshold;
+  const auto approximatelyEquivalent =
+      distanceSquared <= approximateThreshold * approximateThreshold;
   auto result = EquivalenceCriterion::NotEquivalent;
-  if (differenceToOneSquared <= exactThreshold * exactThreshold) {
+  if (exactlyEquivalent ||
+      (!equivalentUpToGlobalPhase && approximatelyEquivalent)) {
     result = EquivalenceCriterion::Equivalent;
-  } else if (distanceSquared <= exactThreshold * exactThreshold) {
+  } else if (equivalentUpToGlobalPhase) {
     result = EquivalenceCriterion::EquivalentUpToGlobalPhase;
-  } else if (distanceSquared <= approximateThreshold * approximateThreshold) {
-    result = EquivalenceCriterion::Equivalent;
   }
   return isDone() ? EquivalenceCriterion::NoInformation : result;
 }

@@ -64,7 +64,7 @@ def test_keyword_options_reject_pair_beyond_threshold(
 
 
 @pytest.mark.parametrize("parallel", [False, True])
-def test_default_simulation_is_not_used_for_process_distance(parallel: bool) -> None:
+def test_default_simulation_is_not_used_for_process_distance(*, parallel: bool) -> None:
     """Do not let state simulation overrule the configured process metric."""
     identity = QuantumCircuit(1)
     x_gate = QuantumCircuit(1)

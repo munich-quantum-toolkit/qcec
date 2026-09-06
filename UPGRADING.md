@@ -6,38 +6,59 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+This release updates the minimum required `mqt-core` version to 3.10.0.
+
 ### Approximate equivalence checking
 
-Approximate equivalence checking uses the projective Hilbert--Schmidt distance
-and requires the alternating, construction, or hybrid Schrödinger--Feynman (HSF)
-decision-diagram checker. Its threshold must be finite and lie in the closed
-interval `[0, 1]`. QCEC disables the simulation and ZX-calculus checkers in
-approximate mode and rejects parameterized circuits, partial equivalence, and
-circuits with ancillary or garbage qubits.
+MQT QCEC now supports approximate equivalence checking based on the projective
+Hilbert--Schmidt distance. Its usage and limitations are described in the
+[documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
 
-Enable the HSF checker with `run_hsf_checker=True`. It is a standalone
-alternative that disables the alternating and construction checkers as well as
-outer checker parallelism, then uses up to `nthreads` workers internally. HSF is
-intended for shallow circuits with few cross-cut gates. Nontrivial checks
-require at least two qubits after idle-qubit removal and operations supported by
-the horizontal circuit cut. QCEC normalizes complete initial layouts and output
-permutations for HSF; incomplete mappings are rejected.
+MQT QCEC now also provides a hybrid Schrödinger--Feynman (HSF) checker for
+approximate equivalence checking. Enable it with `run_hsf_checker=True`. The HSF
+checker runs instead of the alternating and construction checkers, disables
+outer checker parallelism, and uses up to `nthreads` worker threads internally.
+It is intended for shallow circuits with few gates that cross its horizontal
+circuit cut.
 
 ### Equivalence-checking optimizations
 
 MQT QCEC now owns the circuit transformations used only by its equivalence
 checking flow. This ownership change does not change the QCEC API or its
-configuration.
+configuration. The migrated dynamic-circuit transformations handle nested
+compound operations, identical repeated measurements, and non-contiguous
+physical layouts. They reject non-bijective qubit-to-classical-bit measurement
+mappings, targeting a measured qubit without an intervening reset, and
+unsupported one-bit comparisons instead of silently changing circuit semantics.
+Using the measured qubit only as a compatible quantum control remains supported.
+Reset elimination rejects conditional resets and circuits that already contain
+ancillary qubits.
 
 ### macOS support
 
 MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
 newer. The new deployment target enables `std::format` in libc++.
 
-### Python support
+### Qiskit 2.1 minimum
+
+The minimum Qiskit version increases from **1.0.0 to 2.1.0**, dropping support
+for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
+
+### Python 3.11 and Stable ABI wheels
 
 MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment
 before installing this release.
+
+MQT QCEC now publishes one `cp311-abi3` wheel for GIL-enabled CPython 3.11 and
+newer. Free-threaded support starts with CPython 3.15 in a separate
+`cp315-abi3t` wheel. MQT QCEC no longer publishes free-threaded CPython 3.13 or
+3.14 wheels.
+
+This release updates `nanobind` to 3.0.1, which changes the `nanobind` ABI.
+
+The Python bindings depend on `nanobind-backend`, which supplies the
+interpreter-specific `nanobind` runtime. This dependency does not change the C++
+API or the Python import paths.
 
 ## [3.9.0]
 
@@ -217,5 +238,5 @@ be conveniently installed from PyPI using the
 
 <!-- Other links -->
 
-[MQT SyReC]: https://github.com/cda-tum/mqt-syrec
+[MQT SyReC]: https://github.com/munich-quantum-toolkit/syrec
 [CMake presets]: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html

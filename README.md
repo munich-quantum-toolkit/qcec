@@ -42,7 +42,7 @@ backbone of the MQT.
 - Approximate equivalence checking with the projective Hilbert--Schmidt
   distance, including a standalone hybrid Schrödinger--Feynman checker for
   shallow circuits with few cross-cut gates.
-  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/approximate_equivalence.html)
+  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/approximate_equivalence_checking.html)
 - Compilation flow verification: validate transpiled/compiled circuits incl.
   layout permutations and measurements.
   [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/compilation_flow_verification.html)

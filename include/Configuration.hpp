@@ -39,8 +39,8 @@ public:
     bool runSimulationChecker = true;
     bool runAlternatingChecker = true;
     bool runZXChecker = true;
-    bool setAllAncillaeGarbage = false;
     bool runHSFChecker = false;
+    bool setAllAncillaeGarbage = false;
   };
 
   // configuration options for pre-check optimizations

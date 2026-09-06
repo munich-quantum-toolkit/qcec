@@ -15,6 +15,7 @@
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Expression.hpp"
 
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <limits>
 #include <stdexcept>
@@ -22,7 +23,7 @@
 
 namespace {
 
-enum class DDChecker { Alternating, Construction };
+enum class DDChecker : std::uint8_t { Alternating, Construction };
 
 std::string checkerName(const testing::TestParamInfo<DDChecker>& info) {
   return info.param == DDChecker::Alternating ? "Alternating" : "Construction";
@@ -30,7 +31,7 @@ std::string checkerName(const testing::TestParamInfo<DDChecker>& info) {
 
 class ApproximateEquivalenceTest : public testing::TestWithParam<DDChecker> {
 protected:
-  [[nodiscard]] ec::Configuration configuration(const double threshold) const {
+  [[nodiscard]] static ec::Configuration configuration(const double threshold) {
     ec::Configuration config{};
     config.execution.parallel = false;
     config.execution.runSimulationChecker = false;

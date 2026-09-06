@@ -12,6 +12,7 @@
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
@@ -20,6 +21,7 @@
 #include <cmath>
 #include <cstddef>
 #include <gtest/gtest.h>
+#include <numbers>
 #include <stdexcept>
 #include <tuple>
 
@@ -165,7 +167,7 @@ TEST_P(NegativeControlDistanceTest, UsesProjectiveHilbertSchmidtDistance) {
   // For a two-qubit controlled-X and the identity,
   // D_HS = sqrt(1 - |Tr(CX) / 4|^2) = sqrt(3) / 2.
   constexpr auto delta = 1e-6;
-  const auto distance = std::sqrt(3.) / 2.;
+  constexpr auto distance = std::numbers::sqrt3 / 2.;
   auto acceptChecker = ec::DDHybridSchrodingerFeynmanChecker(
       controlledX, identity, hsfConfiguration(distance + delta));
   auto rejectChecker = ec::DDHybridSchrodingerFeynmanChecker(

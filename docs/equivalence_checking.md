@@ -147,8 +147,8 @@ QCEC can also compare circuits using the projective Hilbert--Schmidt distance.
 The construction and alternating checkers support this mode directly. For
 shallow circuits with few gates crossing a horizontal circuit cut, the hybrid
 Schrödinger--Feynman checker provides a standalone alternative that evaluates
-the decomposed summands in parallel. See {doc}`approximate_equivalence` for the
-metric, configuration, and current limitations.
+the decomposed summands in parallel. See {doc}`approximate_equivalence_checking`
+for the metric, configuration, and current limitations.
 
 ## Resulting Equivalence Checking Flow
 

@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 #include <memory>
+#include <stdexcept>
+#include <utility>
 
 namespace qc {
 TEST(EliminateResets, basicTest) {
@@ -296,5 +298,87 @@ TEST(EliminateResets, compoundBeginningWithReset) {
   ASSERT_EQ(operation->size(), 1);
   EXPECT_EQ(operation->front()->getType(), X);
   EXPECT_EQ(operation->front()->getTargets(), Targets{1});
+}
+
+TEST(EliminateResets, nestedCompoundOperation) {
+  QuantumComputation inner(1);
+  inner.reset(0);
+  inner.x(0);
+
+  QuantumComputation outer(1);
+  outer.emplace_back(inner.asCompoundOperation());
+  outer.z(0);
+
+  QuantumComputation qc(1);
+  qc.emplace_back(outer.asCompoundOperation());
+
+  ec::detail::eliminateResets(qc);
+
+  ASSERT_EQ(qc.getNqubits(), 2);
+  const auto* outerOperation =
+      dynamic_cast<const CompoundOperation*>(qc.front().get());
+  ASSERT_NE(outerOperation, nullptr);
+  const auto* innerOperation =
+      dynamic_cast<const CompoundOperation*>(outerOperation->front().get());
+  ASSERT_NE(innerOperation, nullptr);
+  ASSERT_EQ(innerOperation->size(), 1);
+  EXPECT_EQ(innerOperation->front()->getTargets(), Targets{1});
+  EXPECT_EQ(outerOperation->back()->getTargets(), Targets{1});
+}
+
+TEST(EliminateResets, nonContiguousPhysicalLayout) {
+  QuantumComputation qc(2);
+  qc.initialLayout = {{2, 0}, {5, 1}};
+  qc.outputPermutation = {{2, 0}, {5, 1}};
+  qc.reset(2);
+  qc.x(2);
+
+  ec::detail::eliminateResets(qc);
+
+  ASSERT_EQ(qc.getNqubits(), 3);
+  EXPECT_EQ(qc.initialLayout.at(6), 2);
+  ASSERT_EQ(qc.size(), 1);
+  EXPECT_EQ(qc.front()->getTargets(), Targets{6});
+}
+
+TEST(EliminateResets, remapCompoundWrapperControls) {
+  QuantumComputation compoundCircuit(2);
+  compoundCircuit.x(1);
+  auto compound = compoundCircuit.asCompoundOperation();
+  compound->addControl(Control{0});
+
+  QuantumComputation qc(2);
+  qc.reset(0);
+  qc.emplace_back(std::move(compound));
+
+  ec::detail::eliminateResets(qc);
+
+  const auto* operation =
+      dynamic_cast<const CompoundOperation*>(qc.front().get());
+  ASSERT_NE(operation, nullptr);
+  EXPECT_EQ(operation->getControls(), Controls{Control{2}});
+  EXPECT_EQ(operation->front()->getControls(), Controls{Control{2}});
+}
+
+TEST(EliminateResets, errorOnExistingAncillaryQubits) {
+  QuantumComputation qc(1);
+  qc.addAncillaryRegister(1);
+  qc.reset(0);
+
+  EXPECT_THROW(ec::detail::eliminateResets(qc), std::runtime_error);
+  ASSERT_EQ(qc.size(), 1);
+  EXPECT_EQ(qc.front()->getType(), Reset);
+}
+
+TEST(EliminateResets, errorOnConditionalReset) {
+  QuantumComputation qc(1, 1);
+  qc.ifElse(std::make_unique<NonUnitaryOperation>(Targets{0}, Reset),
+            std::unique_ptr<Operation>{}, 0);
+
+  EXPECT_THROW(ec::detail::eliminateResets(qc), std::runtime_error);
+  ASSERT_EQ(qc.size(), 1);
+  const auto* ifElse = dynamic_cast<const IfElseOperation*>(qc.front().get());
+  ASSERT_NE(ifElse, nullptr);
+  EXPECT_EQ(ifElse->getThenOp()->getType(), Reset);
 }
 } // namespace qc
