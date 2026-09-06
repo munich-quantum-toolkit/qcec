@@ -52,6 +52,15 @@ protected:
   // in some form
   EquivalenceCriterion equals(const DDType& e, const DDType& f);
 
+  /**
+   * @brief Determine whether a functionality is within the configured
+   * projective Hilbert--Schmidt distance threshold of the identity.
+   * @param functionality The matrix decision diagram to check.
+   * @return Whether the distance is at most the configured threshold.
+   */
+  [[nodiscard]] bool projectiveHilbertSchmidtDistanceWithinThreshold(
+      const dd::MatrixDD& functionality) const;
+
   virtual void initializeTask(TaskManager<DDType>& taskManager);
   virtual void initialize();
   virtual void execute();

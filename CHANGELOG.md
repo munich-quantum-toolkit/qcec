@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Add approximate equivalence checking based on the projective
+  Hilbert--Schmidt distance ([#443]) ([**@TeWas**], [**@denialhaag**])
+
 ### Changed
 
 - ⬆️ Update `mqt-core` to version 3.10.0 ([#1060]) ([**@denialhaag**])
@@ -295,6 +300,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [#571]: https://github.com/munich-quantum-toolkit/qcec/pull/571
 [#566]: https://github.com/munich-quantum-toolkit/qcec/pull/566
 [#512]: https://github.com/munich-quantum-toolkit/qcec/pull/512
+[#443]: https://github.com/munich-quantum-toolkit/qcec/pull/443
 [#432]: https://github.com/munich-quantum-toolkit/qcec/pull/432
 
 <!-- Contributor -->
@@ -303,6 +309,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [**@pehamTom**]: https://github.com/pehamTom
 [**@denialhaag**]: https://github.com/denialhaag
 [**@simon1hofmann**]: https://github.com/simon1hofmann
+[**@TeWas**]: https://github.com/TeWas
 
 <!-- General links -->
 

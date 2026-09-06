@@ -8,6 +8,12 @@ of changes including minor and patch releases, please refer to the
 
 This release updates the minimum required `mqt-core` version to 3.10.0.
 
+### Approximate equivalence checking
+
+MQT QCEC now supports approximate equivalence checking based on the projective
+Hilbert--Schmidt distance. Its usage and limitations are described in the
+[documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
+
 ### Equivalence-checking optimizations
 
 MQT QCEC now owns the circuit transformations used only by its equivalence
@@ -225,5 +231,5 @@ be conveniently installed from PyPI using the
 
 <!-- Other links -->
 
-[MQT SyReC]: https://github.com/cda-tum/mqt-syrec
+[MQT SyReC]: https://github.com/munich-quantum-toolkit/syrec
 [CMake presets]: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html

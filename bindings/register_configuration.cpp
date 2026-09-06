@@ -247,6 +247,30 @@ In particular, garbage qubits will be treated as if they were measured qubits.
 
 Defaults to :code:`False`.)pb");
 
+  functionality
+      .def_rw(
+          "approximate_checking_threshold",
+          &Configuration::Functionality::approximateCheckingThreshold,
+          R"pb(Set the maximum projective Hilbert--Schmidt distance for approximate equivalence checking.
+
+For two :math:`n`-qubit unitaries :math:`U` and :math:`V`, this distance is :math:`\sqrt{1 - |\operatorname{Tr}(UV^\dagger) / 2^n|^2}`.
+The threshold must be finite and lie in the closed interval :math:`[0, 1]`.
+
+Defaults to :code:`1e-8`.)pb")
+
+      .def_rw(
+          "check_approximate_equivalence",
+          &Configuration::Functionality::checkApproximateEquivalence,
+          R"pb(Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
+
+Approximate checking requires the alternating or construction checker.
+The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
+The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+Parameterized circuits and partial equivalence are not supported.
+Circuits with ancillary or garbage qubits remaining after preprocessing are also not supported.
+
+Defaults to :code:`False`.)pb");
+
   // simulation options
   simulation.def(nb::init<>())
       .def_rw(

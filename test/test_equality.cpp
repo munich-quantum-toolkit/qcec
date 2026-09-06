@@ -12,6 +12,7 @@
 #include "EquivalenceCriterion.hpp"
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "dd/DDDefinitions.hpp"
+#include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
 #include <cstddef>
