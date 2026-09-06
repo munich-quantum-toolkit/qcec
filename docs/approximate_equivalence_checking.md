@@ -19,11 +19,8 @@ In approximate synthesis and optimization, it is often useful to accept a
 circuit that is sufficiently close to the original. MQT QCEC quantifies this
 using the projective Hilbert--Schmidt distance:
 
-```{eval-rst}
-.. math::
-
-   D_\mathrm{HS}(U, V) =
-   \sqrt{1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|^2},
+```{math}
+D_\mathrm{HS}(U, V) = \sqrt{1 - \left|\frac{\operatorname{Tr}(UV^\dagger)}{2^n}\right|^2},
 ```
 
 where $n$ is the number of qubits. The distance is invariant under global phase
