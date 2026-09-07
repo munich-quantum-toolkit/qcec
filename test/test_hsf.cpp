@@ -13,7 +13,6 @@
 #include "EquivalenceCriterion.hpp"
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 #include "ir/Definitions.hpp"
-#include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
@@ -23,6 +22,7 @@
 #include <gtest/gtest.h>
 #include <numbers>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 
 namespace {
@@ -41,7 +41,7 @@ ec::Configuration hsfConfiguration(const double threshold = 0.) {
   return config;
 }
 
-TEST(HybridSchrodingerFeynmanTest, RunsAsExclusiveSequentialManagerChecker) {
+TEST(HybridSchrodingerFeynmanTest, RunsAsExclusiveManagerChecker) {
   auto qc1 = qc::QuantumComputation(2);
   auto qc2 = qc::QuantumComputation(2);
   qc1.h(0);
@@ -62,13 +62,68 @@ TEST(HybridSchrodingerFeynmanTest, RunsAsExclusiveSequentialManagerChecker) {
   manager.run();
 
   EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::Equivalent);
-  EXPECT_FALSE(manager.getConfiguration().execution.parallel);
+  EXPECT_TRUE(manager.getConfiguration().execution.parallel);
   EXPECT_FALSE(manager.getConfiguration().execution.runConstructionChecker);
   EXPECT_FALSE(manager.getConfiguration().execution.runAlternatingChecker);
   EXPECT_FALSE(manager.getConfiguration().execution.runSimulationChecker);
   EXPECT_FALSE(manager.getConfiguration().execution.runZXChecker);
   EXPECT_TRUE(manager.getConfiguration().execution.runHSFChecker);
   EXPECT_EQ(manager.getConfiguration().execution.nthreads, 1U);
+  ASSERT_EQ(manager.getResults().checkerResults.size(), 1U);
+  EXPECT_EQ(manager.getResults().checkerResults.at(0).at("checker"),
+            "decision_diagram_hybrid_schrodinger_feynman");
+}
+
+TEST(HybridSchrodingerFeynmanTest, PreservesManagerStateWhenValidationFails) {
+  auto unsupported = qc::QuantumComputation(2);
+  const auto identity = qc::QuantumComputation(2);
+  unsupported.iswap(0, 1);
+  unsupported.outputPermutation = qc::Permutation{{0, 1}, {1, 0}};
+
+  auto config = ec::Configuration{};
+  config.execution.runHSFChecker = true;
+  config.functionality.checkApproximateEquivalence = true;
+  auto manager = ec::EquivalenceCheckingManager(unsupported, identity, config);
+  const auto firstCircuit = manager.getFirstCircuit();
+  const auto secondCircuit = manager.getSecondCircuit();
+  try {
+    manager.run();
+    FAIL();
+  } catch (const std::invalid_argument& error) {
+    EXPECT_NE(
+        std::string_view{error.what()}.find("targets spread across the cut"),
+        std::string_view::npos);
+  }
+
+  EXPECT_EQ(manager.getConfiguration().execution.parallel,
+            config.execution.parallel);
+  EXPECT_EQ(manager.getConfiguration().execution.runConstructionChecker,
+            config.execution.runConstructionChecker);
+  EXPECT_EQ(manager.getConfiguration().execution.runAlternatingChecker,
+            config.execution.runAlternatingChecker);
+  EXPECT_EQ(manager.getConfiguration().execution.runSimulationChecker,
+            config.execution.runSimulationChecker);
+  EXPECT_EQ(manager.getConfiguration().execution.runZXChecker,
+            config.execution.runZXChecker);
+  EXPECT_EQ(manager.getFirstCircuit(), firstCircuit);
+  EXPECT_EQ(manager.getSecondCircuit(), secondCircuit);
+}
+
+TEST(HybridSchrodingerFeynmanTest,
+     RejectsInvalidTraceThresholdBeforeChangingCheckerSelection) {
+  const auto qc1 = qc::QuantumComputation(2);
+  const auto qc2 = qc::QuantumComputation(2);
+  auto config = ec::Configuration{};
+  config.execution.runHSFChecker = true;
+  config.functionality.checkApproximateEquivalence = true;
+  config.functionality.traceThreshold = -1.;
+  auto manager = ec::EquivalenceCheckingManager(qc1, qc2, config);
+
+  EXPECT_THROW(manager.run(), std::invalid_argument);
+  EXPECT_TRUE(manager.getConfiguration().execution.parallel);
+  EXPECT_TRUE(manager.getConfiguration().execution.runAlternatingChecker);
+  EXPECT_TRUE(manager.getConfiguration().execution.runSimulationChecker);
+  EXPECT_TRUE(manager.getConfiguration().execution.runZXChecker);
 }
 
 TEST(HybridSchrodingerFeynmanTest, PreservesExactGlobalPhaseResult) {
@@ -83,6 +138,35 @@ TEST(HybridSchrodingerFeynmanTest, PreservesExactGlobalPhaseResult) {
   qc2.x(0);
   qc2.z(0);
   qc2.x(0);
+
+  auto manager = ec::EquivalenceCheckingManager(qc1, qc2, hsfConfiguration());
+  manager.run();
+
+  EXPECT_EQ(manager.equivalence(),
+            ec::EquivalenceCriterion::EquivalentUpToGlobalPhase);
+}
+
+TEST(HybridSchrodingerFeynmanTest,
+     PreservesArbitraryGlobalPhaseAtDefaultTraceThreshold) {
+  auto qc1 = qc::QuantumComputation(2);
+  auto qc2 = qc::QuantumComputation(2);
+  qc1.h(0);
+  qc1.h(1);
+  qc2.h(0);
+  qc2.h(1);
+  qc2.gphase(3.);
+
+  auto manager = ec::EquivalenceCheckingManager(qc1, qc2, hsfConfiguration());
+  manager.run();
+
+  EXPECT_EQ(manager.equivalence(),
+            ec::EquivalenceCriterion::EquivalentUpToGlobalPhase);
+}
+
+TEST(HybridSchrodingerFeynmanTest, PreservesGlobalPhaseOnEmptyCircuits) {
+  const auto qc1 = qc::QuantumComputation(2);
+  auto qc2 = qc::QuantumComputation(2);
+  qc2.gphase(3.);
 
   auto manager = ec::EquivalenceCheckingManager(qc1, qc2, hsfConfiguration());
   manager.run();
@@ -109,11 +193,11 @@ TEST_P(CrossCutControlTest, MatchesAnalyticDecomposition) {
   qc2.x(control);
 
   auto config = hsfConfiguration();
+  config.execution.parallel = true;
   config.execution.nthreads = 2U;
-  auto manager = ec::EquivalenceCheckingManager(qc1, qc2, config);
-  manager.run();
+  auto checker = ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, config);
 
-  EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::Equivalent);
+  EXPECT_EQ(checker.run(), ec::EquivalenceCriterion::Equivalent);
 }
 
 TEST(HybridSchrodingerFeynmanTest, ExposesConfigurationContracts) {
@@ -126,7 +210,7 @@ TEST(HybridSchrodingerFeynmanTest, ExposesConfigurationContracts) {
 
   EXPECT_TRUE(config.anythingToExecute());
   EXPECT_TRUE(config.onlySingleTask());
-  EXPECT_TRUE(config.json()["execution"]["run_hsf_checker"]);
+  EXPECT_TRUE(config.json().at("execution").at("run_hsf_checker"));
 
   const auto qc1 = qc::QuantumComputation(2);
   const auto qc2 = qc::QuantumComputation(2);
@@ -190,6 +274,31 @@ TEST(HybridSchrodingerFeynmanTest, RejectsSingleQubitCircuits) {
   EXPECT_THROW(
       ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, hsfConfiguration()),
       std::invalid_argument);
+}
+
+TEST(HybridSchrodingerFeynmanTest, EnforcesCombinedDecisionLimit) {
+  auto qc1 = qc::QuantumComputation(2);
+  auto qc2 = qc::QuantumComputation(2);
+  for (std::size_t i = 0; i < 32U; ++i) {
+    qc1.cx(0, 1);
+  }
+  for (std::size_t i = 0; i < 31U; ++i) {
+    qc2.cx(0, 1);
+  }
+
+  EXPECT_EQ(ec::DDHybridSchrodingerFeynmanChecker::validate(qc1, qc2), 63U);
+  EXPECT_TRUE(ec::DDHybridSchrodingerFeynmanChecker::canHandle(qc1, qc2));
+  EXPECT_NO_THROW(
+      ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, hsfConfiguration()));
+
+  qc2.cx(0, 1);
+  EXPECT_THROW(static_cast<void>(
+                   ec::DDHybridSchrodingerFeynmanChecker::validate(qc1, qc2)),
+               std::overflow_error);
+  EXPECT_FALSE(ec::DDHybridSchrodingerFeynmanChecker::canHandle(qc1, qc2));
+  EXPECT_THROW(
+      ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, hsfConfiguration()),
+      std::overflow_error);
 }
 
 TEST(HybridSchrodingerFeynmanTest, RejectsIncompletePermutations) {
@@ -310,6 +419,23 @@ TEST(HybridSchrodingerFeynmanTest,
       ec::EquivalenceCheckingManager(identity, permuted, hsfConfiguration());
   manager.run();
 
+  EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+}
+
+TEST(HybridSchrodingerFeynmanTest, NormalizesSparseLayoutsOnEmptyCircuits) {
+  auto identity = qc::QuantumComputation(3);
+  auto permuted = qc::QuantumComputation(3);
+  const auto layout = qc::Permutation{{2, 0}, {4, 1}, {7, 2}};
+  identity.initialLayout = layout;
+  identity.outputPermutation = layout;
+  permuted.initialLayout = layout;
+  permuted.outputPermutation = qc::Permutation{{2, 1}, {4, 2}, {7, 0}};
+
+  auto config = hsfConfiguration();
+  config.optimizations.elidePermutations = false;
+  auto manager = ec::EquivalenceCheckingManager(identity, permuted, config);
+
+  EXPECT_NO_THROW(manager.run());
   EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
 }
 

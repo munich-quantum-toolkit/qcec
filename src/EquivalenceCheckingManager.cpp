@@ -63,22 +63,12 @@ void decrementLogicalQubitsInLayoutAboveIndex(
   std::vector<bool> logicalQubits(nqubits, false);
   for (const auto& [physical, logical] : permutation) {
     static_cast<void>(physical);
-    if (logical >= nqubits || logicalQubits[logical]) {
+    if (logical >= nqubits || logicalQubits.at(logical)) {
       return false;
     }
-    logicalQubits[logical] = true;
+    logicalQubits.at(logical) = true;
   }
   return true;
-}
-
-[[nodiscard]] bool isIdentityPermutation(const qc::Permutation& permutation,
-                                         const std::size_t nqubits) noexcept {
-  if (permutation.size() != nqubits) {
-    return false;
-  }
-  return std::ranges::all_of(permutation, [](const auto& entry) {
-    return entry.first == entry.second;
-  });
 }
 
 void materializePermutations(qc::QuantumComputation& circuit) {
@@ -94,10 +84,28 @@ void materializePermutations(qc::QuantumComputation& circuit) {
         "The HSF checker requires complete initial and output permutations.");
   }
 
-  // Normalize the initial layout and turn any SWAPs into a tracked output
-  // permutation first. This also makes the normalization independent of the
-  // optimization options that were active when the manager was constructed.
-  detail::elidePermutations(circuit);
+  if (circuit.empty()) {
+    // elidePermutations intentionally leaves empty circuits untouched. Mirror
+    // its layout normalization here so that the correction operations below
+    // use logical, contiguous qubit indices even for sparse physical layouts.
+    qc::Permutation normalizedOutput{};
+    for (const auto& [physical, logical] : circuit.outputPermutation) {
+      normalizedOutput.emplace(circuit.initialLayout.at(physical), logical);
+    }
+
+    qc::Permutation identity{};
+    for (const auto& [physical, logical] : circuit.initialLayout) {
+      static_cast<void>(physical);
+      identity.emplace(logical, logical);
+    }
+    circuit.initialLayout = identity;
+    circuit.outputPermutation = std::move(normalizedOutput);
+  } else {
+    // Normalize the initial layout and turn any SWAPs into a tracked output
+    // permutation first. This also makes the normalization independent of the
+    // optimization options that were active when the manager was constructed.
+    detail::elidePermutations(circuit);
+  }
 
   auto current = circuit.initialLayout;
   for (const auto& [physical, goal] : circuit.outputPermutation) {
@@ -137,6 +145,7 @@ void materializePermutations(qc::QuantumComputation& circuit) {
   circuit.initialLayout = identity;
   circuit.outputPermutation = std::move(identity);
 }
+
 } // namespace
 
 void EquivalenceCheckingManager::stripIdleQubits() {
@@ -433,6 +442,32 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
         "construction, or HSF decision diagram checker.");
   }
 
+  if (configuration.execution.runHSFChecker) {
+    if (!std::isfinite(configuration.functionality.traceThreshold) ||
+        configuration.functionality.traceThreshold < 0.) {
+      throw std::invalid_argument(
+          "The exact trace threshold must be finite and non-negative.");
+    }
+
+    auto normalizedQc1 = qc1;
+    auto normalizedQc2 = qc2;
+    materializePermutations(normalizedQc1);
+    materializePermutations(normalizedQc2);
+
+    if (!normalizedQc1.empty() || !normalizedQc2.empty()) {
+      // The regular optimization pipeline may produce compound operations. The
+      // HSF checker operates on the individual standard operations after all
+      // layout, permutation, ancillary, and garbage handling is complete.
+      normalizedQc1.flattenOperations();
+      normalizedQc2.flattenOperations();
+      static_cast<void>(DDHybridSchrodingerFeynmanChecker::validate(
+          normalizedQc1, normalizedQc2));
+    }
+
+    qc1 = std::move(normalizedQc1);
+    qc2 = std::move(normalizedQc2);
+  }
+
   if (configuration.execution.runSimulationChecker) {
     std::clog
         << "[QCEC] Warning: the simulation checker does not implement the "
@@ -462,39 +497,6 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
                  "checker; the construction checker will be disabled.\n";
     configuration.execution.runConstructionChecker = false;
   }
-
-  if (configuration.execution.parallel) {
-    std::clog << "[QCEC] Warning: the HSF checker manages its own worker "
-                 "threads; outer checker parallelism will be disabled.\n";
-    configuration.execution.parallel = false;
-  }
-
-  materializePermutations(qc1);
-  materializePermutations(qc2);
-
-  if (!isIdentityPermutation(qc1.initialLayout, qc1.getNqubits()) ||
-      !isIdentityPermutation(qc1.outputPermutation, qc1.getNqubits()) ||
-      !isIdentityPermutation(qc2.initialLayout, qc2.getNqubits()) ||
-      !isIdentityPermutation(qc2.outputPermutation, qc2.getNqubits())) {
-    throw std::invalid_argument(
-        "The HSF checker could not normalize the circuits to identity layouts "
-        "and output permutations.");
-  }
-
-  if (qc1.empty() && qc2.empty()) {
-    return;
-  }
-
-  // The regular optimization pipeline may produce compound operations. The
-  // HSF checker operates on the individual standard operations after all
-  // layout, permutation, ancillary, and garbage handling is complete.
-  qc1.flattenOperations();
-  qc2.flattenOperations();
-
-  if (!DDHybridSchrodingerFeynmanChecker::canHandle(qc1, qc2)) {
-    throw std::invalid_argument(
-        "The HSF checker does not support the preprocessed circuits.");
-  }
 }
 
 void EquivalenceCheckingManager::run() {
@@ -502,7 +504,15 @@ void EquivalenceCheckingManager::run() {
 
   results.equivalence = EquivalenceCriterion::NoInformation;
 
-  validateAndNormalizeConfiguration();
+  if (configuration.execution.runHSFChecker) {
+    const auto start = std::chrono::steady_clock::now();
+    validateAndNormalizeConfiguration();
+    const auto end = std::chrono::steady_clock::now();
+    results.preprocessingTime +=
+        std::chrono::duration<double>(end - start).count();
+  } else {
+    validateAndNormalizeConfiguration();
+  }
 
   const bool garbageQubitsPresent =
       qc1.getNgarbageQubits() > 0 || qc2.getNgarbageQubits() > 0;
@@ -513,7 +523,16 @@ void EquivalenceCheckingManager::run() {
   }
 
   if (qc1.empty() && qc2.empty()) {
-    results.equivalence = EquivalenceCriterion::Equivalent;
+    const auto phaseDifference = qc1.getGlobalPhase() - qc2.getGlobalPhase();
+    const auto realDifference = std::cos(phaseDifference) - 1.;
+    const auto imaginaryDifference = std::sin(phaseDifference);
+    const auto threshold = configuration.functionality.traceThreshold;
+    results.equivalence =
+        (realDifference * realDifference) +
+                    (imaginaryDifference * imaginaryDifference) <=
+                threshold * threshold
+            ? EquivalenceCriterion::Equivalent
+            : EquivalenceCriterion::EquivalentUpToGlobalPhase;
     markDone();
     return;
   }
