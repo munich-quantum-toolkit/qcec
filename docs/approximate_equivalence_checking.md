@@ -50,15 +50,17 @@ rejected when approximate checking is enabled.
 The optional hybrid Schrödinger--Feynman (HSF) checker computes the same
 projective Hilbert--Schmidt distance by cutting each circuit into two horizontal
 slices. Cross-cut controlled gates are decomposed into sums of tensor products,
-allowing the slices and summands to be evaluated independently. Enable it with
+allowing the slices and summands to be evaluated independently, as described in
+{cite:p}`burgholzer2021HybridSchrodingerFeynman`. Enable it with
 `run_hsf_checker=True` in addition to `check_approximate_equivalence=True`.
 
 HSF is a standalone alternative to the alternating and construction checkers.
-When it is enabled, MQT QCEC disables those checkers and outer checker
-parallelism. The simulation and ZX-calculus checkers are already disabled by
-approximate mode. HSF uses up to `nthreads` workers internally. For $k$
-cross-cut gates, it evaluates $2^k$ summands; although at most 63 decisions can
-be represented, the practical limit is typically much smaller. The checker is
+When it is enabled, MQT QCEC disables those checkers; the simulation and
+ZX-calculus checkers are already disabled by approximate mode. The `parallel`
+option controls HSF's internal parallelism: when it is `False`, HSF uses one
+worker; when it is `True`, HSF uses up to `nthreads` workers. For $k$ cross-cut
+gates, it evaluates $2^k$ summands; although at most 63 decisions can be
+represented, the practical limit is typically much smaller. The checker is
 therefore intended for sufficiently shallow circuits with few cross-cut gates.
 
 Normal circuit optimization and layout processing still run before HSF. MQT QCEC
@@ -99,6 +101,7 @@ from mqt.qcec.pyqcec import Configuration
 config = Configuration()
 config.functionality.check_approximate_equivalence = True
 config.functionality.approximate_checking_threshold = 0.7
+config.execution.run_hsf_checker = True
 
 verify(qc_lhs, qc_rhs, configuration=config)
 ```
