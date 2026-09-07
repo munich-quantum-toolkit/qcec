@@ -11,15 +11,11 @@ This release updates the minimum required `mqt-core` version to 3.10.0.
 ### Approximate equivalence checking
 
 MQT QCEC now supports approximate equivalence checking based on the projective
-Hilbert--Schmidt distance. Its usage and limitations are described in the
+Hilbert--Schmidt distance. For shallow circuits with few gates crossing a
+horizontal cut, the optional hybrid Schrödinger--Feynman (HSF) checker can be
+enabled with `check_approximate_equivalence=True` and `run_hsf_checker=True`.
+Usage and limitations are described in the
 [documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
-
-MQT QCEC now also provides a hybrid Schrödinger--Feynman (HSF) checker for
-approximate equivalence checking. Enable it with `run_hsf_checker=True`. The HSF
-checker runs instead of the alternating and construction checkers, disables
-outer checker parallelism, and uses up to `nthreads` worker threads internally.
-It is intended for shallow circuits with few gates that cross its horizontal
-circuit cut.
 
 ### Equivalence-checking optimizations
 
