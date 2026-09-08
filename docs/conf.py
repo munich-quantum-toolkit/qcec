@@ -74,12 +74,12 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "qiskit": ("https://docs.quantum.ibm.com/api/qiskit", None),
-    "mqt": ("https://mqt.readthedocs.io/en/latest", None),
-    "ddsim": ("https://mqt.readthedocs.io/projects/ddsim/en/latest", None),
-    "qmap": ("https://mqt.readthedocs.io/projects/qmap/en/latest", None),
-    "core": ("https://mqt.readthedocs.io/projects/core/en/latest", None),
-    "qecc": ("https://mqt.readthedocs.io/projects/qecc/en/latest", None),
-    "syrec": ("https://mqt.readthedocs.io/projects/syrec/en/latest", None),
+    "mqt": ("https://mqt.readthedocs.io/en/stable", None),
+    "ddsim": ("https://mqt.readthedocs.io/projects/ddsim/en/stable", None),
+    "qmap": ("https://mqt.readthedocs.io/projects/qmap/en/stable", None),
+    "core": ("https://mqt.readthedocs.io/projects/core/en/stable", None),
+    "qecc": ("https://mqt.readthedocs.io/projects/qecc/en/stable", None),
+    "syrec": ("https://mqt.readthedocs.io/projects/syrec/en/stable", None),
 }
 
 myst_enable_extensions = [

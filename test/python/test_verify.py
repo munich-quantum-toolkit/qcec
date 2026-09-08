@@ -74,7 +74,7 @@ def test_verify_config(original_circuit: QuantumCircuit, alternative_circuit: Qu
 
 
 def test_compiled_circuit_without_measurements() -> None:
-    """Regression test for https://github.com/cda-tum/qcec/issues/236.
+    """Regression test for https://github.com/munich-quantum-toolkit/qcec/issues/236.
 
     It makes sure that circuits compiled without measurements are handled correctly.
     """

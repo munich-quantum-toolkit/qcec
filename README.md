@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![CI](https://img.shields.io/github/actions/workflow/status/munich-quantum-toolkit/qcec/ci.yml?branch=main&style=flat-square&logo=github&label=ci)](https://github.com/munich-quantum-toolkit/qcec/actions/workflows/ci.yml)
 [![CD](https://img.shields.io/github/actions/workflow/status/munich-quantum-toolkit/qcec/cd.yml?style=flat-square&logo=github&label=cd)](https://github.com/munich-quantum-toolkit/qcec/actions/workflows/cd.yml)
-[![Documentation](https://img.shields.io/readthedocs/qcec?logo=readthedocs&style=flat-square)](https://mqt.readthedocs.io/projects/qcec)
+[![Documentation](https://img.shields.io/readthedocs/mqt-qcec?logo=readthedocs&style=flat-square)](https://mqt.readthedocs.io/projects/qcec)
 [![codecov](https://img.shields.io/codecov/c/github/munich-quantum-toolkit/qcec?style=flat-square&logo=codecov)](https://codecov.io/gh/munich-quantum-toolkit/qcec)
 
 <p align="center">
@@ -31,27 +31,27 @@ backbone of the MQT.
 ## Key Features
 
 - Comprehensive equivalence checking engines:
-  [Decision-diagram construction](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#construction-equivalence-checker-using-decision-diagrams),
-  [Alternating DD](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#alternating-equivalence-checker-using-decision-diagrams),
-  [Simulation-based falsification](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#simulation-equivalence-checker-using-decision-diagrams),
+  [Decision-diagram construction](https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html#construction-equivalence-checker-using-decision-diagrams),
+  [Alternating DD](https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html#alternating-equivalence-checker-using-decision-diagrams),
+  [Simulation-based falsification](https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html#simulation-equivalence-checker-using-decision-diagrams),
   and
-  [ZX-calculus rewriting](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#zx-calculus-equivalence-checker)—coordinated
+  [ZX-calculus rewriting](https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html#zx-calculus-equivalence-checker)—coordinated
   in an automated
-  [equivalence checking flow](https://mqt.readthedocs.io/projects/qcec/en/latest/equivalence_checking.html#resulting-equivalence-checking-flow)
+  [equivalence checking flow](https://mqt.readthedocs.io/projects/qcec/en/stable/equivalence_checking.html#resulting-equivalence-checking-flow)
   to prove equivalence or quickly find counterexamples.
 - Compilation flow verification: validate transpiled/compiled circuits incl.
   layout permutations and measurements.
-  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/compilation_flow_verification.html)
+  [Guide](https://mqt.readthedocs.io/projects/qcec/en/stable/compilation_flow_verification.html)
 - Parameterized circuits: prove or refute equivalence with symbolic parameters.
-  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/parametrized_circuits.html)
+  [Guide](https://mqt.readthedocs.io/projects/qcec/en/stable/parametrized_circuits.html)
 - Partial equivalence: compare measured output distributions, handling ancillary
   and garbage qubits.
-  [Guide](https://mqt.readthedocs.io/projects/qcec/en/latest/partial_equivalence.html)
+  [Guide](https://mqt.readthedocs.io/projects/qcec/en/stable/partial_equivalence.html)
 - Python-first API and Qiskit integration: pass `QuantumCircuit` or OpenQASM;
   one-call `verify()` or `verify_compilation()`.
-  [Quickstart](https://mqt.readthedocs.io/projects/qcec/en/latest/quickstart.html)
+  [Quickstart](https://mqt.readthedocs.io/projects/qcec/en/stable/quickstart.html)
   •
-  [API](https://mqt.readthedocs.io/projects/qcec/en/latest/api/mqt/qcec/index.html)
+  [API](https://mqt.readthedocs.io/projects/qcec/en/stable/api/mqt/qcec/index.html)
 - Efficient and portable: C++20 core with DD engines and ZX backend, prebuilt
   wheels for Linux/macOS/Windows via [PyPI](https://pypi.org/project/mqt.qcec/).
 
@@ -97,7 +97,7 @@ To support this endeavor, please consider:
   requests
 - Citing the MQT in your publications (see [Cite This](#cite-this))
 - Citing our research in your publications (see
-  [References](https://mqt.readthedocs.io/projects/qcec/en/latest/references.html))
+  [References](https://mqt.readthedocs.io/projects/qcec/en/stable/references.html))
 - Using the MQT in research and teaching, and sharing feedback and use cases
 - Sponsoring us on GitHub: <https://github.com/sponsors/munich-quantum-toolkit>
 

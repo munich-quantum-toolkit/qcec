@@ -9,7 +9,7 @@
 """MQT QCEC library.
 
 This file is part of the MQT QCEC library released under the MIT license.
-See README.md or go to https://github.com/cda-tum/qcec for more information.
+See README.md or go to https://github.com/munich-quantum-toolkit/qcec for more information.
 """
 
 from __future__ import annotations

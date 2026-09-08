@@ -49,6 +49,9 @@ def test_ancilla_mode_conversion(ancilla_mode: AncillaMode) -> None:
     os.environ.get("CHECK_PROFILES") is None,
     reason="This test is only executed if the CHECK_PROFILES environment variable is set.",
 )
+@pytest.mark.filterwarnings(
+    "ignore:.*``mqt.qcec`` has deprecated the ``mode`` argument of ``generate_profile``:DeprecationWarning"
+)
 def test_generated_profiles_are_still_valid(optimization_level: int, ancilla_mode: AncillaMode) -> None:
     """Test validity of generated profiles.
 
@@ -97,7 +100,6 @@ def test_generated_profiles_are_still_valid(optimization_level: int, ancilla_mod
 
 
 @pytest.mark.filterwarnings("ignore:.*is deprecated as of Qiskit 2.1.* ")
-@pytest.mark.filterwarnings("ignore:.*Implicit conversion to integers .* is deprecated.*")
 def test_deprecation_warning() -> None:
     """Tests that a deprecation warning is raised when the ``mode`` argument is passed."""
     with pytest.warns(
