@@ -43,6 +43,28 @@ newer. The new deployment target enables `std::format` in libc++.
 The minimum Qiskit version increases from **1.0.0 to 2.1.0**, dropping support
 for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
 
+### Compilation flow profiles
+
+The deprecated `mode` argument of `generate_profile()` and `ancilla_mode`
+argument of `verify_compilation()` have been removed. `AncillaMode` and the
+`mode` argument of `generate_profile_name()` have also been removed. Remove
+these arguments and any imports of `AncillaMode` from your code.
+
+Profiles now depend only on the Qiskit optimization level. Profile generation
+uses Qiskit's default synthesis for multi-controlled gates without additional
+ancilla qubits. The recursion and v-chain profiles are no longer included. The
+remaining profiles are named `qiskit_O0.profile` through `qiskit_O3.profile`;
+update any paths that use the `_noancilla` suffix.
+
+The `filepath` argument is now the second argument of `generate_profile()`. The
+`configuration` argument is now the fourth argument of `verify_compilation()`.
+Prefer passing these arguments by name:
+
+```python
+generate_profile(optimization_level=1, filepath=profile_directory)
+verify_compilation(original, compiled, optimization_level=1, configuration=config)
+```
+
 ### Python 3.11 and Stable ABI wheels
 
 MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment

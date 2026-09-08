@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Unpack
 
 from mqt.core import load
 
-from .compilation_flow_profiles import AncillaMode, generate_profile_name
+from .compilation_flow_profiles import generate_profile_name
 from .configuration_options import augment_config_from_kwargs
 from .pyqcec import ApplicationScheme, Configuration
 from .verify import verify
@@ -62,14 +62,13 @@ def verify_compilation(
     original_circuit: QuantumComputation | str | os.PathLike[str] | QuantumCircuit,
     compiled_circuit: QuantumComputation | str | os.PathLike[str] | QuantumCircuit,
     optimization_level: int = 1,
-    ancilla_mode: AncillaMode = AncillaMode.NO_ANCILLA,
     configuration: Configuration | None = None,
     **kwargs: Unpack[ConfigurationOptions],
 ) -> EquivalenceCheckingManager.Results:
     """Verify compilation flow results.
 
     Similar to :func:`verify <.verify>`, but uses a dedicated compilation flow profile to guide the equivalence checking process.
-    The compilation flow profile is determined by the ``optimization_level`` and ``ancilla_mode`` arguments.
+    The compilation flow profile is determined by the ``optimization_level`` argument.
 
     There are two (non-exclusive) ways of configuring the equivalence checking process:
 
@@ -82,29 +81,12 @@ def verify_compilation(
         original_circuit: The original circuit.
         compiled_circuit: The compiled circuit.
         optimization_level: The optimization level used for compiling the circuit (0, 1, 2, or 3). Defaults to 1.
-        ancilla_mode:
-            The :class:`ancilla mode <.AncillaMode>` used for realizing multi-controlled Toffoli gates, as available in Qiskit.
-            Defaults to :attr:`.AncillaMode.NO_ANCILLA`.
         configuration: The configuration to use for the equivalence checking process.
         **kwargs: Keyword arguments to configure the equivalence checking process.
 
     Returns:
         The results of the equivalence checking process.
-
-    .. warning::
-        Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1.
-        In accordance with this, ``mqt.qcec`` has deprecated the ``ancilla_mode`` argument as well.
-        The argument will be removed in a future release.
     """
-    if ancilla_mode != AncillaMode.NO_ANCILLA:
-        warnings.warn(
-            "Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` method with version 2.1. "
-            "In accordance with this, ``mqt.qcec`` has deprecated the ``ancilla_mode`` argument of ``verify_compilation()`` as well. "
-            "The argument will be removed in a future release.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
     if configuration is None:
         configuration = Configuration()
 
@@ -123,7 +105,7 @@ def verify_compilation(
     configuration.application.alternating_scheme = ApplicationScheme.gate_cost
 
     # get the pre-defined profile for the gate_cost scheme
-    profile_name = generate_profile_name(optimization_level=optimization_level, mode=ancilla_mode)
+    profile_name = generate_profile_name(optimization_level=optimization_level)
     ref = resources.files("mqt.qcec") / "profiles" / profile_name
     with resources.as_file(ref) as path:
         configuration.application.profile = str(path)

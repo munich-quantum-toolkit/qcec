@@ -47,6 +47,13 @@ releases may include breaking changes.
 - 🐛 Preserve an earlier repeated measurement when deferring measurements
   ([#1040]) ([**@simon1hofmann**])
 
+### Removed
+
+- 🗑️ Remove the deprecated `mode` argument of `generate_profile()`, the
+  `ancilla_mode` argument of `verify_compilation()`, and `AncillaMode`.
+  Compilation flow profiles now depend only on the optimization level
+  ([removal request in #1065][#1065]) ([**@denialhaag**], [**@burgholzer**])
+
 ## [3.9.0] - 2026-08-19
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#390)._
@@ -270,6 +277,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1065]: https://github.com/munich-quantum-toolkit/qcec/pull/1065#discussion_r3958536795
 [#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
 [#1043]: https://github.com/munich-quantum-toolkit/qcec/pull/1043
 [#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
