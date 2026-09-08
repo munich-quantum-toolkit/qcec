@@ -10,8 +10,7 @@
 
 from __future__ import annotations
 
-import warnings
-from enum import Enum, unique
+from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -24,7 +23,6 @@ if TYPE_CHECKING:
     from qiskit.circuit import QuantumCircuit
 
 __all__ = [
-    "AncillaMode",
     "generate_profile",
     "generate_profile_name",
 ]
@@ -32,34 +30,6 @@ __all__ = [
 
 def __dir__() -> list[str]:
     return __all__
-
-
-@unique
-class AncillaMode(Enum):
-    """Enum for the ancilla mode."""
-
-    NO_ANCILLA = "noancilla"
-    """No ancilla qubits are used."""
-    RECURSION = "recursion"
-    """A single ancilla is used in a recursive manner."""
-    V_CHAIN = "v-chain"
-    """A chain of ancilla qubits is used."""
-
-    def __eq__(self, other: object) -> bool:
-        """Check if two AncillaMode objects are equal. Supports string comparison."""
-        if isinstance(other, str):
-            return self.value == other
-        if isinstance(other, self.__class__):
-            return self.value == other.value
-        return False
-
-    def __hash__(self) -> int:
-        """Return the hash of the AncillaMode."""
-        return hash(self.value)
-
-    def __str__(self) -> str:
-        """Return the string representation of the AncillaMode."""
-        return self.value
 
 
 single_qubit_gates_no_params = {
@@ -125,36 +95,16 @@ double_controlled_single_qubit_gates_no_params = {
 
 max_controls = 11
 control_range = range(2, max_controls + 1)
-mcx_no_ancilla = {
+mcx = {
     "qubits": 1,
     "params": 0,
     "controls": control_range,
-    "mode": AncillaMode.NO_ANCILLA,
-    "ancilla_qubits": 0,
-    "gates": ["x"],
-}
-mcx_recursion = {
-    "qubits": 1,
-    "params": 0,
-    "controls": control_range,
-    "mode": AncillaMode.RECURSION,
-    "ancilla_qubits": 1,
-    "gates": ["x"],
-}
-mcx_v_chain = {
-    "qubits": 1,
-    "params": 0,
-    "controls": control_range,
-    "mode": AncillaMode.V_CHAIN,
-    "ancilla_qubits": None,
     "gates": ["x"],
 }
 mcphase = {
     "qubits": 1,
     "params": 1,
     "controls": control_range,
-    "mode": None,
-    "ancilla_qubits": 0,
     "gates": ["p"],
 }
 
@@ -171,10 +121,7 @@ general_gates = [
     double_controlled_single_qubit_gates_no_params,
 ]
 
-multi_controlled_gates = [mcphase]
-multi_controlled_gates_no_ancilla = [mcx_no_ancilla]
-multi_controlled_gates_recursion = [mcx_recursion]
-multi_controlled_gates_v_chain = [mcx_v_chain]
+multi_controlled_gates = [mcphase, mcx]
 
 
 def __create_general_gate(qubits: int, params: int, controls: int, identifier: str) -> QuantumCircuit:
@@ -195,41 +142,19 @@ def __create_multi_controlled_gate(
     qubits: int,
     params: int,
     controls: int,
-    mode: AncillaMode | None,
-    ancilla_qubits: int | None,
     identifier: str,
 ) -> QuantumCircuit:
-    """Create a ``QuantumCircuit`` containing a single multi-controlled gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls`` using ``ancilla_qubits`` ancilla qubits and the given ancilla ``mode``."""
+    """Create a ``QuantumCircuit`` containing a single multi-controlled gate ``identifier`` with the given number of ``qubits``, ``params``, and ``controls``."""
     from qiskit.circuit import QuantumCircuit  # ruff:ignore[import-outside-top-level] optional dependency
 
     required_qubits = qubits + controls
 
-    # special handling for v-chain mode which is indicated by the ancilla_qubits being None
-    if ancilla_qubits is None:
-        ancilla_qubits = max(0, controls - 2)
-
-    # special handling for recursion mode with less than 5 controls,
-    # which does not require ancilla qubits
-    no_ancilla_threshold = 5
-    if mode == "recursion" and controls < no_ancilla_threshold:
-        ancilla_qubits = 0
-
-    required_qubits += ancilla_qubits
     qc = QuantumCircuit(required_qubits)
     gate_identifier = "mc" + identifier
 
     parameter_list = list(range(1, params + 1))
 
-    if mode is not None:
-        getattr(qc, gate_identifier)(
-            *parameter_list,
-            control_qubits=list(range(controls)),
-            target_qubit=controls,
-            ancilla_qubits=list(range(controls + 1, controls + 1 + ancilla_qubits)),
-            mode=mode,
-        )
-    else:
-        getattr(qc, gate_identifier)(*parameter_list, control_qubits=list(range(controls)), target_qubit=controls)
+    getattr(qc, gate_identifier)(*parameter_list, control_qubits=list(range(controls)), target_qubit=controls)
     return qc
 
 
@@ -287,8 +212,6 @@ def __create_gate_profile_data(
                         qubits,
                         params,
                         control,
-                        gate_set["mode"],
-                        gate_set["ancilla_qubits"],
                         gate,
                     )
                 # compute the cost
@@ -387,50 +310,29 @@ def __find_continuation(
         profile_data[gate, max_control + i + 1] = next_term
 
 
-gate_collection_for_mode = {
-    AncillaMode.NO_ANCILLA: multi_controlled_gates_no_ancilla,
-    AncillaMode.RECURSION: multi_controlled_gates_recursion,
-    AncillaMode.V_CHAIN: multi_controlled_gates_v_chain,
-}
 default_profile_path = Path(__file__).resolve().parent.joinpath("profiles")
 
 
-def generate_profile_name(optimization_level: int = 1, mode: AncillaMode = AncillaMode.NO_ANCILLA) -> str:
-    """Generate a profile name based on the given optimization level and ancilla mode."""
-    return "qiskit_O" + str(optimization_level) + "_" + str(mode) + ".profile"
+def generate_profile_name(optimization_level: int = 1) -> str:
+    """Generate a profile name based on the given optimization level."""
+    return f"qiskit_O{optimization_level}.profile"
 
 
 def generate_profile(
     optimization_level: int = 1,
-    mode: AncillaMode = AncillaMode.NO_ANCILLA,
     filepath: Path | None = None,
 ) -> None:
-    """Generate a compilation flow profile for the given optimization level and ancilla mode.
+    """Generate a compilation flow profile for the given optimization level.
+
+    Multi-controlled gates use Qiskit's default synthesis without additional ancilla qubits.
 
     Args:
         optimization_level:
             The IBM Qiskit optimization level to use for the profile (0, 1, 2, or 3). Defaults to 1.
-        mode:
-            The :class:`ancilla mode <.AncillaMode>` used for realizing multi-controlled Toffoli gates, as available in Qiskit.
-            Defaults to :attr:`.AncillaMode.NO_ANCILLA`.
         filepath:
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
-
-    .. warning::
-        Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1.
-        In accordance with this, ``mqt.qcec`` has deprecated the ``mode`` argument as well.
-        The argument will be removed in a future release.
     """
-    if mode != AncillaMode.NO_ANCILLA:
-        warnings.warn(
-            "Qiskit has deprecated the ``mode`` argument of ``QuantumCircuit.mcx()`` with version 2.1. "
-            "In accordance with this, ``mqt.qcec`` has deprecated the ``mode`` argument of ``generate_profile`` as well. "
-            "The argument will be removed in a future release.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
     HAS_QISKIT.require_now("generate compilation flow profiles")
 
     if filepath is None:
@@ -448,23 +350,12 @@ def generate_profile(
         )
     )
     __find_continuation(profile, gate="p", max_control=max_controls)
-
-    gate_collection = gate_collection_for_mode[mode]
-
-    # add multi-controlled gates with specific mode
-    profile.update(
-        __create_gate_profile_data(
-            gate_collection,
-            GateType.MULTI_CONTROLLED,
-            optimization_level=optimization_level,
-        )
-    )
     __find_continuation(profile, gate="x", max_control=max_controls)
 
     # add special case data
     __add_special_case_data(profile)
 
     # write profile data to file
-    filename = generate_profile_name(optimization_level=optimization_level, mode=mode)
+    filename = generate_profile_name(optimization_level=optimization_level)
     filepath = filepath.joinpath(filename)
     __write_profile_data_to_file(profile, filepath)

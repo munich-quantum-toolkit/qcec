@@ -40,6 +40,13 @@ releases may include breaking changes.
 - ♻️ Own the equivalence-checking-specific circuit transformations ([#1040])
   ([**@simon1hofmann**])
 
+### Removed
+
+- 🗑️ Remove the `mode` arguments of `generate_profile()` and
+  `generate_profile_name()`, the `ancilla_mode` argument of
+  `verify_compilation()`, and `AncillaMode`. Compilation flow profiles now
+  depend only on the optimization level ([#1066]) ([**@denialhaag**])
+
 ### Fixed
 
 - 🐛 Make equivalence checker timeout and cancellation signaling thread-safe
@@ -270,6 +277,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1066]: https://github.com/munich-quantum-toolkit/qcec/pull/1066
 [#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
 [#1043]: https://github.com/munich-quantum-toolkit/qcec/pull/1043
 [#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041

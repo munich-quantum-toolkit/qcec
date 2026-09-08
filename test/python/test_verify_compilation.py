@@ -15,7 +15,6 @@ from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 
 from mqt.qcec import verify_compilation
-from mqt.qcec.compilation_flow_profiles import AncillaMode
 from mqt.qcec.pyqcec import EquivalenceCriterion
 
 
@@ -57,7 +56,28 @@ def test_warning_on_missing_measurements() -> None:
     assert result.equivalence == EquivalenceCriterion.equivalent
 
 
-def test_deprecation_warning(original_circuit: QuantumCircuit) -> None:
-    """Tests that a deprecation warning is raised when the ``ancilla_mode`` argument is passed."""
-    with pytest.warns(DeprecationWarning, match=r"``mqt.qcec`` has deprecated the ``ancilla_mode`` argument"):
-        verify_compilation(original_circuit, original_circuit, ancilla_mode=AncillaMode.V_CHAIN)
+@pytest.mark.parametrize("optimization_level", [0, 1, 2, 3])
+def test_verify_compilation_with_multi_controlled_gates(optimization_level: int) -> None:
+    """Test compilation verification with Qiskit's default multi-controlled gate synthesis."""
+    original_circuit = QuantumCircuit(6)
+    original_circuit.h(range(5))
+    original_circuit.mcx(list(range(5)), 5)
+    original_circuit.mcp(1, list(range(5)), 5)
+    original_circuit.measure_all()
+    compiled_circuit = transpile(
+        original_circuit,
+        basis_gates=["id", "rz", "sx", "x", "cx"],
+        optimization_level=optimization_level,
+        seed_transpiler=12345,
+    )
+    result = verify_compilation(
+        original_circuit,
+        compiled_circuit,
+        optimization_level,
+        run_simulation_checker=False,
+        run_zx_checker=False,
+    )
+    assert result.equivalence in {
+        EquivalenceCriterion.equivalent,
+        EquivalenceCriterion.equivalent_up_to_global_phase,
+    }

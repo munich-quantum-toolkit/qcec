@@ -15,7 +15,6 @@ from qiskit import transpile
 from qiskit.circuit import Parameter, QuantumCircuit
 
 from mqt.qcec import verify, verify_compilation
-from mqt.qcec.compilation_flow_profiles import AncillaMode
 from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 alpha = Parameter("alpha")
@@ -220,7 +219,7 @@ def test_verify_compilation_on_optimization_levels_config(
         basis_gates=["cx", "x", "id", "u3", "measure", "u2", "rz", "u1", "reset", "sx"],
         optimization_level=optimization_level,
     )
-    result = verify_compilation(original_circuit, compiled_circuit, optimization_level, AncillaMode.NO_ANCILLA, config)
+    result = verify_compilation(original_circuit, compiled_circuit, optimization_level, config)
     assert result.equivalence in {
         EquivalenceCriterion.equivalent,
         EquivalenceCriterion.equivalent_up_to_global_phase,
