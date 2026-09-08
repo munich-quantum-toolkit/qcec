@@ -6,8 +6,9 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
-This release updates the minimum required `mqt-core` version to 3.10.0 and
-requires CMake 3.28 or newer.
+## [3.10.0]
+
+This release updates the minimum required `mqt-core` version to 3.10.0.
 
 ### Approximate equivalence checking
 
@@ -15,40 +16,22 @@ MQT QCEC now supports approximate equivalence checking based on the projective
 Hilbert--Schmidt distance. For shallow circuits with few gates crossing a
 horizontal cut, the optional hybrid Schrödinger--Feynman (HSF) checker can be
 enabled with `check_approximate_equivalence=True` and `run_hsf_checker=True`.
-HSF cancels shared output permutations before splitting the circuits and uses
-`trace_threshold` as its numerical projective-distance tolerance. Usage and
-limitations are described in the
+Usage and limitations are described in the
 [documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
 
-### Equivalence-checking optimizations
+### Dynamic circuits
 
-MQT QCEC now owns the circuit transformations used only by its equivalence
-checking flow. This ownership change does not change the QCEC API or its
-configuration. The migrated dynamic-circuit transformations handle nested
-compound operations, identical repeated measurements, and non-contiguous
-physical layouts. They reject non-bijective qubit-to-classical-bit measurement
-mappings, targeting a measured qubit without an intervening reset, and
-unsupported one-bit comparisons instead of silently changing circuit semantics.
-Using the measured qubit only as a compatible quantum control remains supported.
-Reset elimination rejects conditional resets and circuits that already contain
-ancillary qubits.
-
-### macOS support
-
-MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
-newer. The new deployment target enables `std::format` in libc++.
-
-### Qiskit 2.1 minimum
-
-The minimum Qiskit version increases from **1.0.0 to 2.1.0**, dropping support
-for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
+When `transform_dynamic_circuit` is enabled, some previously accepted circuits
+now raise an error. After resets have been eliminated, measurements must use a
+one-to-one mapping between qubits and classical bits. Reset a measured qubit
+before using it again as a gate target. Classical conditions must compare one
+bit against 0 or 1 using equality.
 
 ### Compilation flow profiles
 
 The deprecated `mode` argument of `generate_profile()` and `ancilla_mode`
 argument of `verify_compilation()` have been removed. `AncillaMode` and the
-`mode` argument of `generate_profile_name()` have also been removed
-([#1066](https://github.com/munich-quantum-toolkit/qcec/pull/1066)). Remove
+`mode` argument of `generate_profile_name()` have also been removed. Remove
 these arguments and any imports of `AncillaMode` from your code.
 
 Profiles now depend only on the Qiskit optimization level. Profile generation
@@ -66,6 +49,11 @@ generate_profile(optimization_level=1, filepath=profile_directory)
 verify_compilation(original, compiled, optimization_level=1, configuration=config)
 ```
 
+### Qiskit 2.1 minimum
+
+The minimum Qiskit version increases from **1.0.0 to 2.1.0**, dropping support
+for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
+
 ### Python 3.11 and Stable ABI wheels
 
 MQT QCEC now requires Python 3.11 or newer. Upgrade the Python environment
@@ -78,9 +66,15 @@ newer. Free-threaded support starts with CPython 3.15 in a separate
 
 This release updates `nanobind` to 3.0.1, which changes the `nanobind` ABI.
 
-The Python bindings depend on `nanobind-backend`, which supplies the
-interpreter-specific `nanobind` runtime. This dependency does not change the C++
-API or the Python import paths.
+### macOS support
+
+MQT QCEC no longer supports x86 macOS. Use Apple silicon with macOS 13.3 or
+newer. The new deployment target enables `std::format` in libc++.
+
+### CMake 3.28 minimum
+
+MQT QCEC now requires CMake 3.28 or newer. Upgrade CMake before building this
+release.
 
 ## [3.9.0]
 
@@ -246,7 +240,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...HEAD
+[3.10.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...v3.10.0
 [3.9.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.8.0...v3.9.0
 [3.8.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.7.0...v3.8.0
 [3.7.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.6.0...v3.7.0
