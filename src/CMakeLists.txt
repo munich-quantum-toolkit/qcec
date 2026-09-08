@@ -18,7 +18,6 @@ if(NOT TARGET MQT::QCEC)
   target_include_directories(${PROJECT_NAME}
                              PUBLIC $<BUILD_INTERFACE:${MQT_QCEC_INCLUDE_BUILD_DIR}>)
   target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-  target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${MQT_QCEC_BOOST_INCLUDE_DIRS})
 
   # link to the MQT::Core and nlohmann_json libraries
   target_link_libraries(
