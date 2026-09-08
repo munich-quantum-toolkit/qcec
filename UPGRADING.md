@@ -47,7 +47,8 @@ for all Qiskit 1.x releases and Qiskit 2.0. Upgrade Qiskit to 2.1.0 or newer.
 
 The deprecated `mode` argument of `generate_profile()` and `ancilla_mode`
 argument of `verify_compilation()` have been removed. `AncillaMode` and the
-`mode` argument of `generate_profile_name()` have also been removed. Remove
+`mode` argument of `generate_profile_name()` have also been removed
+([#1066](https://github.com/munich-quantum-toolkit/qcec/pull/1066)). Remove
 these arguments and any imports of `AncillaMode` from your code.
 
 Profiles now depend only on the Qiskit optimization level. Profile generation
