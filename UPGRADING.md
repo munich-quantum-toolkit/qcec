@@ -16,10 +16,16 @@ MQT QCEC now supports approximate equivalence checking based on the projective
 Hilbert--Schmidt distance. For shallow circuits with few gates crossing a
 horizontal cut, the optional hybrid Schrödinger--Feynman (HSF) checker can be
 enabled with `check_approximate_equivalence=True` and `run_hsf_checker=True`.
-HSF cancels shared output permutations before splitting the circuits and uses
-`trace_threshold` as its numerical projective-distance tolerance. Usage and
-limitations are described in the
+Usage and limitations are described in the
 [documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
+
+### Dynamic circuits
+
+When `transform_dynamic_circuit` is enabled, some previously accepted circuits
+now raise an error. After resets have been eliminated, measurements must use a
+one-to-one mapping between qubits and classical bits. Reset a measured qubit
+before using it again as a gate target. Classical conditions must compare one
+bit against 0 or 1 using equality.
 
 ### Compilation flow profiles
 
@@ -59,10 +65,6 @@ newer. Free-threaded support starts with CPython 3.15 in a separate
 3.14 wheels.
 
 This release updates `nanobind` to 3.0.1, which changes the `nanobind` ABI.
-
-The Python bindings depend on `nanobind-backend`, which supplies the
-interpreter-specific `nanobind` runtime. This dependency does not change the C++
-API or the Python import paths.
 
 ### macOS support
 
