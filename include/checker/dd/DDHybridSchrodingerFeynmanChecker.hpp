@@ -17,12 +17,14 @@
 #include "dd/Package_fwd.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
-#include "ir/operations/Operation.hpp"
+#include "ir/operations/Control.hpp"
+#include "ir/operations/StandardOperation.hpp"
 #include "nlohmann/json_fwd.hpp"
 
 #include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 namespace ec {
 /**
@@ -89,9 +91,17 @@ private:
   class Slice;
   using DDPackage = dd::Package;
 
+  /// One local operation and, for a cross-cut gate, its controlling decision.
+  struct SliceOperation {
+    qc::StandardOperation operation;
+    bool upper{};
+    std::optional<qc::Control> crossControl;
+    std::uint64_t decisionMask{};
+  };
+
   qc::Qubit splitQubit{};
   std::size_t nDecisions{};
-  qc::QuantumComputation invertedQc2;
+  std::vector<SliceOperation> operations;
   double globalPhaseDifference{};
 
   EquivalenceCriterion checkEquivalence();
@@ -101,9 +111,6 @@ private:
 
   [[nodiscard]] std::optional<dd::ComplexValue>
   simulateSlicing(DDPackage& sliceDD, std::uint64_t i);
-
-  static void applyLowerUpper(DDPackage& sliceDD, const qc::Operation& op,
-                              Slice& lower, Slice& upper);
 };
 
 } // namespace ec

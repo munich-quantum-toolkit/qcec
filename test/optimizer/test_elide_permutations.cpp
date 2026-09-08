@@ -8,6 +8,7 @@
  * Licensed under the MIT License
  */
 
+#include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/NonUnitaryOperation.hpp"
 #include "ir/operations/OpType.hpp"
@@ -21,6 +22,18 @@ TEST(ElidePermutations, emptyCircuit) {
   QuantumComputation qc(1);
   ec::detail::elidePermutations(qc);
   EXPECT_EQ(qc.size(), 0);
+}
+
+TEST(ElidePermutations, emptyCircuitWithSparseLayout) {
+  QuantumComputation circuit(3);
+  circuit.initialLayout = Permutation{{2, 0}, {4, 1}, {7, 2}};
+  circuit.outputPermutation = Permutation{{2, 1}, {4, 2}, {7, 0}};
+
+  ec::detail::elidePermutations(circuit);
+
+  EXPECT_TRUE(circuit.empty());
+  EXPECT_EQ(circuit.initialLayout, (Permutation{{0, 0}, {1, 1}, {2, 2}}));
+  EXPECT_EQ(circuit.outputPermutation, (Permutation{{0, 1}, {1, 2}, {2, 0}}));
 }
 
 TEST(ElidePermutations, simpleSwap) {

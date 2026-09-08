@@ -11,15 +11,18 @@
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
+#include "checker/dd/DDConstructionChecker.hpp"
 #include "checker/dd/DDHybridSchrodingerFeynmanChecker.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <gtest/gtest.h>
+#include <limits>
 #include <numbers>
 #include <stdexcept>
 #include <string_view>
@@ -492,6 +495,134 @@ TEST(HybridSchrodingerFeynmanTest, HonorsManagerTimeout) {
 
   EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NoInformation);
   EXPECT_LT(runtime, std::chrono::seconds(2));
+}
+
+TEST(HybridSchrodingerFeynmanTest,
+     RejectsSmallRotationsRegardlessOfGlobalPhase) {
+  auto original = qc::QuantumComputation(2);
+  original.h(0);
+  original.x(1);
+  for (const auto phase : {0., 0.2, 3.}) {
+    auto rotated = original;
+    rotated.rz(1e-4, 0);
+    rotated.gphase(phase);
+    for (const auto threshold : {0., 1e-8, 1e-4}) {
+      SCOPED_TRACE(testing::Message()
+                   << "phase=" << phase << ", threshold=" << threshold);
+      auto manager = ec::EquivalenceCheckingManager(
+          original, rotated, hsfConfiguration(threshold));
+      manager.run();
+      /// D_HS = sin(5e-5), whereas the trace differs from 1 by only 1.25e-9.
+      EXPECT_EQ(manager.equivalence(),
+                threshold < std::sin(5e-5)
+                    ? ec::EquivalenceCriterion::NotEquivalent
+                    : ec::EquivalenceCriterion::Equivalent);
+    }
+  }
+}
+
+TEST(HybridSchrodingerFeynmanTest, CancelsCommonOutputPermutations) {
+  auto original = qc::QuantumComputation(22);
+  for (qc::Qubit q = 0; q < 22; ++q) {
+    original.h(q);
+  }
+  for (qc::Qubit q = 0; q < 11; ++q) {
+    std::swap(original.outputPermutation.at(q),
+              original.outputPermutation.at(q + 11));
+  }
+  auto config = hsfConfiguration();
+  config.execution.timeout = 2.;
+  for (const auto angle : {0., 0.2}) {
+    auto alternative = original;
+    alternative.rz(angle, 0);
+    auto manager =
+        ec::EquivalenceCheckingManager(original, alternative, config);
+    /// Expanding the shared output permutation would exceed the decision limit.
+    ASSERT_NO_THROW(manager.run());
+    EXPECT_EQ(manager.equivalence(),
+              angle == 0. ? ec::EquivalenceCriterion::Equivalent
+                          : ec::EquivalenceCriterion::NotEquivalent);
+  }
+}
+
+TEST(HybridSchrodingerFeynmanTest, MatchesConstructionForRelativePermutations) {
+  constexpr std::array permutations{
+      std::array<qc::Qubit, 3>{0, 1, 2}, std::array<qc::Qubit, 3>{0, 2, 1},
+      std::array<qc::Qubit, 3>{1, 0, 2}, std::array<qc::Qubit, 3>{1, 2, 0},
+      std::array<qc::Qubit, 3>{2, 0, 1}, std::array<qc::Qubit, 3>{2, 1, 0}};
+  for (const auto& first : permutations) {
+    for (const auto& second : permutations) {
+      auto qc1 = qc::QuantumComputation(3);
+      qc1.h(0);
+      qc1.ry(0.3, 1);
+      qc1.cx(0, 2);
+      auto qc2 = qc1;
+      qc2.ry(0.2, 0);
+      qc2.cx(1, 2);
+      for (qc::Qubit q = 0; q < 3; ++q) {
+        qc1.outputPermutation.at(q) = first.at(q);
+        qc2.outputPermutation.at(q) = second.at(q);
+      }
+      for (const auto threshold : {0.7, 0.88, 0.97}) {
+        const auto config = hsfConfiguration(threshold);
+        auto reference = ec::DDConstructionChecker(qc1, qc2, config);
+        auto manager = ec::EquivalenceCheckingManager(qc1, qc2, config);
+        manager.run();
+        EXPECT_EQ(manager.equivalence(), reference.run());
+      }
+    }
+  }
+}
+
+TEST(HybridSchrodingerFeynmanTest, HandlesMixedControlsAndInverseOperations) {
+  auto qc1 = qc::QuantumComputation(4);
+  qc1.h(0);
+  qc1.mcx(
+      qc::Controls{{0, qc::Control::Type::Neg}, {2, qc::Control::Type::Pos}},
+      3);
+  qc1.ry(0.7, 1);
+  qc1.cswap(0, 2, 3);
+  qc1.crz(0.3, 3, 1);
+  qc1.swap(0, 1);
+  auto qc2 = qc1;
+  qc2.s(0);
+  qc2.sdg(0);
+  auto config = hsfConfiguration(1e-6);
+  config.execution.parallel = true;
+  config.execution.nthreads = 2;
+  auto checker = ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, config);
+  EXPECT_EQ(checker.run(), ec::EquivalenceCriterion::Equivalent);
+  EXPECT_EQ(checker.run(), ec::EquivalenceCriterion::Equivalent);
+
+  qc2.rx(0.1, 2);
+  auto reference = ec::DDConstructionChecker(qc1, qc2, config);
+  auto different = ec::DDHybridSchrodingerFeynmanChecker(qc1, qc2, config);
+  EXPECT_EQ(different.run(), reference.run());
+  EXPECT_EQ(different.getEquivalence(),
+            ec::EquivalenceCriterion::NotEquivalent);
+}
+
+TEST(HybridSchrodingerFeynmanTest, RejectsMultipleControlsOnOppositeSlice) {
+  auto circuit = qc::QuantumComputation(4);
+  circuit.mcx(qc::Controls{0, 1}, 2);
+  const auto identity = qc::QuantumComputation(4);
+  EXPECT_THROW(ec::DDHybridSchrodingerFeynmanChecker(circuit, identity,
+                                                     hsfConfiguration()),
+               std::invalid_argument);
+}
+
+TEST(HybridSchrodingerFeynmanTest, CountsOnlyScheduledSimulations) {
+  auto config = hsfConfiguration();
+  config.execution.runSimulationChecker = true;
+  config.simulation.maxSims = 0;
+  EXPECT_TRUE(config.onlySingleTask());
+  config.simulation.maxSims = 1;
+  EXPECT_FALSE(config.onlySingleTask());
+  config.execution.runHSFChecker = false;
+  EXPECT_TRUE(config.onlySingleTask());
+  config.simulation.maxSims = std::numeric_limits<std::size_t>::max();
+  config.execution.runConstructionChecker = true;
+  EXPECT_FALSE(config.onlySingleTask());
 }
 
 } // namespace

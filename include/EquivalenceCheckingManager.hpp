@@ -259,11 +259,10 @@ protected:
         if (checker == nullptr) {
           auto newChecker = std::make_unique<Checker>(qc1, qc2, configuration);
           const std::lock_guard lock(checkersMutex);
-          auto& checkerSlot = checkers[id];
-          if (!checkerSlot) {
-            checkerSlot = std::move(newChecker);
-          }
-          checker = checkerSlot.get();
+          /// Each slot has one producer. Reuse starts only after its future
+          /// completes; the mutex synchronizes publication with cancellation.
+          checker = newChecker.get();
+          checkers[id] = std::move(newChecker);
         }
 
         if constexpr (std::is_same_v<Checker, DDSimulationChecker>) {

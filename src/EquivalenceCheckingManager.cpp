@@ -71,7 +71,7 @@ void decrementLogicalQubitsInLayoutAboveIndex(
   return true;
 }
 
-void materializePermutations(qc::QuantumComputation& circuit) {
+void normalizeLayout(qc::QuantumComputation& circuit) {
   const auto nqubits = circuit.getNqubits();
   if (!isCompletePermutation(circuit.initialLayout, nqubits) ||
       !isCompletePermutation(circuit.outputPermutation, nqubits) ||
@@ -83,67 +83,48 @@ void materializePermutations(qc::QuantumComputation& circuit) {
     throw std::invalid_argument(
         "The HSF checker requires complete initial and output permutations.");
   }
+  detail::elidePermutations(circuit);
+}
 
-  if (circuit.empty()) {
-    // elidePermutations intentionally leaves empty circuits untouched. Mirror
-    // its layout normalization here so that the correction operations below
-    // use logical, contiguous qubit indices even for sparse physical layouts.
-    qc::Permutation normalizedOutput{};
-    for (const auto& [physical, logical] : circuit.outputPermutation) {
-      normalizedOutput.emplace(circuit.initialLayout.at(physical), logical);
-    }
+void materializeRelativePermutation(qc::QuantumComputation& qc1,
+                                    qc::QuantumComputation& qc2) {
+  normalizeLayout(qc1);
+  normalizeLayout(qc2);
 
-    qc::Permutation identity{};
-    for (const auto& [physical, logical] : circuit.initialLayout) {
-      static_cast<void>(physical);
-      identity.emplace(logical, logical);
-    }
-    circuit.initialLayout = identity;
-    circuit.outputPermutation = std::move(normalizedOutput);
-  } else {
-    // Normalize the initial layout and turn any SWAPs into a tracked output
-    // permutation first. This also makes the normalization independent of the
-    // optimization options that were active when the manager was constructed.
-    detail::elidePermutations(circuit);
+  /// A common output permutation cancels from Tr(U V^dagger). Apply P1^-1
+  /// to both outputs so only P1^-1 P2 needs to be materialized on qc2.
+  qc::Permutation inverse{};
+  for (const auto& [physical, logical] : qc1.outputPermutation) {
+    inverse.emplace(logical, physical);
+  }
+  for (auto& [physical, logical] : qc2.outputPermutation) {
+    static_cast<void>(physical);
+    logical = inverse.at(logical);
   }
 
-  auto current = circuit.initialLayout;
-  for (const auto& [physical, goal] : circuit.outputPermutation) {
-    const auto currentIt = current.find(physical);
-    if (currentIt == current.end()) {
-      throw std::invalid_argument(
-          "The HSF checker cannot normalize an incomplete initial layout.");
-    }
-    if (currentIt->second == goal) {
+  auto current = qc2.initialLayout;
+  /// Track the inverse as well to avoid searching for each swap partner.
+  inverse = current;
+  const auto splitQubit = qc2.getNqubits() / 2U;
+  for (const auto& [physical, goal] : qc2.outputPermutation) {
+    const auto first = current.at(physical);
+    if (first == goal) {
       continue;
     }
-
-    const auto goalIt = std::ranges::find_if(
-        current, [goal](const auto& entry) { return entry.second == goal; });
-    if (goalIt == current.end()) {
-      throw std::invalid_argument(
-          "The HSF checker cannot normalize an incomplete output "
-          "permutation.");
+    const auto otherPhysical = inverse.at(goal);
+    if ((first < splitQubit) == (goal < splitQubit)) {
+      qc2.swap(first, goal);
+    } else {
+      qc2.cx(first, goal);
+      qc2.cx(goal, first);
+      qc2.cx(first, goal);
     }
-
-    const auto otherPhysical = goalIt->first;
-    const auto first = current.at(physical);
-    const auto second = current.at(otherPhysical);
-    circuit.cx(first, second);
-    circuit.cx(second, first);
-    circuit.cx(first, second);
     std::swap(current.at(physical), current.at(otherPhysical));
+    inverse.at(first) = otherPhysical;
+    inverse.at(goal) = physical;
   }
-
-  // The appended CNOT triples implement the same SWAP correction that DD-based
-  // checkers ordinarily apply to their final matrix. Emitting the decomposition
-  // directly preserves any controlled SWAPs already present in the circuit.
-  qc::Permutation identity{};
-  for (const auto& entry : current) {
-    identity.emplace(entry.second, entry.second);
-  }
-  circuit.initialLayout = identity;
-  circuit.outputPermutation = std::move(identity);
+  qc1.outputPermutation = qc1.initialLayout;
+  qc2.outputPermutation = qc2.initialLayout;
 }
 
 } // namespace
@@ -451,8 +432,7 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
 
     auto normalizedQc1 = qc1;
     auto normalizedQc2 = qc2;
-    materializePermutations(normalizedQc1);
-    materializePermutations(normalizedQc2);
+    materializeRelativePermutation(normalizedQc1, normalizedQc2);
 
     if (!normalizedQc1.empty() || !normalizedQc2.empty()) {
       // The regular optimization pipeline may produce compound operations. The

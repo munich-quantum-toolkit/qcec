@@ -63,13 +63,22 @@ gates, it evaluates $2^k$ summands; although at most 63 decisions can be
 represented, the practical limit is typically much smaller. The checker is
 therefore intended for sufficiently shallow circuits with few cross-cut gates.
 
+HSF uses `trace_threshold` as its numerical tolerance for the projective
+distance. Within that tolerance, the trace phase distinguishes `equivalent` from
+`equivalent_up_to_global_phase`. Outside it, only
+`approximate_checking_threshold` determines acceptance. Phase proximity alone
+never establishes equivalence. As with any floating-point trace calculation,
+distances near zero are limited by rounding error.
+
 Normal circuit optimization and layout processing still run before HSF. MQT QCEC
-normalizes initial layouts and output permutations, materializing any remaining
-permutation as supported gates; incomplete mappings are rejected. A nontrivial
-HSF check requires at least two qubits after idle-qubit removal and does not
-support gates with targets on both sides of the cut or multiple controls on the
-control side of a cross-cut gate. Unsupported circuits are rejected instead of
-falling back to another checker.
+normalizes initial layouts and cancels common output permutations. Only the
+relative output permutation is materialized: SWAPs within a slice remain SWAPs,
+while those crossing the cut become three CNOTs each and count toward the
+decision limit. Incomplete mappings are rejected. A nontrivial HSF check
+requires at least two qubits after idle-qubit removal and does not support gates
+with targets on both sides of the cut or multiple controls on the control side
+of a cross-cut gate. These are implementation limitations; unsupported circuits
+are rejected instead of falling back to another checker.
 
 +++
 

@@ -24,27 +24,15 @@ bool Configuration::anythingToExecute() const noexcept {
 }
 
 bool Configuration::onlySingleTask() const noexcept {
-  // only a single simulation shall be performed
-  if (execution.runSimulationChecker && (simulation.maxSims == 1U) &&
-      !execution.runAlternatingChecker && !execution.runConstructionChecker &&
-      !execution.runZXChecker && !execution.runHSFChecker) {
-    return true;
-  }
-
-  // no simulations and only one of the other checks shall be performed
-  if (!execution.runSimulationChecker &&
-      ((execution.runAlternatingChecker && !execution.runConstructionChecker &&
-        !execution.runZXChecker && !execution.runHSFChecker) ||
-       (!execution.runAlternatingChecker && execution.runConstructionChecker &&
-        !execution.runZXChecker && !execution.runHSFChecker) ||
-       (!execution.runAlternatingChecker && !execution.runConstructionChecker &&
-        execution.runZXChecker && !execution.runHSFChecker) ||
-       (!execution.runAlternatingChecker && !execution.runConstructionChecker &&
-        !execution.runZXChecker && execution.runHSFChecker))) {
-    return true;
-  }
-
-  return false;
+  const auto nonSimulationTasks =
+      static_cast<unsigned>(execution.runAlternatingChecker) +
+      static_cast<unsigned>(execution.runConstructionChecker) +
+      static_cast<unsigned>(execution.runZXChecker) +
+      static_cast<unsigned>(execution.runHSFChecker);
+  const auto simulations =
+      execution.runSimulationChecker ? simulation.maxSims : 0U;
+  return (nonSimulationTasks == 1U && simulations == 0U) ||
+         (nonSimulationTasks == 0U && simulations == 1U);
 }
 
 bool Configuration::onlyZXCheckerConfigured() const noexcept {

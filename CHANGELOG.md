@@ -13,7 +13,8 @@ releases may include breaking changes.
 ### Added
 
 - ✨ Add hybrid Schrödinger--Feynman checker for approximate equivalence
-  checking ([#1043]) ([**@TeWas**], [**@denialhaag**])
+  checking with reusable slice decision diagrams and relative output-permutation
+  normalization ([#1043]) ([**@TeWas**], [**@denialhaag**], [**@burgholzer**])
 - ✨ Add approximate equivalence checking based on the projective
   Hilbert--Schmidt distance ([#443]) ([**@TeWas**], [**@denialhaag**])
 
