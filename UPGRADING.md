@@ -12,7 +12,12 @@ requires CMake 3.28 or newer.
 ### Approximate equivalence checking
 
 MQT QCEC now supports approximate equivalence checking based on the projective
-Hilbert--Schmidt distance. Its usage and limitations are described in the
+Hilbert--Schmidt distance. For shallow circuits with few gates crossing a
+horizontal cut, the optional hybrid Schrödinger--Feynman (HSF) checker can be
+enabled with `check_approximate_equivalence=True` and `run_hsf_checker=True`.
+HSF cancels shared output permutations before splitting the circuits and uses
+`trace_threshold` as its numerical projective-distance tolerance. Usage and
+limitations are described in the
 [documentation](https://mqt.readthedocs.io/projects/qcec/en/stable/approximate_equivalence_checking.html).
 
 ### Equivalence-checking optimizations

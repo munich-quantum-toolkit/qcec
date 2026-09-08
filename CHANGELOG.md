@@ -12,6 +12,9 @@ releases may include breaking changes.
 
 ### Added
 
+- ✨ Add hybrid Schrödinger--Feynman checker for approximate equivalence
+  checking with reusable slice decision diagrams and relative output-permutation
+  normalization ([#1043]) ([**@TeWas**], [**@denialhaag**], [**@burgholzer**])
 - ✨ Add approximate equivalence checking based on the projective
   Hilbert--Schmidt distance ([#443]) ([**@TeWas**], [**@denialhaag**])
 
@@ -39,6 +42,8 @@ releases may include breaking changes.
 
 ### Fixed
 
+- 🐛 Make equivalence checker timeout and cancellation signaling thread-safe
+  ([#1043]) ([**@denialhaag**])
 - 🐛 Preserve an earlier repeated measurement when deferring measurements
   ([#1040]) ([**@simon1hofmann**])
 
@@ -266,6 +271,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
+[#1043]: https://github.com/munich-quantum-toolkit/qcec/pull/1043
 [#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
 [#1040]: https://github.com/munich-quantum-toolkit/qcec/pull/1040
 [#1030]: https://github.com/munich-quantum-toolkit/qcec/pull/1030

@@ -43,6 +43,7 @@ class ConfigurationOptions(TypedDict, total=False):
     run_construction_checker: bool
     run_simulation_checker: bool
     run_zx_checker: bool
+    run_hsf_checker: bool
     timeout: float
     # Functionality
     trace_threshold: float

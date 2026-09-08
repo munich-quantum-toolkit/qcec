@@ -1074,10 +1074,6 @@ void elidePermutationsImpl(Container& container, Permutation& permutation) {
 } // namespace
 
 void elidePermutations(QuantumComputation& qc) {
-  if (qc.empty()) {
-    return;
-  }
-
   auto permutation = qc.initialLayout;
   elidePermutationsImpl(qc, permutation);
 

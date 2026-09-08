@@ -133,6 +133,16 @@ Defaults to :code:`True` since staying close to the identity can quickly show th
 Defaults to :code:`True` but arbitrary multi-controlled operations are only partially supported.)pb")
 
       .def_rw(
+          "run_hsf_checker", &Configuration::Execution::runHSFChecker,
+          R"pb(Set whether the hybrid Schrödinger--Feynman checker should be executed.
+
+Defaults to :code:`False`. Enabling it requires :attr:`~.Configuration.Functionality.check_approximate_equivalence` and makes HSF the sole checker.
+
+The :attr:`~.Configuration.Execution.parallel` option controls HSF's internal parallelism. When it is :code:`False`, HSF uses one worker; when it is :code:`True`, HSF uses up to :attr:`~.Configuration.Execution.nthreads` workers.
+
+See :doc:`/approximate_equivalence_checking` for usage and limitations.)pb")
+
+      .def_rw(
           "numerical_tolerance", &Configuration::Execution::numericalTolerance,
           R"pb(Set the numerical tolerance of the underlying decision diagram package.
 
@@ -263,9 +273,10 @@ Defaults to :code:`1e-8`.)pb")
           &Configuration::Functionality::checkApproximateEquivalence,
           R"pb(Set whether approximate equivalence should be checked using the configured :attr:`~.Configuration.Functionality.approximate_checking_threshold`.
 
-Approximate checking requires the alternating or construction checker.
+Approximate checking requires the alternating, construction, or HSF checker.
 The simulation checker is disabled because its state-fidelity threshold does not represent the configured process distance.
 The ZX checker is also disabled because it cannot establish approximate non-equivalence.
+The HSF checker is an exclusive alternative and disables the alternating and construction checkers when selected.
 Parameterized circuits and partial equivalence are not supported.
 Circuits with ancillary or garbage qubits remaining after preprocessing are also not supported.
 
