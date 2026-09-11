@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- 🔧 Use Ninja and shared CMake presets on all platforms, removing `-windows`
+  from preset names ([#1069]) ([**@denialhaag**])
+
 ## [3.10.0] - 2026-09-08
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3100)._
@@ -282,6 +287,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1069]: https://github.com/munich-quantum-toolkit/qcec/pull/1069
 [#1066]: https://github.com/munich-quantum-toolkit/qcec/pull/1066
 [#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
 [#1043]: https://github.com/munich-quantum-toolkit/qcec/pull/1043
