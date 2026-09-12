@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- 🔧 Use Ninja and shared CMake presets on all platforms, removing `-windows`
+  from preset names ([#1069]) ([**@denialhaag**])
+
 ## [3.10.0] - 2026-09-08
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3100)._
@@ -24,6 +29,8 @@ _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3100)._
 
 ### Changed
 
+- 💥 Require CMake 3.28 or newer for source builds and embedded projects
+  ([#1063]) ([**@burgholzer**])
 - ⬆️ Update `mqt-core` to version 3.10.0 ([#1060]) ([**@denialhaag**])
 - ⬆️ Update `nanobind` to version 3.0.1 ([#1060]) ([**@denialhaag**])
 - 💥 Require Python 3.11 or newer ([#1041]) ([**@denialhaag**])
@@ -282,7 +289,9 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1069]: https://github.com/munich-quantum-toolkit/qcec/pull/1069
 [#1066]: https://github.com/munich-quantum-toolkit/qcec/pull/1066
+[#1063]: https://github.com/munich-quantum-toolkit/qcec/pull/1063
 [#1060]: https://github.com/munich-quantum-toolkit/qcec/pull/1060
 [#1043]: https://github.com/munich-quantum-toolkit/qcec/pull/1043
 [#1041]: https://github.com/munich-quantum-toolkit/qcec/pull/1041
