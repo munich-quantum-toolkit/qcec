@@ -361,7 +361,10 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
 } // namespace
 } // namespace dd
 
+namespace {
+
 class PartialEquivalenceTest : public testing::Test {
+protected:
   void SetUp() override {
     qc1 = qc::QuantumComputation(nqubits, nqubits);
     qc2 = qc::QuantumComputation(nqubits, nqubits);
@@ -375,12 +378,13 @@ class PartialEquivalenceTest : public testing::Test {
     config.functionality.checkPartialEquivalence = true;
   }
 
-protected:
   std::size_t nqubits = 3U;
   qc::QuantumComputation qc1;
   qc::QuantumComputation qc2;
   ec::Configuration config{};
 };
+
+} // namespace
 
 TEST(PartialEquivalenceGenerator, ReproducibleAndIndependentSeeds) {
   constexpr size_t seed = 17U;

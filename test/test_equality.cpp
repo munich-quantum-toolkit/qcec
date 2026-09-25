@@ -21,7 +21,10 @@
 #include <optional>
 #include <stdexcept>
 
+namespace {
+
 class EqualityTest : public testing::Test {
+protected:
   void SetUp() override {
     qc1 = qc::QuantumComputation(nqubits);
     qc2 = qc::QuantumComputation(nqubits);
@@ -32,12 +35,13 @@ class EqualityTest : public testing::Test {
     config.execution.runZXChecker = false;
   }
 
-protected:
   std::size_t nqubits = 1U;
   qc::QuantumComputation qc1;
   qc::QuantumComputation qc2;
   ec::Configuration config{};
 };
+
+} // namespace
 
 TEST_F(EqualityTest, NothingToDo) {
   qc1.x(0);

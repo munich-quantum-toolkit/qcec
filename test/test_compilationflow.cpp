@@ -110,7 +110,6 @@ legacyCostFunction(const GateCostLookupTableKeyType& key) noexcept {
     return 1U;
   }
 }
-} // namespace
 
 class CompilationFlowTest : public testing::TestWithParam<std::string> {
 protected:
@@ -138,6 +137,8 @@ protected:
     configuration.application.costFunction = legacyCostFunction;
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     CompilationFlowTest, CompilationFlowTest,

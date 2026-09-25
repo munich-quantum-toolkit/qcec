@@ -20,6 +20,9 @@
 
 using namespace qc;
 using namespace sym;
+
+namespace {
+
 class SymbolicTest : public ::testing::Test {
 public:
   Variable x = Variable("x");
@@ -30,6 +33,8 @@ public:
   QuantumComputation symQc1 = QuantumComputation(1);
   QuantumComputation symQc2 = QuantumComputation(1);
 };
+
+} // namespace
 
 TEST_F(SymbolicTest, SymbolicEqu) {
   symQc1.rx(xMonom, 0);

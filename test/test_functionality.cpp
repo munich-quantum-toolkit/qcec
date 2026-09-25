@@ -21,6 +21,8 @@
 #include <string>
 #include <thread>
 
+namespace {
+
 class FunctionalityTest : public testing::TestWithParam<std::string> {
 protected:
   qc::QuantumComputation qcOriginal;
@@ -52,6 +54,8 @@ protected:
         ec::ApplicationSchemeType::Sequential;
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     TestCircuits, FunctionalityTest,

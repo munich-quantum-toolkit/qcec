@@ -20,6 +20,8 @@
 #include <string>
 #include <utility>
 
+namespace {
+
 class SimpleCircuitIdentitiesTest
     : public testing::TestWithParam<
           std::pair<std::string, std::pair<std::string, std::string>>> {
@@ -45,6 +47,8 @@ protected:
 
   void TearDown() override { std::cout << ecm->getResults() << "\n"; }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     TestCircuits, SimpleCircuitIdentitiesTest,

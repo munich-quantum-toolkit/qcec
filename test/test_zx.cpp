@@ -24,6 +24,8 @@
 #include <sstream>
 #include <string>
 
+namespace {
+
 class ZXTest : public testing::TestWithParam<std::string> {
 protected:
   qc::QuantumComputation qcOriginal;
@@ -45,6 +47,8 @@ protected:
 
   void TearDown() override { std::cout << ecm->getResults() << "\n"; }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     TestCircuits, ZXTest,

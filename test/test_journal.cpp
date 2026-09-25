@@ -29,6 +29,8 @@
 #include <string>
 #include <tuple>
 
+namespace {
+
 class JournalTestNonEQ
     : public testing::TestWithParam<std::tuple<std::string, std::uint16_t>> {
 protected:
@@ -126,6 +128,8 @@ protected:
     }
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     Journal, JournalTestNonEQ,
@@ -263,6 +267,8 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
             << ";" << '\n';
 }
 
+namespace {
+
 class JournalTestEQ : public testing::TestWithParam<std::string> {
 protected:
   qc::QuantumComputation qcOriginal;
@@ -293,6 +299,8 @@ protected:
     qcTranspiled = qasm3::Importer::importf(transpiledFile);
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     Journal, JournalTestEQ,
