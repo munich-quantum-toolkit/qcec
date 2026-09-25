@@ -113,7 +113,7 @@ jobs:
     with:
       build-project: true
       clang-version: 23
-      files-changed-only: true
+      files-changed-only: false
       install-pkgs: "nanobind==3.0.1"
       setup-python: true
       cpp-linter-extra-args: "-std=c++20"
