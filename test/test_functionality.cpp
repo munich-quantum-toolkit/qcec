@@ -10,6 +10,7 @@
 
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
+#include "checker/dd/DDConstructionChecker.hpp"
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "checker/dd/simulation/StateType.hpp"
 #include "ir/QuantumComputation.hpp"
@@ -17,9 +18,13 @@
 
 #include <gtest/gtest.h>
 #include <iostream>
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <sstream>
 #include <string>
 #include <thread>
+
+namespace {
 
 class FunctionalityTest : public testing::TestWithParam<std::string> {
 protected:
@@ -53,6 +58,8 @@ protected:
   }
 };
 
+} // namespace
+
 INSTANTIATE_TEST_SUITE_P(
     TestCircuits, FunctionalityTest,
     testing::Values("inputperm", "ancilla", "ancilla_inputperm", "swap",
@@ -65,6 +72,14 @@ INSTANTIATE_TEST_SUITE_P(
       ss << inf.param;
       return ss.str();
     });
+
+TEST(CheckerSerialization, RejectsNonObjectJson) {
+  const qc::QuantumComputation circuit(1);
+  const ec::DDConstructionChecker checker(circuit, circuit,
+                                          ec::Configuration{});
+  auto json = nlohmann::json::array();
+  EXPECT_THROW(checker.json(json), nlohmann::json::type_error);
+}
 
 TEST_P(FunctionalityTest, Reference) {
   config.execution.runConstructionChecker = true;

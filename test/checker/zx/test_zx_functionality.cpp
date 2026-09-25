@@ -163,12 +163,14 @@ TEST_F(ZXFunctionalityTest, parseQasm) {
   EXPECT_EQ(outputs[0], 2);
   EXPECT_EQ(outputs[1], 3);
 
-  constexpr auto edges =
-      std::array{std::pair{0U, 4U}, std::pair{5U, 6U}, std::pair{6U, 1U},
-                 std::pair{3U, 6U}, std::pair{4U, 5U}, std::pair{5U, 2U}};
-  constexpr auto expectedEdgeTypes =
-      std::array{EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
-                 EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple};
+  constexpr auto edges = std::array{
+      std::pair{0U, 4U}, std::pair{5U, 6U}, std::pair{6U, 1U},
+      std::pair{3U, 6U}, std::pair{4U, 5U}, std::pair{5U, 2U},
+  };
+  constexpr auto expectedEdgeTypes = std::array{
+      EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
+      EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple,
+  };
   for (std::size_t i = 0; i < edges.size(); ++i) {
     const auto& [v1, v2] = edges.at(i);
     const auto& edge = diag.getEdge(v1, v2);
@@ -182,7 +184,8 @@ TEST_F(ZXFunctionalityTest, parseQasm) {
   constexpr auto expectedVertexTypes = std::array{
       VertexType::Boundary, VertexType::Boundary, VertexType::Boundary,
       VertexType::Boundary, VertexType::Z,        VertexType::Z,
-      VertexType::X};
+      VertexType::X,
+  };
   const auto nVerts = diag.getNVertices();
   for (std::size_t i = 0; i < nVerts; ++i) {
     const auto& vData = diag.getVData(i);
@@ -496,7 +499,7 @@ TEST_F(ZXFunctionalityTest, InitialLayout) {
   qc::Permutation layout{};
   layout[0] = 1;
   layout[1] = 0;
-  qc.initialLayout = layout;
+  qc.initialLayout = std::move(layout);
   qc.x(0);
   qc.z(1);
 
@@ -806,7 +809,7 @@ TEST_F(ZXFunctionalityTest, RCCXSelfInverse) {
   qc.rccx(0, 1, 2);
   qc.rccx(0, 1, 2);
 
-  auto qcPrime = qc::QuantumComputation(3);
+  const auto qcPrime = qc::QuantumComputation(3);
   checkEquivalence(qc, qcPrime, {0, 1, 2});
 }
 

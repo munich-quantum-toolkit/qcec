@@ -30,7 +30,7 @@ public:
                        const qc::QuantumComputation& circ2,
                        Configuration config);
 
-  void json(nlohmann::json& j) const noexcept override;
+  void json(nlohmann::json& j) const override;
 
   /// a function to determine whether the alternating checker can handle
   /// checking both circuits. In particular, it checks whether both circuits

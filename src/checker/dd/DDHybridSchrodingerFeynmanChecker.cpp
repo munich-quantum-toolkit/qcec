@@ -63,7 +63,8 @@ class DDHybridSchrodingerFeynmanChecker::Slice {
 
 public:
   explicit Slice(DDPackage& package) : dd(package) { dd.incRef(matrix); }
-  ~Slice() noexcept(false) { dd.decRef(matrix); }
+  // NOLINTNEXTLINE(bugprone-exception-escape)
+  ~Slice() { dd.decRef(matrix); }
   Slice(const Slice&) = delete;
   Slice& operator=(const Slice&) = delete;
   Slice(Slice&&) = delete;
@@ -137,7 +138,12 @@ DDHybridSchrodingerFeynmanChecker::DDHybridSchrodingerFeynmanChecker(
       local.invert();
     }
     const auto mask = crossControl ? std::uint64_t{1} << decision++ : 0U;
-    operations.push_back({std::move(local), upper, crossControl, mask});
+    operations.push_back({
+        .operation = std::move(local),
+        .upper = upper,
+        .crossControl = crossControl,
+        .decisionMask = mask,
+    });
   };
   for (const auto& op : circ1) {
     append(*op, false);
@@ -322,7 +328,7 @@ EquivalenceCriterion DDHybridSchrodingerFeynmanChecker::checkEquivalence() {
     for (std::size_t worker = 0U; worker < workerCount; ++worker) {
       workers.emplace_back([this, worker, maxControl, &nextControl,
                             &workerFailed, &workerException, &exceptionMutex,
-                            &partialTraces]() {
+                            &partialTraces] {
         try {
           dd::ComplexValue localTrace{};
           const auto maxSliceQubits = std::max<std::size_t>(
@@ -395,8 +401,7 @@ EquivalenceCriterion DDHybridSchrodingerFeynmanChecker::checkEquivalence() {
   return isDone() ? EquivalenceCriterion::NoInformation : result;
 }
 
-void DDHybridSchrodingerFeynmanChecker::json(
-    nlohmann::basic_json<>& j) const noexcept {
+void DDHybridSchrodingerFeynmanChecker::json(nlohmann::basic_json<>& j) const {
   EquivalenceChecker::json(j);
   j["checker"] = "decision_diagram_hybrid_schrodinger_feynman";
 }

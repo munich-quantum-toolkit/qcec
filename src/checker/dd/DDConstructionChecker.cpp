@@ -39,7 +39,7 @@ ec::DDConstructionChecker::DDConstructionChecker(
 // this function is mainly placed here in order to have an out-of-line
 // virtual method definition which avoids emitting the classes' vtable in
 // every translation unit.
-void ec::DDConstructionChecker::json(nlohmann::basic_json<>& j) const noexcept {
+void ec::DDConstructionChecker::json(nlohmann::basic_json<>& j) const {
   DDEquivalenceChecker::json(j);
   j["checker"] = "decision_diagram_construction";
 }

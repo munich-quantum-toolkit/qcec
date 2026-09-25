@@ -30,6 +30,8 @@
 #include <stdexcept>
 #include <string>
 
+namespace {
+
 class DynamicCircuitTestExactQPE : public testing::TestWithParam<qc::Qubit> {
 protected:
   qc::Qubit precision{};
@@ -81,8 +83,8 @@ protected:
       }
     }
     std::stringstream ss{};
-    for (auto i = static_cast<int>(precision - 1); i >= 0; --i) {
-      if ((expectedResult & (1ULL << i)) != 0) {
+    for (auto i = precision; i > 0; --i) {
+      if ((expectedResult & (1ULL << (i - 1))) != 0) {
         ss << 1;
       } else {
         ss << 0;
@@ -349,3 +351,5 @@ TEST(GeneralDynamicCircuitTest, DynamicCircuit) {
 
   std::cout << ecm2.getResults() << "\n";
 }
+
+} // namespace

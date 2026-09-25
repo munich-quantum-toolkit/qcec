@@ -58,7 +58,7 @@ void DDSimulationChecker::setRandomInitialState(StateGenerator& generator) {
       generator.generateRandomState(*dd, nqubits, nancillary, stateType);
 }
 
-void DDSimulationChecker::json(nlohmann::basic_json<>& j) const noexcept {
+void DDSimulationChecker::json(nlohmann::basic_json<>& j) const {
   DDEquivalenceChecker::json(j);
   j["checker"] = "decision_diagram_simulation";
 }

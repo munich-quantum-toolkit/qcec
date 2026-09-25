@@ -26,7 +26,7 @@
 namespace ec::zx {
 
 ZXDiagram::ZXDiagram(const std::size_t nqubits) {
-  auto qubitVertices = initGraph(nqubits);
+  const auto qubitVertices = initGraph(nqubits);
   closeGraph(qubitVertices);
 }
 
@@ -120,10 +120,10 @@ Vertex ZXDiagram::addVertex(const Qubit qubit, const Col col,
 }
 
 void ZXDiagram::addQubit() {
-  auto in = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
-                      PiExpression(), VertexType::Boundary);
-  auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
-                       PiExpression(), VertexType::Boundary);
+  const auto in = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
+                            PiExpression(), VertexType::Boundary);
+  const auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
+                             PiExpression(), VertexType::Boundary);
   inputs.emplace_back(in);
   outputs.emplace_back(out);
 }
@@ -263,12 +263,12 @@ ZXDiagram& ZXDiagram::concat(const ZXDiagram& rhs) {
         }
       } else {
         const auto outV = outputs[static_cast<std::size_t>(rhs.qubit(to))];
-        for (const auto& [interior_v, interior_type] :
+        for (const auto& [interiorV, interiorType] :
              edges[outV]) { // redirect edges going to outputs
-          if (interior_type == type) {
-            addEdge(interior_v, newVs[i], EdgeType::Simple);
+          if (interiorType == type) {
+            addEdge(interiorV, newVs[i], EdgeType::Simple);
           } else {
-            addEdge(interior_v, newVs[i], EdgeType::Hadamard);
+            addEdge(interiorV, newVs[i], EdgeType::Hadamard);
           }
         }
       }
@@ -304,10 +304,12 @@ std::vector<Vertex> ZXDiagram::initGraph(const std::size_t nqubits) {
 
   const auto nVerts = qubitVertices.size();
   for (size_t i = 0; i < nVerts; ++i) {
-    const auto v = addVertex({.col = 1,
-                              .qubit = static_cast<Qubit>(i),
-                              .phase = PiExpression(),
-                              .type = VertexType::Boundary});
+    const auto v = addVertex({
+        .col = 1,
+        .qubit = static_cast<Qubit>(i),
+        .phase = PiExpression(),
+        .type = VertexType::Boundary,
+    });
     qubitVertices[i] = v;
     inputs.push_back(v);
   }
@@ -322,10 +324,12 @@ void ZXDiagram::closeGraph(const std::vector<Vertex>& qubitVertices) {
       continue;
     }
 
-    const Vertex newV = addVertex({.col = vData->col + 1,
-                                   .qubit = vData->qubit,
-                                   .phase = PiExpression(),
-                                   .type = VertexType::Boundary});
+    const Vertex newV = addVertex({
+        .col = vData->col + 1,
+        .qubit = vData->qubit,
+        .phase = PiExpression(),
+        .type = VertexType::Boundary,
+    });
     addEdge(v, newV);
     outputs.push_back(newV);
   }
@@ -352,7 +356,7 @@ void ZXDiagram::approximateCliffords(const fp tolerance) {
 }
 
 void ZXDiagram::removeDisconnectedSpiders() {
-  auto connectedToBoundary = [this](const Vertex v) {
+  const auto connectedToBoundary = [this](const Vertex v) {
     std::unordered_set<Vertex> visited{};
     std::vector<Vertex> stack{};
     stack.push_back(v);

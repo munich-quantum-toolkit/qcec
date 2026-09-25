@@ -47,7 +47,7 @@ public:
     return taskManager2.getInternalState();
   }
 
-  void json(nlohmann::basic_json<>& j) const noexcept override;
+  void json(nlohmann::basic_json<>& j) const override;
 
 private:
   // the initial state used for simulation. defaults to the all-zero state

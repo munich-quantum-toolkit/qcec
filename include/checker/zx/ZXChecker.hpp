@@ -34,7 +34,7 @@ public:
   static bool canHandle(const qc::QuantumComputation& qc1,
                         const qc::QuantumComputation& qc2);
 
-  void json(nlohmann::basic_json<>& j) const noexcept override {
+  void json(nlohmann::basic_json<>& j) const override {
     EquivalenceChecker::json(j);
     j["checker"] = "zx";
   }

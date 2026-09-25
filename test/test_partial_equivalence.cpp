@@ -32,23 +32,38 @@
 namespace dd {
 
 namespace {
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_1{
-    {}, {}, {}, {}};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_2{
-    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_1{
-    {}, {}, {}, {}, {qc::X}, {qc::X}};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_2{
-    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X}};
-
 void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
                              qc::QuantumComputation& circuit2,
                              const qc::Qubit groupBeginIndex,
                              const qc::Qubit groupSize,
                              std::mt19937_64& randomGenerator) {
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_1_1{
+          {},
+          {},
+          {},
+          {},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_1_2{
+          {qc::Z},
+          {qc::Tdg},
+          {qc::S},
+          {qc::Sdg},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_2_1{
+          {}, {}, {}, {}, {qc::X}, {qc::X},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_2_2{
+          {qc::Z},   {qc::Tdg},      {qc::S},
+          {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X},
+  };
+
   const auto& circuits1 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_1
                                          : PRE_GENERATED_CIRCUITS_SIZE_2_1;
   const auto& circuits2 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_2
@@ -59,7 +74,7 @@ void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
   const auto randomIndex = randomDistribution(randomGenerator);
   const auto x1 = circuits1[randomIndex];
   const auto x2 = circuits2[randomIndex];
-  for (auto gateType : x1) {
+  for (const auto gateType : x1) {
     if (gateType == qc::X) { // add CNOT
       circuit1.emplace_back<qc::StandardOperation>(
           groupBeginIndex, groupBeginIndex + 1, gateType);
@@ -67,7 +82,7 @@ void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
       circuit1.emplace_back<qc::StandardOperation>(groupBeginIndex, gateType);
     }
   }
-  for (auto gateType : x2) {
+  for (const auto gateType : x2) {
     if (gateType == qc::X) { // add CNOT
       circuit2.emplace_back<qc::StandardOperation>(
           groupBeginIndex, groupBeginIndex + 1, gateType);
@@ -121,7 +136,8 @@ fiveDifferentRandomNumbers(const qc::Qubit min, const qc::Qubit max,
   std::shuffle(numbers.begin(), numbers.end(), randomGenerator);
 
   const int64_t lengthOutputVector{
-      static_cast<int64_t>(std::min<size_t>(5UL, numbers.size()))};
+      static_cast<int64_t>(std::min<size_t>(5UL, numbers.size())),
+  };
 
   std::vector<qc::Qubit> outputVector(numbers.begin(),
                                       numbers.begin() + lengthOutputVector);
@@ -339,7 +355,7 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
     qc::Qubit currentDataQubit = 0;
     for (qc::Qubit currentAncillaQubit = d; currentAncillaQubit < n;
          currentAncillaQubit++) {
-      auto nextDataQubit = (currentDataQubit + 1) % d;
+      const auto nextDataQubit = (currentDataQubit + 1) % d;
       circuit1.cx(currentAncillaQubit, currentDataQubit);
       circuit2.cx(currentAncillaQubit, nextDataQubit);
       currentDataQubit = nextDataQubit;
@@ -361,7 +377,10 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
 } // namespace
 } // namespace dd
 
+namespace {
+
 class PartialEquivalenceTest : public testing::Test {
+protected:
   void SetUp() override {
     qc1 = qc::QuantumComputation(nqubits, nqubits);
     qc2 = qc::QuantumComputation(nqubits, nqubits);
@@ -375,12 +394,13 @@ class PartialEquivalenceTest : public testing::Test {
     config.functionality.checkPartialEquivalence = true;
   }
 
-protected:
   std::size_t nqubits = 3U;
   qc::QuantumComputation qc1;
   qc::QuantumComputation qc2;
   ec::Configuration config{};
 };
+
+} // namespace
 
 TEST(PartialEquivalenceGenerator, ReproducibleAndIndependentSeeds) {
   constexpr size_t seed = 17U;

@@ -129,7 +129,7 @@ void FunctionalityConstruction::addCphase(ZXDiagram& diag,
                                           const PiExpression& phase,
                                           const Qubit ctrl, const Qubit target,
                                           std::vector<Vertex>& qubits) {
-  auto newConst = phase.getConst() / 2;
+  const auto newConst = phase.getConst() / 2;
   auto newPhase = phase / 2.0;
   newPhase.setConst(newConst);
   addZSpider(diag, ctrl, qubits,
@@ -840,9 +840,8 @@ FunctionalityConstruction::parseOp(ZXDiagram& diag, op_it it, op_it end,
       if (checkSwap(it, end, ctrl, target, p)) {
         addSwap(diag, target, ctrl, qubits);
         return it + 3;
-      } else {
-        addCnot(diag, ctrl, target, qubits);
       }
+      addCnot(diag, ctrl, target, qubits);
 
       break;
     case qc::OpType::Z:

@@ -122,7 +122,11 @@ void fuseSpiders(ZXDiagram& diag, const Vertex v0, const Vertex v1) {
 
 bool checkLocalComp(const ZXDiagram& diag, const Vertex v) {
   const auto vData = diag.getVData(v).value_or(VertexData{
-      .col = 0, .qubit = 0, .phase = PiExpression(), .type = VertexType::X});
+      .col = 0,
+      .qubit = 0,
+      .phase = PiExpression(),
+      .type = VertexType::X,
+  });
   if (vData.type != VertexType::Z || !isProperClifford(vData.phase)) {
     return false;
   }
@@ -143,7 +147,7 @@ void localComp(ZXDiagram& diag, const Vertex v) { // TODO:scalars
     const auto& [n0, _] = edges[i];
     diag.addPhase(n0, phase);
     for (size_t j = i + 1; j < nedges; ++j) {
-      const auto& [n1, _u] = edges[j];
+      const auto& [n1, unused] = edges[j];
       diag.addEdgeParallelAware(n0, n1, EdgeType::Hadamard);
     }
   }
@@ -154,9 +158,17 @@ void localComp(ZXDiagram& diag, const Vertex v) { // TODO:scalars
 
 bool checkPivotPauli(const ZXDiagram& diag, const Vertex v0, const Vertex v1) {
   const auto v0Data = diag.getVData(v0).value_or(VertexData{
-      .col = 0, .qubit = 0, .phase = PiExpression(), .type = VertexType::X});
+      .col = 0,
+      .qubit = 0,
+      .phase = PiExpression(),
+      .type = VertexType::X,
+  });
   const auto v1Data = diag.getVData(v1).value_or(VertexData{
-      .col = 0, .qubit = 0, .phase = PiExpression(), .type = VertexType::X});
+      .col = 0,
+      .qubit = 0,
+      .phase = PiExpression(),
+      .type = VertexType::X,
+  });
 
   if (v0Data.type != VertexType::Z || // maybe problem if there is a self-loop?
       v1Data.type != VertexType::Z || !isPauli(diag, v0) ||
@@ -170,7 +182,7 @@ bool checkPivotPauli(const ZXDiagram& diag, const Vertex v0, const Vertex v1) {
   }
 
   const auto& v0Edges = diag.incidentEdges(v0);
-  auto isValidEdge = [&](const Edge& e) {
+  const auto isValidEdge = [&](const Edge& e) {
     return diag.type(e.to) == VertexType::Z && e.type == EdgeType::Hadamard;
   };
 
@@ -196,21 +208,21 @@ void pivotPauli(ZXDiagram& diag, const Vertex v0,
   const auto& v0Edges = diag.incidentEdges(v0);
   const auto& v1Edges = diag.incidentEdges(v1);
 
-  for (const auto& [neighbor_v0, _] : v0Edges) {
-    if (neighbor_v0 == v1) {
+  for (const auto& [neighborV0, _] : v0Edges) {
+    if (neighborV0 == v1) {
       continue;
     }
 
-    diag.addPhase(neighbor_v0, v1Phase);
-    for (const auto& [neighbor_v1, type] : v1Edges) {
-      if (neighbor_v1 != v0) {
-        diag.addEdgeParallelAware(neighbor_v0, neighbor_v1, EdgeType::Hadamard);
+    diag.addPhase(neighborV0, v1Phase);
+    for (const auto& [neighborV1, type] : v1Edges) {
+      if (neighborV1 != v0) {
+        diag.addEdgeParallelAware(neighborV0, neighborV1, EdgeType::Hadamard);
       }
     }
   }
 
-  for (const auto& [neighbor_v1, _] : v1Edges) {
-    diag.addPhase(neighbor_v1, v0Phase);
+  for (const auto& [neighborV1, _] : v1Edges) {
+    diag.addPhase(neighborV1, v0Phase);
   }
 
   diag.removeVertex(v0);
@@ -246,7 +258,7 @@ bool checkPivot(const ZXDiagram& diag, const Vertex v0, const Vertex v1) {
     return false;
   }
 
-  auto isInteriorPauli = [&](const Vertex v) {
+  const auto isInteriorPauli = [&](const Vertex v) {
     return isInterior(diag, v) && isPauli(diag, v);
   };
 

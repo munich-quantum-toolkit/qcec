@@ -17,6 +17,8 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+namespace {
+
 class SimulationTest : public ::testing::Test {
 protected:
   qc::QuantumComputation qcOriginal;
@@ -34,6 +36,8 @@ protected:
     config.simulation.seed = 12345U;
   }
 };
+
+} // namespace
 
 TEST_F(SimulationTest, Consistency) {
   qcOriginal = qasm3::Importer::importf("./circuits/test/test_original.qasm");

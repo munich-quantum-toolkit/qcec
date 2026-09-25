@@ -50,7 +50,7 @@ std::pair<size_t, size_t> LookaheadApplicationScheme::operator()() {
   }
 
   // compute both possible applications and measure the resulting size
-  auto saved = *internalState;
+  const auto saved = *internalState;
   const auto dd1 = package->multiply(op1, saved);
   const auto size1 = dd1.size();
   const auto dd2 = package->multiply(saved, op2);

@@ -71,7 +71,7 @@ void removeIdentities(QuantumComputation& qc) {
       } else {
         if (compOp.size() == 1) {
           // CompoundOperation has degraded to single Operation
-          (*it) = std::move(*(compOp.begin()));
+          (*it) = std::move(*compOp.begin());
         }
         ++it;
       }
@@ -95,7 +95,8 @@ DAG constructDAG(QuantumComputation& qc) {
 void singleQubitGateFusion(QuantumComputation& qc) {
   static const std::map<OpType, OpType> INVERSE_MAP = {
       {I, I},   {X, X},   {Y, Y},   {Z, Z},     {H, H},     {S, Sdg},
-      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier}};
+      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier},
+  };
 
   auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1U);
 
@@ -265,31 +266,27 @@ void removeDiagonalGatesBeforeMeasureRecursive(
     return;
   }
   // check if desired operation was reached
-  if (until != nullptr) {
-    if ((*dagIterators.at(idx))->get() == until) {
-      return;
-    }
+  if (until != nullptr && (*dagIterators.at(idx))->get() == until) {
+    return;
   }
 
   auto& it = dagIterators.at(idx);
   while (it != dag.at(idx).rend()) {
     // check if desired operation was reached
-    if (until != nullptr) {
-      if ((*dagIterators.at(idx))->get() == until) {
-        break;
-      }
+    if (until != nullptr && (*dagIterators.at(idx))->get() == until) {
+      break;
     }
     auto* op = (*it)->get();
     if (op->isStandardOperation()) {
       // try removing gate and upon success increase all corresponding iterators
-      auto onlyDiagonalGates =
+      const auto onlyDiagonalGates =
           removeDiagonalGate(dag, dagIterators, idx, it, op);
       if (onlyDiagonalGates) {
         for (const auto& control : op->getControls()) {
-          ++(dagIterators.at(control.qubit));
+          ++dagIterators.at(control.qubit);
         }
         for (const auto& target : op->getTargets()) {
-          ++(dagIterators.at(target));
+          ++dagIterators.at(target);
         }
       }
 
@@ -310,7 +307,7 @@ void removeDiagonalGatesBeforeMeasureRecursive(
       if (onlyDiagonalGates) {
         for (size_t q = 0; q < dag.size(); ++q) {
           if (compOp->actsOn(static_cast<Qubit>(q))) {
-            ++(dagIterators.at(q));
+            ++dagIterators.at(q);
           }
         }
       }
@@ -342,7 +339,7 @@ bool removeDiagonalGate(DAG& dag, DAGReverseIterators& dagIterators, Qubit idx,
     // need to check all controls and targets
     bool onlyDiagonalGates = true;
     for (const auto& control : op->getControls()) {
-      auto controlQubit = control.qubit;
+      const auto controlQubit = control.qubit;
       if (controlQubit == idx) {
         continue;
       }
@@ -409,7 +406,7 @@ void removeDiagonalGatesBeforeMeasure(QuantumComputation& qc) {
       dagIterators.at(q) = dag.at(q).rend();
     } else {
       // point to operation before measurement
-      dagIterators.at(q) = ++(dag.at(q).rbegin());
+      dagIterators.at(q) = ++dag.at(q).rbegin();
     }
   }
   // iterate over DAG in depth-first fashion
@@ -423,7 +420,7 @@ namespace {
 void changeTargets(Targets& targets,
                    const std::map<Qubit, Qubit>& replacementMap) {
   for (auto& target : targets) {
-    auto newTargetIt = replacementMap.find(target);
+    const auto newTargetIt = replacementMap.find(target);
     if (newTargetIt != replacementMap.end()) {
       target = newTargetIt->second;
     }
@@ -438,7 +435,7 @@ void changeControls(Controls& controls,
 
   // iterate over the replacement map and see if any control matches
   for (const auto& [from, to] : replacementMap) {
-    auto controlIt = controls.find(from);
+    const auto controlIt = controls.find(from);
     if (controlIt != controls.end()) {
       const auto controlType = controlIt->type;
       controls.erase(controlIt);
@@ -474,7 +471,7 @@ void changeQubits(Operation& operation,
     return;
   }
 
-  if (auto* ifElse = dynamic_cast<IfElseOperation*>(&operation)) {
+  if (const auto* ifElse = dynamic_cast<IfElseOperation*>(&operation)) {
     changeQubits(*ifElse->getThenOp(), replacementMap);
     if (auto* elseOperation = ifElse->getElseOp()) {
       changeQubits(*elseOperation, replacementMap);
@@ -753,7 +750,7 @@ void deferMeasurements(QuantumComputation& qc) {
           continue;
         }
 
-        if (auto* ifElse = dynamic_cast<IfElseOperation*>(opIt->get());
+        if (const auto* ifElse = dynamic_cast<IfElseOperation*>(opIt->get());
             ifElse != nullptr) {
           // determine control bit
           std::uint64_t expectedValue = 0U;
@@ -929,7 +926,7 @@ void backpropagateOutputPermutationImpl(
     Permutation& permutation, std::unordered_set<Qubit>& missingLogicalQubits) {
   for (auto it = rbegin; it != rend; ++it) {
     if ((*it)->isCompoundOperation()) {
-      auto& op = dynamic_cast<CompoundOperation&>(**it);
+      const auto& op = dynamic_cast<CompoundOperation&>(**it);
       backpropagateOutputPermutationImpl(op.crbegin(), op.crend(), permutation,
                                          missingLogicalQubits);
       continue;
@@ -1012,7 +1009,7 @@ void backpropagateOutputPermutation(QuantumComputation& qc) {
   // `permutation` now holds a potentially incomplete initial layout
   // check whether the initial layout is complete and return if it is
   if (permutation.size() == qc.getNqubits()) {
-    qc.initialLayout = permutation;
+    qc.initialLayout = std::move(permutation);
     return;
   }
 
@@ -1031,7 +1028,7 @@ void backpropagateOutputPermutation(QuantumComputation& qc) {
     }
   }
   assert(missingLogicalQubits.empty());
-  qc.initialLayout = permutation;
+  qc.initialLayout = std::move(permutation);
 }
 
 namespace {
@@ -1090,7 +1087,7 @@ void elidePermutations(QuantumComputation& qc) {
     assert(permutation.find(physical) != permutation.end());
     outputPermutation[permutation[physical]] = logical;
   }
-  qc.outputPermutation = outputPermutation;
+  qc.outputPermutation = std::move(outputPermutation);
 }
 
 } // namespace ec::detail

@@ -55,7 +55,7 @@ public:
 
   EquivalenceCriterion run() override;
 
-  void json(nlohmann::json& j) const noexcept override;
+  void json(nlohmann::json& j) const override;
 
   /**
    * @brief Validate that the HSF checker can handle a pair of circuits.

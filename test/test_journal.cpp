@@ -29,6 +29,8 @@
 #include <string>
 #include <tuple>
 
+namespace {
+
 class JournalTestNonEQ
     : public testing::TestWithParam<std::tuple<std::string, std::uint16_t>> {
 protected:
@@ -90,11 +92,11 @@ protected:
     std::array<std::mt19937_64::result_type, std::mt19937_64::state_size>
         randomData{};
     std::random_device rd;
-    std::ranges::generate(randomData, [&]() { return rd(); });
+    std::ranges::generate(randomData, [&] { return rd(); });
     std::seed_seq seeds(begin(randomData), end(randomData));
     mt.seed(seeds);
     distribution = decltype(distribution)(0U, qcTranspiled.getNops() - 1U);
-    rng = [this]() { return distribution(mt); };
+    rng = [this] { return distribution(mt); };
 
     gatesToRemove = std::get<1>(GetParam());
 
@@ -120,12 +122,14 @@ protected:
       maxTime = std::max(maxTime, time);
       maxSims = std::max(maxSims, nsims);
       avgTime =
-          (avgTime * tryCount + time) / static_cast<double>(tryCount + 1U);
-      avgSims = (avgSims * tryCount + static_cast<double>(nsims)) /
+          ((avgTime * tryCount) + time) / static_cast<double>(tryCount + 1U);
+      avgSims = ((avgSims * tryCount) + static_cast<double>(nsims)) /
                 static_cast<double>(tryCount + 1U);
     }
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     Journal, JournalTestNonEQ,
@@ -192,7 +196,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulation) {
     alreadyRemoved.insert(removed);
     ec::EquivalenceCheckingManager ecm(qcOriginal, qcTranspiled, config);
     ecm.run();
-    auto results = ecm.getResults();
+    const auto results = ecm.getResults();
     std::cout << "[" << i << "] ";
     std::cout << toString(results.equivalence) << '\n';
     addToStatistics(i, results.checkTime + results.preprocessingTime,
@@ -246,7 +250,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
     alreadyRemoved.insert(removed);
     ec::EquivalenceCheckingManager ecm(qcOriginal, qcTranspiled, config);
     ecm.run();
-    auto results = ecm.getResults();
+    const auto results = ecm.getResults();
     std::cout << "[" << i << "] ";
     std::cout << toString(results.equivalence) << '\n';
     addToStatistics(i, results.checkTime + results.preprocessingTime,
@@ -262,6 +266,8 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
             << static_cast<double>(successes) / static_cast<double>(tries)
             << ";" << '\n';
 }
+
+namespace {
 
 class JournalTestEQ : public testing::TestWithParam<std::string> {
 protected:
@@ -293,6 +299,8 @@ protected:
     qcTranspiled = qasm3::Importer::importf(transpiledFile);
   }
 };
+
+} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     Journal, JournalTestEQ,
