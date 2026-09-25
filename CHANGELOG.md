@@ -12,6 +12,7 @@ releases may include breaking changes.
 
 ### Changed
 
+- ⬆️ Update `clang-tidy` to version 23 ([#1085]) ([**@denialhaag**])
 - 🔧 Use Ninja and shared CMake presets on all platforms, removing `-windows`
   from preset names ([#1069]) ([**@denialhaag**])
 
@@ -289,6 +290,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1085]: https://github.com/munich-quantum-toolkit/qcec/pull/1085
 [#1069]: https://github.com/munich-quantum-toolkit/qcec/pull/1069
 [#1066]: https://github.com/munich-quantum-toolkit/qcec/pull/1066
 [#1063]: https://github.com/munich-quantum-toolkit/qcec/pull/1063
