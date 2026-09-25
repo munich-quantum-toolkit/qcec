@@ -549,7 +549,8 @@ TEST(HybridSchrodingerFeynmanTest, MatchesConstructionForRelativePermutations) {
   constexpr std::array permutations{
       std::array<qc::Qubit, 3>{0, 1, 2}, std::array<qc::Qubit, 3>{0, 2, 1},
       std::array<qc::Qubit, 3>{1, 0, 2}, std::array<qc::Qubit, 3>{1, 2, 0},
-      std::array<qc::Qubit, 3>{2, 0, 1}, std::array<qc::Qubit, 3>{2, 1, 0}};
+      std::array<qc::Qubit, 3>{2, 0, 1}, std::array<qc::Qubit, 3>{2, 1, 0},
+  };
   for (const auto& first : permutations) {
     for (const auto& second : permutations) {
       auto qc1 = qc::QuantumComputation(3);

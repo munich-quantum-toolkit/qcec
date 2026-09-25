@@ -206,8 +206,10 @@ TEST_F(ExpressionTest, Convertability) {
 TEST_F(ExpressionTest, Instantiation) {
   Expression<double, double> e(2 * x, y);
 
-  const VariableAssignment assignment{{Variable{"x"}, 2.0},
-                                      {Variable{"y"}, 1.0}};
+  const VariableAssignment assignment{
+      {Variable{"x"}, 2.0},
+      {Variable{"y"}, 1.0},
+  };
 
   EXPECT_PRED_FORMAT2(testing::DoubleLE, e.evaluate(assignment), 5.0);
 

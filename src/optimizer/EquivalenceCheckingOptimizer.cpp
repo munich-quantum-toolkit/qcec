@@ -95,7 +95,8 @@ DAG constructDAG(QuantumComputation& qc) {
 void singleQubitGateFusion(QuantumComputation& qc) {
   static const std::map<OpType, OpType> INVERSE_MAP = {
       {I, I},   {X, X},   {Y, Y},   {Z, Z},     {H, H},     {S, Sdg},
-      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier}};
+      {Sdg, S}, {T, Tdg}, {Tdg, T}, {SX, SXdg}, {SXdg, SX}, {Barrier, Barrier},
+  };
 
   auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1U);
 

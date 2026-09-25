@@ -69,12 +69,14 @@ TEST_F(ZXDiagramTest, createDiagram) {
   EXPECT_EQ(outputs[0], 1);
   EXPECT_EQ(outputs[1], 3);
 
-  constexpr auto edges =
-      std::array{std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
-                 std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U}};
-  constexpr auto expectedEdgeTypes =
-      std::array{EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
-                 EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple};
+  constexpr auto edges = std::array{
+      std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
+      std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U},
+  };
+  constexpr auto expectedEdgeTypes = std::array{
+      EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
+      EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple,
+  };
   for (std::size_t i = 0; i < edges.size(); ++i) {
     const auto& [v1, v2] = edges.at(i);
     const auto& edge = diag.getEdge(v1, v2);
@@ -88,7 +90,8 @@ TEST_F(ZXDiagramTest, createDiagram) {
   constexpr auto expectedVertexTypes = std::array{
       VertexType::Boundary, VertexType::Boundary, VertexType::Boundary,
       VertexType::Boundary, VertexType::Z,        VertexType::Z,
-      VertexType::X};
+      VertexType::X,
+  };
   const auto nVerts = diag.getNVertices();
   for (std::size_t i = 0; i < nVerts; ++i) {
     const auto& vData = diag.getVData(i);
@@ -115,12 +118,14 @@ TEST_F(ZXDiagramTest, deletions) {
 TEST_F(ZXDiagramTest, graphLike) {
   diag.toGraphlike();
 
-  constexpr auto edges =
-      std::array{std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
-                 std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U}};
-  constexpr auto expectedEdgeTypes =
-      std::array{EdgeType::Hadamard, EdgeType::Simple, EdgeType::Hadamard,
-                 EdgeType::Hadamard, EdgeType::Simple, EdgeType::Hadamard};
+  constexpr auto edges = std::array{
+      std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
+      std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U},
+  };
+  constexpr auto expectedEdgeTypes = std::array{
+      EdgeType::Hadamard, EdgeType::Simple, EdgeType::Hadamard,
+      EdgeType::Hadamard, EdgeType::Simple, EdgeType::Hadamard,
+  };
   for (std::size_t i = 0; i < edges.size(); ++i) {
     const auto& [v1, v2] = edges.at(i);
     const auto& edge = diag.getEdge(v1, v2);
@@ -134,7 +139,8 @@ TEST_F(ZXDiagramTest, graphLike) {
   constexpr auto expectedVertexTypes = std::array{
       VertexType::Boundary, VertexType::Boundary, VertexType::Boundary,
       VertexType::Boundary, VertexType::Z,        VertexType::Z,
-      VertexType::Z};
+      VertexType::Z,
+  };
   const auto nVerts = diag.getNVertices();
   for (std::size_t i = 0; i < nVerts; ++i) {
     const auto& vData = diag.getVData(i);
@@ -150,12 +156,14 @@ TEST_F(ZXDiagramTest, graphLike) {
 TEST_F(ZXDiagramTest, adjoint) {
   diag = diag.adjoint();
 
-  constexpr auto edges =
-      std::array{std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
-                 std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U}};
-  constexpr auto expectedEdgeTypes =
-      std::array{EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
-                 EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple};
+  constexpr auto edges = std::array{
+      std::pair{0U, 4U}, std::pair{4U, 5U}, std::pair{2U, 6U},
+      std::pair{5U, 6U}, std::pair{5U, 1U}, std::pair{6U, 3U},
+  };
+  constexpr auto expectedEdgeTypes = std::array{
+      EdgeType::Hadamard, EdgeType::Simple, EdgeType::Simple,
+      EdgeType::Simple,   EdgeType::Simple, EdgeType::Simple,
+  };
   for (std::size_t i = 0; i < edges.size(); ++i) {
     const auto& [v1, v2] = edges.at(i);
     const auto& edge = diag.getEdge(v1, v2);
@@ -169,7 +177,8 @@ TEST_F(ZXDiagramTest, adjoint) {
   constexpr auto expectedVertexTypes = std::array{
       VertexType::Boundary, VertexType::Boundary, VertexType::Boundary,
       VertexType::Boundary, VertexType::Z,        VertexType::Z,
-      VertexType::X};
+      VertexType::X,
+  };
   const auto nVerts = diag.getNVertices();
   for (std::size_t i = 0; i < nVerts; ++i) {
     const auto& vData = diag.getVData(i);

@@ -33,16 +33,26 @@ namespace dd {
 
 namespace {
 const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_1{
-    {}, {}, {}, {}};
+    {},
+    {},
+    {},
+    {},
+};
 
 const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_2{
-    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}};
+    {qc::Z},
+    {qc::Tdg},
+    {qc::S},
+    {qc::Sdg},
+};
 
 const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_1{
-    {}, {}, {}, {}, {qc::X}, {qc::X}};
+    {}, {}, {}, {}, {qc::X}, {qc::X},
+};
 
 const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_2{
-    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X}};
+    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X},
+};
 
 void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
                              qc::QuantumComputation& circuit2,
@@ -121,7 +131,8 @@ fiveDifferentRandomNumbers(const qc::Qubit min, const qc::Qubit max,
   std::shuffle(numbers.begin(), numbers.end(), randomGenerator);
 
   const int64_t lengthOutputVector{
-      static_cast<int64_t>(std::min<size_t>(5UL, numbers.size()))};
+      static_cast<int64_t>(std::min<size_t>(5UL, numbers.size())),
+  };
 
   std::vector<qc::Qubit> outputVector(numbers.begin(),
                                       numbers.begin() + lengthOutputVector);
