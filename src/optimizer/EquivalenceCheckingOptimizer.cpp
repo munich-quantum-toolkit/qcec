@@ -71,7 +71,7 @@ void removeIdentities(QuantumComputation& qc) {
       } else {
         if (compOp.size() == 1) {
           // CompoundOperation has degraded to single Operation
-          (*it) = std::move(*(compOp.begin()));
+          (*it) = std::move(*compOp.begin());
         }
         ++it;
       }
@@ -266,19 +266,15 @@ void removeDiagonalGatesBeforeMeasureRecursive(
     return;
   }
   // check if desired operation was reached
-  if (until != nullptr) {
-    if ((*dagIterators.at(idx))->get() == until) {
-      return;
-    }
+  if (until != nullptr && (*dagIterators.at(idx))->get() == until) {
+    return;
   }
 
   auto& it = dagIterators.at(idx);
   while (it != dag.at(idx).rend()) {
     // check if desired operation was reached
-    if (until != nullptr) {
-      if ((*dagIterators.at(idx))->get() == until) {
-        break;
-      }
+    if (until != nullptr && (*dagIterators.at(idx))->get() == until) {
+      break;
     }
     auto* op = (*it)->get();
     if (op->isStandardOperation()) {
@@ -287,10 +283,10 @@ void removeDiagonalGatesBeforeMeasureRecursive(
           removeDiagonalGate(dag, dagIterators, idx, it, op);
       if (onlyDiagonalGates) {
         for (const auto& control : op->getControls()) {
-          ++(dagIterators.at(control.qubit));
+          ++dagIterators.at(control.qubit);
         }
         for (const auto& target : op->getTargets()) {
-          ++(dagIterators.at(target));
+          ++dagIterators.at(target);
         }
       }
 
@@ -311,7 +307,7 @@ void removeDiagonalGatesBeforeMeasureRecursive(
       if (onlyDiagonalGates) {
         for (size_t q = 0; q < dag.size(); ++q) {
           if (compOp->actsOn(static_cast<Qubit>(q))) {
-            ++(dagIterators.at(q));
+            ++dagIterators.at(q);
           }
         }
       }
@@ -410,7 +406,7 @@ void removeDiagonalGatesBeforeMeasure(QuantumComputation& qc) {
       dagIterators.at(q) = dag.at(q).rend();
     } else {
       // point to operation before measurement
-      dagIterators.at(q) = ++(dag.at(q).rbegin());
+      dagIterators.at(q) = ++dag.at(q).rbegin();
     }
   }
   // iterate over DAG in depth-first fashion
@@ -1013,7 +1009,7 @@ void backpropagateOutputPermutation(QuantumComputation& qc) {
   // `permutation` now holds a potentially incomplete initial layout
   // check whether the initial layout is complete and return if it is
   if (permutation.size() == qc.getNqubits()) {
-    qc.initialLayout = permutation;
+    qc.initialLayout = std::move(permutation);
     return;
   }
 
@@ -1032,7 +1028,7 @@ void backpropagateOutputPermutation(QuantumComputation& qc) {
     }
   }
   assert(missingLogicalQubits.empty());
-  qc.initialLayout = permutation;
+  qc.initialLayout = std::move(permutation);
 }
 
 namespace {
@@ -1091,7 +1087,7 @@ void elidePermutations(QuantumComputation& qc) {
     assert(permutation.find(physical) != permutation.end());
     outputPermutation[permutation[physical]] = logical;
   }
-  qc.outputPermutation = outputPermutation;
+  qc.outputPermutation = std::move(outputPermutation);
 }
 
 } // namespace ec::detail

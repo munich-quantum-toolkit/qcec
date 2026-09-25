@@ -83,8 +83,8 @@ protected:
       }
     }
     std::stringstream ss{};
-    for (auto i = static_cast<int>(precision - 1); i >= 0; --i) {
-      if ((expectedResult & (1ULL << i)) != 0) {
+    for (auto i = precision; i > 0; --i) {
+      if ((expectedResult & (1ULL << (i - 1))) != 0) {
         ss << 1;
       } else {
         ss << 0;

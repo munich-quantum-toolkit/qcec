@@ -840,9 +840,8 @@ FunctionalityConstruction::parseOp(ZXDiagram& diag, op_it it, op_it end,
       if (checkSwap(it, end, ctrl, target, p)) {
         addSwap(diag, target, ctrl, qubits);
         return it + 3;
-      } else {
-        addCnot(diag, ctrl, target, qubits);
       }
+      addCnot(diag, ctrl, target, qubits);
 
       break;
     case qc::OpType::Z:

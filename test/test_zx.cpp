@@ -290,7 +290,7 @@ TEST_F(ZXTest, NonEquivalentAncillaryCircuit) {
             ec::EquivalenceCriterion::NoInformation);
 
   ecm->getConfiguration().execution.parallel = true;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NoInformation);
@@ -299,13 +299,13 @@ TEST_F(ZXTest, NonEquivalentAncillaryCircuit) {
   // does not abort the computation.
   ecm->getConfiguration().execution.runAlternatingChecker = true;
   ecm->getConfiguration().execution.parallel = false;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);
 
   ecm->getConfiguration().execution.parallel = true;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);
@@ -328,7 +328,7 @@ TEST_F(ZXTest, NonEquivalentCircuit) {
             ec::EquivalenceCriterion::ProbablyNotEquivalent);
 
   ecm->getConfiguration().execution.parallel = true;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::ProbablyNotEquivalent);
@@ -337,13 +337,13 @@ TEST_F(ZXTest, NonEquivalentCircuit) {
   // does not abort the computation.
   ecm->getConfiguration().execution.runAlternatingChecker = true;
   ecm->getConfiguration().execution.parallel = false;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);
 
   ecm->getConfiguration().execution.parallel = true;
-  ecm->reset();
+  (*ecm).reset();
   ecm->run();
   EXPECT_EQ(ecm->getResults().equivalence,
             ec::EquivalenceCriterion::NotEquivalent);

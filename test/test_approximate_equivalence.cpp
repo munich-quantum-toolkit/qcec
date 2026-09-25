@@ -19,13 +19,12 @@
 #include <gtest/gtest.h>
 #include <limits>
 #include <stdexcept>
-#include <string>
 
 namespace {
 
 enum class DDChecker : std::uint8_t { Alternating, Construction };
 
-std::string checkerName(const testing::TestParamInfo<DDChecker>& info) {
+const char* checkerName(const testing::TestParamInfo<DDChecker>& info) {
   return info.param == DDChecker::Alternating ? "Alternating" : "Construction";
 }
 

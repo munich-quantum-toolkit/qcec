@@ -216,7 +216,7 @@ auto createRandomCliffordCircuit(const Qubit nq, const std::size_t depth,
 
   std::uniform_int_distribution<std::uint16_t> distribution(0, 11520);
   auto generator = std::mt19937_64(seed);
-  const auto cliffordGenerator = [&]() { return distribution(generator); };
+  const auto cliffordGenerator = [&] { return distribution(generator); };
 
   for (std::size_t l = 0; l < depth; ++l) {
     if (nq == 1) {

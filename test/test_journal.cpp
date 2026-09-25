@@ -92,11 +92,11 @@ protected:
     std::array<std::mt19937_64::result_type, std::mt19937_64::state_size>
         randomData{};
     std::random_device rd;
-    std::ranges::generate(randomData, [&]() { return rd(); });
+    std::ranges::generate(randomData, [&] { return rd(); });
     std::seed_seq seeds(begin(randomData), end(randomData));
     mt.seed(seeds);
     distribution = decltype(distribution)(0U, qcTranspiled.getNops() - 1U);
-    rng = [this]() { return distribution(mt); };
+    rng = [this] { return distribution(mt); };
 
     gatesToRemove = std::get<1>(GetParam());
 
@@ -122,8 +122,8 @@ protected:
       maxTime = std::max(maxTime, time);
       maxSims = std::max(maxSims, nsims);
       avgTime =
-          (avgTime * tryCount + time) / static_cast<double>(tryCount + 1U);
-      avgSims = (avgSims * tryCount + static_cast<double>(nsims)) /
+          ((avgTime * tryCount) + time) / static_cast<double>(tryCount + 1U);
+      avgSims = ((avgSims * tryCount) + static_cast<double>(nsims)) /
                 static_cast<double>(tryCount + 1U);
     }
   }

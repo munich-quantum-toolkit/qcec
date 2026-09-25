@@ -781,7 +781,7 @@ void EquivalenceCheckingManager::checkSequential() {
             << "Only ZX checker specified, but one of the circuits contains "
                "operations not supported by this checker! Exiting!\n";
         markDone();
-        const std::lock_guard lock(checkersMutex);
+        const std::scoped_lock lock(checkersMutex);
         checkers.clear();
         results.equivalence = EquivalenceCriterion::NoInformation;
       }
@@ -1090,7 +1090,7 @@ void EquivalenceCheckingManager::checkSymbolic() {
                    "operations not supported by this checker! Exiting!"
                 << '\n';
       markDone();
-      const std::lock_guard lock(checkersMutex);
+      const std::scoped_lock lock(checkersMutex);
       checkers.clear();
       results.equivalence = EquivalenceCriterion::NoInformation;
       return;

@@ -499,7 +499,7 @@ TEST_F(ZXFunctionalityTest, InitialLayout) {
   qc::Permutation layout{};
   layout[0] = 1;
   layout[1] = 0;
-  qc.initialLayout = layout;
+  qc.initialLayout = std::move(layout);
   qc.x(0);
   qc.z(1);
 

@@ -147,7 +147,7 @@ void localComp(ZXDiagram& diag, const Vertex v) { // TODO:scalars
     const auto& [n0, _] = edges[i];
     diag.addPhase(n0, phase);
     for (size_t j = i + 1; j < nedges; ++j) {
-      const auto& [n1, _u] = edges[j];
+      const auto& [n1, unused] = edges[j];
       diag.addEdgeParallelAware(n0, n1, EdgeType::Hadamard);
     }
   }
@@ -208,21 +208,21 @@ void pivotPauli(ZXDiagram& diag, const Vertex v0,
   const auto& v0Edges = diag.incidentEdges(v0);
   const auto& v1Edges = diag.incidentEdges(v1);
 
-  for (const auto& [neighbor_v0, _] : v0Edges) {
-    if (neighbor_v0 == v1) {
+  for (const auto& [neighborV0, _] : v0Edges) {
+    if (neighborV0 == v1) {
       continue;
     }
 
-    diag.addPhase(neighbor_v0, v1Phase);
-    for (const auto& [neighbor_v1, type] : v1Edges) {
-      if (neighbor_v1 != v0) {
-        diag.addEdgeParallelAware(neighbor_v0, neighbor_v1, EdgeType::Hadamard);
+    diag.addPhase(neighborV0, v1Phase);
+    for (const auto& [neighborV1, type] : v1Edges) {
+      if (neighborV1 != v0) {
+        diag.addEdgeParallelAware(neighborV0, neighborV1, EdgeType::Hadamard);
       }
     }
   }
 
-  for (const auto& [neighbor_v1, _] : v1Edges) {
-    diag.addPhase(neighbor_v1, v0Phase);
+  for (const auto& [neighborV1, _] : v1Edges) {
+    diag.addPhase(neighborV1, v0Phase);
   }
 
   diag.removeVertex(v0);

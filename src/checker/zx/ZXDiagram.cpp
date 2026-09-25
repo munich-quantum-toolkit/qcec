@@ -263,12 +263,12 @@ ZXDiagram& ZXDiagram::concat(const ZXDiagram& rhs) {
         }
       } else {
         const auto outV = outputs[static_cast<std::size_t>(rhs.qubit(to))];
-        for (const auto& [interior_v, interior_type] :
+        for (const auto& [interiorV, interiorType] :
              edges[outV]) { // redirect edges going to outputs
-          if (interior_type == type) {
-            addEdge(interior_v, newVs[i], EdgeType::Simple);
+          if (interiorType == type) {
+            addEdge(interiorV, newVs[i], EdgeType::Simple);
           } else {
-            addEdge(interior_v, newVs[i], EdgeType::Hadamard);
+            addEdge(interiorV, newVs[i], EdgeType::Hadamard);
           }
         }
       }
