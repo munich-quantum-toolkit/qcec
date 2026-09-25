@@ -806,7 +806,7 @@ TEST_F(ZXFunctionalityTest, RCCXSelfInverse) {
   qc.rccx(0, 1, 2);
   qc.rccx(0, 1, 2);
 
-  auto qcPrime = qc::QuantumComputation(3);
+  const auto qcPrime = qc::QuantumComputation(3);
   checkEquivalence(qc, qcPrime, {0, 1, 2});
 }
 

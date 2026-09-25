@@ -282,7 +282,7 @@ void removeDiagonalGatesBeforeMeasureRecursive(
     auto* op = (*it)->get();
     if (op->isStandardOperation()) {
       // try removing gate and upon success increase all corresponding iterators
-      auto onlyDiagonalGates =
+      const auto onlyDiagonalGates =
           removeDiagonalGate(dag, dagIterators, idx, it, op);
       if (onlyDiagonalGates) {
         for (const auto& control : op->getControls()) {
@@ -342,7 +342,7 @@ bool removeDiagonalGate(DAG& dag, DAGReverseIterators& dagIterators, Qubit idx,
     // need to check all controls and targets
     bool onlyDiagonalGates = true;
     for (const auto& control : op->getControls()) {
-      auto controlQubit = control.qubit;
+      const auto controlQubit = control.qubit;
       if (controlQubit == idx) {
         continue;
       }
@@ -423,7 +423,7 @@ namespace {
 void changeTargets(Targets& targets,
                    const std::map<Qubit, Qubit>& replacementMap) {
   for (auto& target : targets) {
-    auto newTargetIt = replacementMap.find(target);
+    const auto newTargetIt = replacementMap.find(target);
     if (newTargetIt != replacementMap.end()) {
       target = newTargetIt->second;
     }
@@ -438,7 +438,7 @@ void changeControls(Controls& controls,
 
   // iterate over the replacement map and see if any control matches
   for (const auto& [from, to] : replacementMap) {
-    auto controlIt = controls.find(from);
+    const auto controlIt = controls.find(from);
     if (controlIt != controls.end()) {
       const auto controlType = controlIt->type;
       controls.erase(controlIt);
@@ -474,7 +474,7 @@ void changeQubits(Operation& operation,
     return;
   }
 
-  if (auto* ifElse = dynamic_cast<IfElseOperation*>(&operation)) {
+  if (const auto* ifElse = dynamic_cast<IfElseOperation*>(&operation)) {
     changeQubits(*ifElse->getThenOp(), replacementMap);
     if (auto* elseOperation = ifElse->getElseOp()) {
       changeQubits(*elseOperation, replacementMap);
@@ -753,7 +753,7 @@ void deferMeasurements(QuantumComputation& qc) {
           continue;
         }
 
-        if (auto* ifElse = dynamic_cast<IfElseOperation*>(opIt->get());
+        if (const auto* ifElse = dynamic_cast<IfElseOperation*>(opIt->get());
             ifElse != nullptr) {
           // determine control bit
           std::uint64_t expectedValue = 0U;
@@ -929,7 +929,7 @@ void backpropagateOutputPermutationImpl(
     Permutation& permutation, std::unordered_set<Qubit>& missingLogicalQubits) {
   for (auto it = rbegin; it != rend; ++it) {
     if ((*it)->isCompoundOperation()) {
-      auto& op = dynamic_cast<CompoundOperation&>(**it);
+      const auto& op = dynamic_cast<CompoundOperation&>(**it);
       backpropagateOutputPermutationImpl(op.crbegin(), op.crend(), permutation,
                                          missingLogicalQubits);
       continue;

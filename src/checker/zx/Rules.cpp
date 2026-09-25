@@ -170,7 +170,7 @@ bool checkPivotPauli(const ZXDiagram& diag, const Vertex v0, const Vertex v1) {
   }
 
   const auto& v0Edges = diag.incidentEdges(v0);
-  auto isValidEdge = [&](const Edge& e) {
+  const auto isValidEdge = [&](const Edge& e) {
     return diag.type(e.to) == VertexType::Z && e.type == EdgeType::Hadamard;
   };
 
@@ -246,7 +246,7 @@ bool checkPivot(const ZXDiagram& diag, const Vertex v0, const Vertex v1) {
     return false;
   }
 
-  auto isInteriorPauli = [&](const Vertex v) {
+  const auto isInteriorPauli = [&](const Vertex v) {
     return isInterior(diag, v) && isPauli(diag, v);
   };
 

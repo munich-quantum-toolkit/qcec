@@ -45,7 +45,7 @@ TEST(ElidePermutations, simpleSwap) {
 
   EXPECT_EQ(qc.size(), 1);
   EXPECT_TRUE(qc.front()->isStandardOperation());
-  auto reference = StandardOperation(0, H);
+  const auto reference = StandardOperation(0, H);
   EXPECT_EQ(*qc.front(), reference);
 
   EXPECT_EQ(qc.outputPermutation[0], 1);
@@ -64,7 +64,7 @@ TEST(ElidePermutations, simpleInitialLayout) {
 
   EXPECT_EQ(qc.size(), 1);
   EXPECT_TRUE(qc.front()->isStandardOperation());
-  auto reference = StandardOperation(0, H);
+  const auto reference = StandardOperation(0, H);
   EXPECT_EQ(*qc.front(), reference);
   EXPECT_EQ(qc.initialLayout[0], 0);
   EXPECT_EQ(qc.outputPermutation[0], 0);
@@ -104,8 +104,8 @@ TEST(ElidePermutations, compoundOperation) {
   EXPECT_TRUE(qc.front()->isCompoundOperation());
   auto& compound = dynamic_cast<CompoundOperation&>(*qc.front());
   EXPECT_EQ(compound.size(), 2);
-  auto reference = StandardOperation(0, 1, X);
-  auto reference2 = StandardOperation(1, 0, X);
+  const auto reference = StandardOperation(0, 1, X);
+  const auto reference2 = StandardOperation(1, 0, X);
   EXPECT_EQ(*compound.getOps().front(), reference);
   EXPECT_EQ(*compound.getOps().back(), reference2);
   EXPECT_EQ(*qc.back(), reference);
@@ -125,7 +125,7 @@ TEST(ElidePermutations, compoundOperation2) {
 
   EXPECT_EQ(qc.size(), 2);
   EXPECT_TRUE(qc.front()->isStandardOperation());
-  auto reference = StandardOperation(1, 0, X);
+  const auto reference = StandardOperation(1, 0, X);
   EXPECT_EQ(*qc.front(), reference);
   EXPECT_TRUE(qc.back()->isStandardOperation());
   EXPECT_EQ(*qc.back(), reference);
@@ -144,7 +144,7 @@ TEST(ElidePermutations, compoundOperation3) {
 
   EXPECT_EQ(qc.size(), 1);
   EXPECT_TRUE(qc.front()->isStandardOperation());
-  auto reference = StandardOperation(1, 0, X);
+  const auto reference = StandardOperation(1, 0, X);
   EXPECT_EQ(*qc.front(), reference);
   EXPECT_EQ(qc.outputPermutation[0], 1);
   EXPECT_EQ(qc.outputPermutation[1], 0);
@@ -182,7 +182,7 @@ TEST(ElidePermutations, nonUnitaryOperation) {
 
   EXPECT_EQ(qc.size(), 1);
   EXPECT_TRUE(qc.front()->isNonUnitaryOperation());
-  auto reference = NonUnitaryOperation(0, 0);
+  const auto reference = NonUnitaryOperation(0, 0);
   EXPECT_EQ(*qc.front(), reference);
   EXPECT_EQ(qc.outputPermutation[0], 0);
   EXPECT_EQ(qc.outputPermutation[1], 1);

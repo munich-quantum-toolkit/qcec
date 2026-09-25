@@ -26,7 +26,7 @@
 namespace ec::zx {
 
 ZXDiagram::ZXDiagram(const std::size_t nqubits) {
-  auto qubitVertices = initGraph(nqubits);
+  const auto qubitVertices = initGraph(nqubits);
   closeGraph(qubitVertices);
 }
 
@@ -120,10 +120,10 @@ Vertex ZXDiagram::addVertex(const Qubit qubit, const Col col,
 }
 
 void ZXDiagram::addQubit() {
-  auto in = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
-                      PiExpression(), VertexType::Boundary);
-  auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
-                       PiExpression(), VertexType::Boundary);
+  const auto in = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
+                            PiExpression(), VertexType::Boundary);
+  const auto out = addVertex(static_cast<zx::Qubit>(getNQubits()) + 1, 0,
+                             PiExpression(), VertexType::Boundary);
   inputs.emplace_back(in);
   outputs.emplace_back(out);
 }
@@ -352,7 +352,7 @@ void ZXDiagram::approximateCliffords(const fp tolerance) {
 }
 
 void ZXDiagram::removeDisconnectedSpiders() {
-  auto connectedToBoundary = [this](const Vertex v) {
+  const auto connectedToBoundary = [this](const Vertex v) {
     std::unordered_set<Vertex> visited{};
     std::vector<Vertex> stack{};
     stack.push_back(v);

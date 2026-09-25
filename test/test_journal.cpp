@@ -192,7 +192,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulation) {
     alreadyRemoved.insert(removed);
     ec::EquivalenceCheckingManager ecm(qcOriginal, qcTranspiled, config);
     ecm.run();
-    auto results = ecm.getResults();
+    const auto results = ecm.getResults();
     std::cout << "[" << i << "] ";
     std::cout << toString(results.equivalence) << '\n';
     addToStatistics(i, results.checkTime + results.preprocessingTime,
@@ -246,7 +246,7 @@ TEST_P(JournalTestNonEQ, PowerOfSimulationParallel) {
     alreadyRemoved.insert(removed);
     ec::EquivalenceCheckingManager ecm(qcOriginal, qcTranspiled, config);
     ecm.run();
-    auto results = ecm.getResults();
+    const auto results = ecm.getResults();
     std::cout << "[" << i << "] ";
     std::cout << toString(results.equivalence) << '\n';
     addToStatistics(i, results.checkTime + results.preprocessingTime,

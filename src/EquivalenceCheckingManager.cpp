@@ -138,7 +138,7 @@ void EquivalenceCheckingManager::stripIdleQubits() {
 
   // Iterate over the initialLayout of largerCircuit and remove an idle logical
   // qubit together with the physical qubit it is mapped to
-  for (auto& physicalQubitIt :
+  for (const auto& physicalQubitIt :
        std::ranges::reverse_view(largerCircuitLayoutCopy)) {
     const auto physicalQubitIndex = physicalQubitIt.first;
 

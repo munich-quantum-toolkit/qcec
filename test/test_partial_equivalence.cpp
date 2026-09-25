@@ -59,7 +59,7 @@ void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
   const auto randomIndex = randomDistribution(randomGenerator);
   const auto x1 = circuits1[randomIndex];
   const auto x2 = circuits2[randomIndex];
-  for (auto gateType : x1) {
+  for (const auto gateType : x1) {
     if (gateType == qc::X) { // add CNOT
       circuit1.emplace_back<qc::StandardOperation>(
           groupBeginIndex, groupBeginIndex + 1, gateType);
@@ -67,7 +67,7 @@ void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
       circuit1.emplace_back<qc::StandardOperation>(groupBeginIndex, gateType);
     }
   }
-  for (auto gateType : x2) {
+  for (const auto gateType : x2) {
     if (gateType == qc::X) { // add CNOT
       circuit2.emplace_back<qc::StandardOperation>(
           groupBeginIndex, groupBeginIndex + 1, gateType);
@@ -339,7 +339,7 @@ generatePartiallyEquivalentCircuits(const size_t n, const qc::Qubit d,
     qc::Qubit currentDataQubit = 0;
     for (qc::Qubit currentAncillaQubit = d; currentAncillaQubit < n;
          currentAncillaQubit++) {
-      auto nextDataQubit = (currentDataQubit + 1) % d;
+      const auto nextDataQubit = (currentDataQubit + 1) % d;
       circuit1.cx(currentAncillaQubit, currentDataQubit);
       circuit2.cx(currentAncillaQubit, nextDataQubit);
       currentDataQubit = nextDataQubit;
