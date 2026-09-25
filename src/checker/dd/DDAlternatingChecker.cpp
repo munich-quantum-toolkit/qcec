@@ -199,7 +199,7 @@ DDAlternatingChecker::DDAlternatingChecker(const qc::QuantumComputation& circ1,
   }
 }
 
-void DDAlternatingChecker::json(nlohmann::basic_json<>& j) const noexcept {
+void DDAlternatingChecker::json(nlohmann::basic_json<>& j) const {
   DDEquivalenceChecker::json(j);
   j["checker"] = "decision_diagram_alternating";
 }

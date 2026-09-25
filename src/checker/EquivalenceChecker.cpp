@@ -17,7 +17,7 @@
 // this function is mainly placed here in order to have an out-of-line
 // virtual method definition which avoids emitting the classes' vtable in
 // every translation unit.
-void ec::EquivalenceChecker::json(nlohmann::basic_json<>& j) const noexcept {
+void ec::EquivalenceChecker::json(nlohmann::basic_json<>& j) const {
   j["equivalence"] = toString(equivalence);
   j["runtime"] = getRuntime();
 }

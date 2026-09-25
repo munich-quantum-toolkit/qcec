@@ -63,7 +63,7 @@ class DDHybridSchrodingerFeynmanChecker::Slice {
 
 public:
   explicit Slice(DDPackage& package) : dd(package) { dd.incRef(matrix); }
-  ~Slice() noexcept(false) { dd.decRef(matrix); }
+  ~Slice() { dd.decRef(matrix); }
   Slice(const Slice&) = delete;
   Slice& operator=(const Slice&) = delete;
   Slice(Slice&&) = delete;
@@ -395,8 +395,7 @@ EquivalenceCriterion DDHybridSchrodingerFeynmanChecker::checkEquivalence() {
   return isDone() ? EquivalenceCriterion::NoInformation : result;
 }
 
-void DDHybridSchrodingerFeynmanChecker::json(
-    nlohmann::basic_json<>& j) const noexcept {
+void DDHybridSchrodingerFeynmanChecker::json(nlohmann::basic_json<>& j) const {
   EquivalenceChecker::json(j);
   j["checker"] = "decision_diagram_hybrid_schrodinger_feynman";
 }

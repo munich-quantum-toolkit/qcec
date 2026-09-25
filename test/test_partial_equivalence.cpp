@@ -32,33 +32,38 @@
 namespace dd {
 
 namespace {
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_1{
-    {},
-    {},
-    {},
-    {},
-};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_1_2{
-    {qc::Z},
-    {qc::Tdg},
-    {qc::S},
-    {qc::Sdg},
-};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_1{
-    {}, {}, {}, {}, {qc::X}, {qc::X},
-};
-
-const std::vector<std::vector<qc::OpType>> PRE_GENERATED_CIRCUITS_SIZE_2_2{
-    {qc::Z}, {qc::Tdg}, {qc::S}, {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X},
-};
-
 void addPreGeneratedCircuits(qc::QuantumComputation& circuit1,
                              qc::QuantumComputation& circuit2,
                              const qc::Qubit groupBeginIndex,
                              const qc::Qubit groupSize,
                              std::mt19937_64& randomGenerator) {
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_1_1{
+          {},
+          {},
+          {},
+          {},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_1_2{
+          {qc::Z},
+          {qc::Tdg},
+          {qc::S},
+          {qc::Sdg},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_2_1{
+          {}, {}, {}, {}, {qc::X}, {qc::X},
+  };
+
+  static const std::vector<std::vector<qc::OpType>>
+      PRE_GENERATED_CIRCUITS_SIZE_2_2{
+          {qc::Z},   {qc::Tdg},      {qc::S},
+          {qc::Sdg}, {qc::X, qc::Z}, {qc::Z, qc::X},
+  };
+
   const auto& circuits1 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_1
                                          : PRE_GENERATED_CIRCUITS_SIZE_2_1;
   const auto& circuits2 = groupSize == 1 ? PRE_GENERATED_CIRCUITS_SIZE_1_2
