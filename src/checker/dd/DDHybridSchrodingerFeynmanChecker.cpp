@@ -63,8 +63,7 @@ class DDHybridSchrodingerFeynmanChecker::Slice {
 
 public:
   explicit Slice(DDPackage& package) : dd(package) { dd.incRef(matrix); }
-  // decRef only throws for an untracked matrix; construction and apply() retain
-  // it. NOLINTNEXTLINE(bugprone-exception-escape)
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   ~Slice() { dd.decRef(matrix); }
   Slice(const Slice&) = delete;
   Slice& operator=(const Slice&) = delete;

@@ -102,8 +102,6 @@ protected:
   }
 };
 
-} // namespace
-
 INSTANTIATE_TEST_SUITE_P(
     Eval, DynamicCircuitTestExactQPE, testing::Range<qc::Qubit>(1U, 64U, 5U),
     [](const testing::TestParamInfo<DynamicCircuitTestExactQPE::ParamType>&
@@ -124,8 +122,6 @@ TEST_P(DynamicCircuitTestExactQPE, UnitaryEquivalence) {
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
 }
-
-namespace {
 
 class DynamicCircuitTestInexactQPE : public testing::TestWithParam<qc::Qubit> {
 protected:
@@ -211,8 +207,6 @@ protected:
   }
 };
 
-} // namespace
-
 INSTANTIATE_TEST_SUITE_P(
     Eval, DynamicCircuitTestInexactQPE, testing::Range<qc::Qubit>(1U, 15U, 3U),
     [](const testing::TestParamInfo<DynamicCircuitTestInexactQPE::ParamType>&
@@ -233,8 +227,6 @@ TEST_P(DynamicCircuitTestInexactQPE, UnitaryEquivalence) {
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
 }
-
-namespace {
 
 class DynamicCircuitTestBV : public testing::TestWithParam<qc::Qubit> {
 protected:
@@ -266,8 +258,6 @@ protected:
   }
 };
 
-} // namespace
-
 INSTANTIATE_TEST_SUITE_P(
     Eval, DynamicCircuitTestBV, testing::Range<qc::Qubit>(1U, 64U, 5U),
     [](const testing::TestParamInfo<DynamicCircuitTestBV::ParamType>& inf) {
@@ -287,8 +277,6 @@ TEST_P(DynamicCircuitTestBV, UnitaryEquivalence) {
   ecm.run();
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
 }
-
-namespace {
 
 class DynamicCircuitTestQFT : public testing::TestWithParam<qc::Qubit> {
 protected:
@@ -314,8 +302,6 @@ protected:
     config.optimizations.backpropagateOutputPermutation = true;
   }
 };
-
-} // namespace
 
 INSTANTIATE_TEST_SUITE_P(
     Eval, DynamicCircuitTestQFT, testing::Range<qc::Qubit>(1U, 65U, 5U),
@@ -365,3 +351,5 @@ TEST(GeneralDynamicCircuitTest, DynamicCircuit) {
 
   std::cout << ecm2.getResults() << "\n";
 }
+
+} // namespace
