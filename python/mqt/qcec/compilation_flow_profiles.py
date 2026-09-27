@@ -251,7 +251,7 @@ def __write_profile_data_to_file(profile_data: dict[tuple[str, int], int], filen
         f.writelines(f"{gate} {controls} {cost}\n" for (gate, controls), cost in profile_data.items())
 
 
-def __check_recurrence(seq: list[int], order: int = 2) -> list[int] | None:
+def __check_recurrence(seq: list[int], order: int = 2) -> list[float] | None:
     """Determine a recurrence relation with a given ``order`` in ``sequence`` and return the corresponding coefficients or ``None`` if no relation was determined."""
     if len(seq) < (2 * order + 1):
         return None
@@ -269,7 +269,7 @@ def __check_recurrence(seq: list[int], order: int = 2) -> list[int] | None:
         if abs(predict - seq[i]) > 10 ** (-2):
             return None
 
-    return list(coefficients)
+    return coefficients.tolist()
 
 
 def __find_continuation(
