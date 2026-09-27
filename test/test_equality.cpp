@@ -157,6 +157,50 @@ TEST_F(EqualityTest, CloseButNotEqualSimulation) {
   EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::ProbablyEquivalent);
 }
 
+// Regression test for
+// https://github.com/munich-quantum-toolkit/qcec/issues/1084.
+// Controlled RZ gates are not symmetric in their control and target qubits.
+TEST_F(EqualityTest, ControlledRZControlTargetSwap) {
+  config.execution.runAlternatingChecker = true;
+
+  qc1 = qc::QuantumComputation(2U);
+  qc2 = qc::QuantumComputation(2U);
+  qc1.crz(1.0, 0, 1);
+  qc2.crz(1.0, 1, 0);
+  ec::EquivalenceCheckingManager crz(qc1, qc2, config);
+  crz.run();
+  EXPECT_EQ(crz.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+
+  qc1 = qc::QuantumComputation(3U);
+  qc2 = qc::QuantumComputation(3U);
+  qc1.mcrz(1.0, qc::Controls{0, 1}, 2);
+  qc2.mcrz(1.0, qc::Controls{0, 2}, 1);
+  ec::EquivalenceCheckingManager mcrz(qc1, qc2, config);
+  mcrz.run();
+  EXPECT_EQ(mcrz.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+
+  qc1 = qc::QuantumComputation(3U);
+  qc2 = qc::QuantumComputation(3U);
+  qc1.crzz(1.0, 0, 1, 2);
+  qc2.crzz(1.0, 1, 0, 2);
+  ec::EquivalenceCheckingManager crzz(qc1, qc2, config);
+  crzz.run();
+  EXPECT_EQ(crzz.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+}
+
+// A controlled phase gate is symmetric in its control and target qubits.
+TEST_F(EqualityTest, ControlledPhaseControlTargetSwap) {
+  config.execution.runAlternatingChecker = true;
+
+  qc1 = qc::QuantumComputation(2U);
+  qc2 = qc::QuantumComputation(2U);
+  qc1.cp(1.0, 0, 1);
+  qc2.cp(1.0, 1, 0);
+  ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
+  ecm.run();
+  EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
+}
+
 TEST_F(EqualityTest, SimulationMoreThan64Qubits) {
   using namespace qc::literals;
 
