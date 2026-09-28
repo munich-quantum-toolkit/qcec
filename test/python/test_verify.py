@@ -180,3 +180,54 @@ cx q[7],q[8];
 
     result = verify(qc1, qc2, transform_dynamic_circuit=True)
     assert result.equivalence == EquivalenceCriterion.not_equivalent
+
+
+def _swapped_controlled_rz_pair(gate: str) -> tuple[QuantumComputation, QuantumComputation]:
+    """Build a controlled RZ-type gate and the same gate with a control and a target qubit swapped."""
+    if gate == "crz":
+        qc1, qc2 = QuantumComputation(2), QuantumComputation(2)
+        qc1.crz(1.0, 0, 1)
+        qc2.crz(1.0, 1, 0)
+    elif gate == "mcrz":
+        qc1, qc2 = QuantumComputation(3), QuantumComputation(3)
+        qc1.mcrz(1.0, {0, 1}, 2)
+        qc2.mcrz(1.0, {0, 2}, 1)
+    else:
+        qc1, qc2 = QuantumComputation(3), QuantumComputation(3)
+        qc1.crzz(1.0, 0, 1, 2)
+        qc2.crzz(1.0, 1, 0, 2)
+    return qc1, qc2
+
+
+@pytest.mark.parametrize("gate", ["crz", "mcrz", "crzz"])
+def test_issue_1084(gate: str) -> None:
+    """This is a regression test for the issue described in https://github.com/munich-quantum-toolkit/qcec/issues/1084.
+
+    Controlled RZ gates are not symmetric in their control and target qubits.
+    """
+    qc1, qc2 = _swapped_controlled_rz_pair(gate)
+    result = verify(
+        qc1,
+        qc2,
+        run_alternating_checker=True,
+        run_construction_checker=False,
+        run_simulation_checker=False,
+        run_zx_checker=False,
+    )
+    assert result.equivalence == EquivalenceCriterion.not_equivalent
+
+
+def test_controlled_phase_control_target_swap() -> None:
+    """Test that a controlled phase gate is symmetric in its control and target qubits."""
+    qc1, qc2 = QuantumComputation(2), QuantumComputation(2)
+    qc1.cp(1.0, 0, 1)
+    qc2.cp(1.0, 1, 0)
+    result = verify(
+        qc1,
+        qc2,
+        run_alternating_checker=True,
+        run_construction_checker=False,
+        run_simulation_checker=False,
+        run_zx_checker=False,
+    )
+    assert result.equivalence == EquivalenceCriterion.equivalent

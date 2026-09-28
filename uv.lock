@@ -1556,7 +1556,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mqt-core", specifier = "~=3.10.0" },
+    { name = "mqt-core", specifier = "~=3.10.1" },
     { name = "nanobind-backend", specifier = ">=1" },
     { name = "numpy", specifier = ">=1.24" },
     { name = "numpy", marker = "python_full_version >= '3.12'", specifier = ">=1.26" },
@@ -1569,14 +1569,14 @@ provides-extras = ["qiskit"]
 [package.metadata.requires-dev]
 build = [
     { name = "cmake", specifier = ">=4.4.1" },
-    { name = "mqt-core", specifier = "~=3.10.0" },
+    { name = "mqt-core", specifier = "~=3.10.1" },
     { name = "nanobind", specifier = "~=3.1.0" },
     { name = "scikit-build-core", specifier = ">=1.0.3" },
     { name = "vcs-versioning", specifier = ">=2.3" },
 ]
 dev = [
     { name = "cmake", specifier = ">=4.4.1" },
-    { name = "mqt-core", specifier = "~=3.10.0" },
+    { name = "mqt-core", specifier = "~=3.10.1" },
     { name = "nanobind", specifier = "~=3.1.0" },
     { name = "nox", specifier = ">=2025.11.12" },
     { name = "pytest", specifier = ">=9.0.3" },
