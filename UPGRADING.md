@@ -6,6 +6,10 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+## [3.10.1]
+
+This release updates the minimum required `mqt-core` version to 3.10.1.
+
 ### CMake presets on Windows
 
 All CMake presets now use Ninja. On Windows, remove `-windows` from preset names
@@ -254,7 +258,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...HEAD
+[3.10.1]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...v3.10.1
 [3.10.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...v3.10.0
 [3.9.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.8.0...v3.9.0
 [3.8.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.7.0...v3.8.0
