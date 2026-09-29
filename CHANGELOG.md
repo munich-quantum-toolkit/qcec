@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- 👷 Enable testing on Python 3.15 ([#1093]) ([**@denialhaag**])
+
 ### Changed
 
 - ⬆️ Update `mqt-core` to version 3.10.1 ([#1088]) ([**@DongjaeLee-Dd2dD2**])
@@ -296,6 +300,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1093]: https://github.com/munich-quantum-toolkit/qcec/pull/1093
 [#1088]: https://github.com/munich-quantum-toolkit/qcec/pull/1088
 [#1085]: https://github.com/munich-quantum-toolkit/qcec/pull/1085
 [#1069]: https://github.com/munich-quantum-toolkit/qcec/pull/1069
