@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+## [3.10.1] - 2026-09-29
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3101)._
+
 ### Added
 
 - 👷 Enable testing on Python 3.15 ([#1093]) ([**@denialhaag**])
@@ -283,7 +287,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...HEAD
+[3.10.1]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.10.1
 [3.10.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.10.0
 [3.9.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.9.0
 [3.8.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.8.0
