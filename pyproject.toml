@@ -53,6 +53,7 @@ dependencies = [
   "numpy>=1.26; python_version>='3.12'",
   "numpy>=2.1; python_version>='3.13'",
   "numpy>=2.3.2; python_version>='3.14'",
+  "numpy>=2.5.2; python_version>='3.15'",
 ]
 
 [[project.authors]]
@@ -217,7 +218,7 @@ before-test = "uv pip install --group test"
 test-groups = []
 
 [[tool.cibuildwheel.overrides]]
-select = [ "cp*-win_arm64", "cp315*" ]
+select = [ "cp*-win_arm64", "cp3??t-*" ]
 before-test = ""
 test-command = 'python -c "import mqt.qcec"'
 test-groups = []
