@@ -244,7 +244,6 @@ docstring-code-format = true
 ]
 "docs/**" = [ "T20" ]
 "noxfile.py" = [ "T20", "TID251" ]
-"python/mqt/qcec/_compat/**.py" = [ "TID251" ]
 "*.pyi" = [ "D301", "D418", "E501", "PYI021" ]
 "*.ipynb" = [
   "D",    # pydocstyle
@@ -305,7 +304,6 @@ ignore = [
   "PLR2004", # Magic value used in comparison
   "S101",    # Use of assert detected
 ]
-typing-modules = [ "mqt.qcec._compat.typing" ]
 future-annotations = true
 
 
@@ -382,7 +380,6 @@ testpaths = [ "test/python" ]
 
 [tool.coverage.run]
 source = [ "mqt.qcec" ]
-omit = [ "python/mqt/qcec/_compat/typing.py" ]
 parallel = true
 disable_warnings = [
   "no-sysmon",
