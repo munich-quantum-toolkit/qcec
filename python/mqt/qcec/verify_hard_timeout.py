@@ -38,6 +38,10 @@ def verify_with_hard_timeout(
 ) -> dict[str, Any]:
     """Verify two circuits in a process that is killed after ``deadline`` seconds.
 
+    Use this function only when a check needs forced termination. For other
+    checks, prefer :func:`verify` with its cooperative ``timeout`` option. A
+    worker process adds substantial overhead, especially for Qiskit inputs.
+
     Inputs may be file paths, OpenQASM text, or Qiskit circuits. Qiskit circuits
     are serialized with QPY before the worker starts. The timeout covers worker
     startup and circuit loading after process creation, but not serialization

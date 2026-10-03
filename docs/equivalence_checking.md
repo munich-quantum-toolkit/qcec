@@ -180,8 +180,16 @@ In general, the following steps are performed:
 
 ## Hard Timeouts for Circuit Inputs
 
-To stop a check during a long-running DD operation, use
-`verify_with_hard_timeout` with file paths, OpenQASM text, or Qiskit circuits:
+For normal checks, use the cooperative `timeout` option of `verify`. It avoids
+starting a worker process for each check. A long-running DD operation can delay
+cancellation past the requested timeout.
+
+Use `verify_with_hard_timeout`
+**only when the worker must be terminated after a timeout**. It can stop a check
+during a long-running DD operation, but starting the worker adds substantial
+latency. In a five-run 133-gate self-check on a DGX Spark, the median was 4.3 ms
+with `verify`, 114 ms with a file worker, and 253 ms with QPY input. The
+function accepts file paths, OpenQASM text, or Qiskit circuits:
 
 ```python
 from mqt import qcec
