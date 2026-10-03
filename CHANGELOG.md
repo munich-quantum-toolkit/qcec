@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛 Stop DD checkers at stage and gate boundaries after cancellation ([#1095])
+  ([**@burgholzer**])
+
 ## [3.10.1] - 2026-09-29
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3101)._
@@ -305,6 +310,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1095]: https://github.com/munich-quantum-toolkit/qcec/pull/1095
 [#1093]: https://github.com/munich-quantum-toolkit/qcec/pull/1093
 [#1088]: https://github.com/munich-quantum-toolkit/qcec/pull/1088
 [#1085]: https://github.com/munich-quantum-toolkit/qcec/pull/1085

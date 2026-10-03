@@ -79,24 +79,31 @@ void DDAlternatingChecker::execute() {
       const auto [apply1, apply2] = (*applicationScheme)();
 
       // advance both tasks correspondingly
-      if (!isDone()) {
-        taskManager1.advance(functionality, apply1);
+      for (std::size_t i = 0U;
+           i < apply1 && !taskManager1.finished() && !isDone(); ++i) {
+        taskManager1.advance(functionality);
       }
-      if (!isDone()) {
-        taskManager2.advance(functionality, apply2);
+      for (std::size_t i = 0U;
+           i < apply2 && !taskManager2.finished() && !isDone(); ++i) {
+        taskManager2.advance(functionality);
       }
     }
   }
 }
 
 void DDAlternatingChecker::finish() {
-  taskManager1.finish(functionality);
-  if (!isDone()) {
-    taskManager2.finish(functionality);
+  while (!taskManager1.finished() && !isDone()) {
+    taskManager1.advance(functionality);
+  }
+  while (!taskManager2.finished() && !isDone()) {
+    taskManager2.advance(functionality);
   }
 }
 
 void DDAlternatingChecker::postprocess() {
+  if (isDone()) {
+    return;
+  }
   // ensure that the permutations that were tracked throughout the circuit match
   // the expected output permutations
   taskManager1.changePermutation(functionality);
