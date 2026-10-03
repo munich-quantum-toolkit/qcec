@@ -10,8 +10,10 @@
 
 #include "EquivalenceCheckingManager.hpp"
 #include "EquivalenceCriterion.hpp"
+#include "checker/dd/DDEquivalenceChecker.hpp"
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "dd/DDDefinitions.hpp"
+#include "dd/Node.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
@@ -41,7 +43,42 @@ protected:
   ec::Configuration config{};
 };
 
+class CancelAfterExecuteChecker
+    : public ec::DDEquivalenceChecker<dd::MatrixDD> {
+public:
+  using DDEquivalenceChecker::DDEquivalenceChecker;
+
+  bool cancel = false;
+  int finishes = 0;
+  int postprocesses = 0;
+
+protected:
+  void execute() override {
+    if (cancel) {
+      signalDone();
+    }
+  }
+  void finish() override { ++finishes; }
+  void postprocess() override { ++postprocesses; }
+  ec::EquivalenceCriterion checkEquivalence() override {
+    return ec::EquivalenceCriterion::Equivalent;
+  }
+};
+
 } // namespace
+
+TEST(CancellationTest, SkipsRemainingStages) {
+  auto qc = qc::QuantumComputation(1);
+  qc.x(0);
+  auto checker = CancelAfterExecuteChecker(qc, qc, {});
+
+  EXPECT_EQ(checker.run(), ec::EquivalenceCriterion::Equivalent);
+  checker.cancel = true;
+  EXPECT_EQ(checker.run(), ec::EquivalenceCriterion::NoInformation);
+  EXPECT_EQ(checker.getEquivalence(), ec::EquivalenceCriterion::NoInformation);
+  EXPECT_EQ(checker.finishes, 1);
+  EXPECT_EQ(checker.postprocesses, 1);
+}
 
 TEST_F(EqualityTest, NothingToDo) {
   qc1.x(0);

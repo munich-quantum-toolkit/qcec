@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 
@@ -132,26 +133,39 @@ bool DDEquivalenceChecker<DDType>::
 template <class DDType>
 EquivalenceCriterion DDEquivalenceChecker<DDType>::run() {
   const auto start = std::chrono::steady_clock::now();
+  equivalence = EquivalenceCriterion::NoInformation;
 
   // initialize the internal representation (initial state, initial matrix,
   // etc.)
-  initialize();
+  if (!isDone()) {
+    initialize();
+  }
 
   // execute the equivalence checking scheme
-  execute();
+  if (!isDone()) {
+    execute();
+  }
 
   // finish off both circuits
-  finish();
+  if (!isDone()) {
+    finish();
+  }
 
   // postprocess the result
-  postprocess();
+  if (!isDone()) {
+    postprocess();
+  }
 
   if (isDone()) {
     return equivalence;
   }
 
   // check the equivalence
-  equivalence = checkEquivalence();
+  const auto result = checkEquivalence();
+  if (isDone()) {
+    return equivalence;
+  }
+  equivalence = result;
 
   const auto end = std::chrono::steady_clock::now();
   runtime += std::chrono::duration<double>(end - start).count();
@@ -181,22 +195,24 @@ template <class DDType> void DDEquivalenceChecker<DDType>::execute() {
       const auto [apply1, apply2] = (*applicationScheme)();
 
       // advance both tasks correspondingly
-      if (!isDone()) {
-        taskManager1.advance(apply1);
+      for (std::size_t i = 0U;
+           i < apply1 && !taskManager1.finished() && !isDone(); ++i) {
+        taskManager1.advance();
       }
-      if (!isDone()) {
-        taskManager2.advance(apply2);
+      for (std::size_t i = 0U;
+           i < apply2 && !taskManager2.finished() && !isDone(); ++i) {
+        taskManager2.advance();
       }
     }
   }
 }
 
 template <class DDType> void DDEquivalenceChecker<DDType>::finish() {
-  if (!isDone()) {
-    taskManager1.finish();
+  while (!taskManager1.finished() && !isDone()) {
+    taskManager1.advance();
   }
-  if (!isDone()) {
-    taskManager2.finish();
+  while (!taskManager2.finished() && !isDone()) {
+    taskManager2.advance();
   }
 }
 
