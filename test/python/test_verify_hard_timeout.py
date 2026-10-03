@@ -10,7 +10,10 @@
 
 from __future__ import annotations
 
+import io
+import json
 import os
+import sys
 from typing import TYPE_CHECKING, cast
 
 import pytest
@@ -19,6 +22,7 @@ from qiskit.circuit import Parameter, QuantumCircuit
 
 from mqt.qcec import verify_with_hard_timeout
 from mqt.qcec.pyqcec import ApplicationScheme, StateType
+from mqt.qcec.verify_hard_timeout import _encode_circuit, _run_worker
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -100,3 +104,20 @@ def test_verify_with_hard_timeout_errors(tmp_path: Path) -> None:
         verify_with_hard_timeout(cast("str", QuantumComputation(1)), path, deadline=1)
     with pytest.raises(RuntimeError, match="missing"):
         verify_with_hard_timeout(path, path, deadline=5)
+
+
+def test_hard_timeout_worker_decoding(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Decode mixed inputs and checker options from the worker's input."""
+    circuit = QuantumCircuit(1)
+    circuit.x(0)
+    qasm = "OPENQASM 3.0; qubit[1] q; x q[0];"
+    request = [
+        [_encode_circuit(qasm), _encode_circuit(circuit)],
+        {"alternating_scheme": "one_to_one", "state_type": "computational_basis"},
+    ]
+    output = io.StringIO()
+    monkeypatch.setattr(sys, "stdin", io.StringIO(json.dumps(request)))
+    monkeypatch.setattr(sys, "stdout", output)
+
+    _run_worker()
+    assert json.loads(output.getvalue())["equivalence"] == "equivalent"
