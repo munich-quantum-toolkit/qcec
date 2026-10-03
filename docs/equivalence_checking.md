@@ -178,10 +178,10 @@ In general, the following steps are performed:
   finishes and was not able to reduce the ZX-diagram to the identity, this
   indicates that the circuits are probably not equivalent.
 
-## Hard Timeouts for Circuit Files
+## Hard Timeouts for Circuit Inputs
 
 To stop a check during a long-running DD operation, use
-`verify_with_hard_timeout` with circuit file paths:
+`verify_with_hard_timeout` with file paths, OpenQASM text, or Qiskit circuits:
 
 ```python
 from mqt import qcec
@@ -190,9 +190,24 @@ result = qcec.verify_with_hard_timeout("original.qasm", "optimized.qasm", deadli
 print(result["equivalence"])
 ```
 
+The two inputs may use different forms. For example, a Qiskit circuit can be
+checked against OpenQASM text:
+
+```python
+from mqt import qcec
+from qiskit import QuantumCircuit
+
+qiskit_circuit = QuantumCircuit(1)
+qiskit_circuit.x(0)
+qasm = "OPENQASM 3.0; qubit[1] q; x q[0];"
+result = qcec.verify_with_hard_timeout(qiskit_circuit, qasm, deadline=5)
+```
+
 This starts a separate process and raises `TimeoutError` if the worker timeout
 expires. The timeout covers worker startup and circuit loading after process
-creation; process creation itself may delay the timeout on some platforms.
-Successful checks return the JSON-style result of `verify`, including checker
-statistics but not DD counterexamples. Process startup adds overhead to short
-checks; use `verify` when a hard deadline is unnecessary.
+creation. Qiskit circuits use QPY; serialization in the caller occurs before the
+deadline starts. Process creation itself may delay the timeout on some
+platforms. `QuantumComputation` objects are not supported. Successful checks
+return the JSON-style result of `verify`, including checker statistics but not
+DD counterexamples. Process startup adds overhead to short checks; use `verify`
+when a hard deadline is unnecessary.

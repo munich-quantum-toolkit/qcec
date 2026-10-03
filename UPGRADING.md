@@ -6,10 +6,13 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
-For checks started from circuit files that may stall in a long DD operation,
-call `verify_with_hard_timeout(path1, path2, deadline=seconds)`. It returns a
-JSON-style dictionary and raises `TimeoutError` when the worker is terminated.
-The existing `verify` API and its result type are unchanged.
+For checks that may stall in a long DD operation, call
+`verify_with_hard_timeout(circuit1, circuit2, deadline=seconds)`. It accepts
+file paths, OpenQASM text, and Qiskit circuits, including mixed inputs. Qiskit
+circuits require the `qiskit` extra and are serialized with QPY before the
+deadline starts. `QuantumComputation` objects are not supported. The function
+returns a JSON-style dictionary and raises `TimeoutError` when the worker is
+terminated. The existing `verify` API and its result type are unchanged.
 
 ## [3.10.1]
 

@@ -12,8 +12,8 @@ releases may include breaking changes.
 
 ### Added
 
-- ⏱️ Add a file-based verification API that terminates checks after a worker
-  timeout ([#818]) ([**@burgholzer**])
+- ⏱️ Add hard-timeout verification for file paths, OpenQASM text, and Qiskit
+  circuits ([#818]) ([**@burgholzer**])
 
 ### Fixed
 
