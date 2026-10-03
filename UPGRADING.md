@@ -6,6 +6,18 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+For normal checks, keep using `verify(..., timeout=seconds)`. This cooperative
+timeout avoids starting a worker for each check, but a long DD operation can
+delay cancellation. Use
+`verify_with_hard_timeout(circuit1, circuit2, deadline=seconds)` only when a
+check needs forced termination. The worker adds substantial latency, especially
+for Qiskit inputs. The function accepts file paths, OpenQASM text, and Qiskit
+circuits, including mixed inputs. Qiskit circuits require the `qiskit` extra and
+are serialized with QPY before the deadline starts. `QuantumComputation` objects
+are not supported. The function returns a JSON-style dictionary and raises
+`TimeoutError` when the worker is terminated. The existing `verify` API and its
+result type are unchanged.
+
 ## [3.10.1]
 
 This release updates the minimum required `mqt-core` version to 3.10.1.

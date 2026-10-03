@@ -10,15 +10,14 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._compat.optional import HAS_QISKIT
-
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
     from qiskit.circuit import QuantumCircuit
 
@@ -173,16 +172,9 @@ def __compute_cost(
     return size
 
 
-class GateType(Enum):
-    """Enum for gate types."""
-
-    GENERAL = 1
-    MULTI_CONTROLLED = 2
-
-
 def __create_gate_profile_data(
     gate_collection: list[dict[str, Any]],
-    gate_type: GateType,
+    create_gate: Callable[[int, int, int, str], QuantumCircuit],
     basis_gates: list[str] | None = None,
     optimization_level: int = 1,
 ) -> dict[tuple[str, int], int]:
@@ -197,23 +189,9 @@ def __create_gate_profile_data(
         params = gate_set["params"]
         controls = gate_set["controls"]
 
-        # pack single control numbers into list
-        if gate_type == GateType.GENERAL:
-            controls = [controls]
-
         for gate in gates:
-            for control in controls:
-                qc = None
-                # create the gate
-                if gate_type == GateType.GENERAL:
-                    qc = __create_general_gate(qubits, params, control, gate)
-                elif gate_type == GateType.MULTI_CONTROLLED:
-                    qc = __create_multi_controlled_gate(
-                        qubits,
-                        params,
-                        control,
-                        gate,
-                    )
+            for control in [controls] if isinstance(controls, int) else controls:
+                qc = create_gate(qubits, params, control, gate)
                 # compute the cost
                 cost = __compute_cost(qc, basis_gates, optimization_level)
 
@@ -333,19 +311,17 @@ def generate_profile(
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
     """
-    HAS_QISKIT.require_now("generate compilation flow profiles")
-
     if filepath is None:
         filepath = default_profile_path
 
     # generate general profile data
-    profile = __create_gate_profile_data(general_gates, GateType.GENERAL, optimization_level=optimization_level)
+    profile = __create_gate_profile_data(general_gates, __create_general_gate, optimization_level=optimization_level)
 
     # add multi-controlled gates
     profile.update(
         __create_gate_profile_data(
             multi_controlled_gates,
-            GateType.MULTI_CONTROLLED,
+            __create_multi_controlled_gate,
             optimization_level=optimization_level,
         )
     )

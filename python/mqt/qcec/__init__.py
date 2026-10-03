@@ -35,9 +35,11 @@ if sys.platform == "win32":  # ruff:ignore[non-empty-init-module] This is actual
 from ._version import version as __version__
 from .verify import verify
 from .verify_compilation_flow import verify_compilation
+from .verify_hard_timeout import verify_with_hard_timeout
 
 __all__ = [
     "__version__",
     "verify",
     "verify_compilation",
+    "verify_with_hard_timeout",
 ]

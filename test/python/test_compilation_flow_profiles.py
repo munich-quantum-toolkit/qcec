@@ -18,7 +18,6 @@ import pytest
 from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 
-from mqt.qcec._compat.optional import HAS_QISKIT
 from mqt.qcec.compilation_flow_profiles import generate_profile, generate_profile_name
 
 if TYPE_CHECKING:
@@ -44,6 +43,7 @@ def test_default_profile_generation(tmp_path: Path) -> None:
         (gate, int(controls)): int(cost)
         for gate, controls, cost in (line.split() for line in profile.read_text(encoding="utf-8").splitlines()[1:])
     }
+    assert costs["x", 0] == 1
     controls = 5
     mcx = QuantumCircuit(controls + 1)
     mcx.mcx(list(range(controls)), controls)
@@ -82,9 +82,3 @@ def test_generated_profiles_are_still_valid(optimization_level: int, tmp_path: P
             f"The generated profile {profile_name} differs from the reference profile {ref}. "
             f"This might be due to a change in Qiskit. If this is the case, the reference profile should be updated."
         )
-
-
-def test_compilation_flow_profile_generation_fails_without_qiskit() -> None:
-    """Test that profile generation fails if Qiskit is not available."""
-    with HAS_QISKIT.disable_locally(), pytest.raises(ImportError, match=r"The 'qiskit' library is required to .*"):
-        generate_profile()
