@@ -177,3 +177,22 @@ In general, the following steps are performed:
   case it finishes with an affirmative answer, the check is finished. In case it
   finishes and was not able to reduce the ZX-diagram to the identity, this
   indicates that the circuits are probably not equivalent.
+
+## Hard Timeouts for Circuit Files
+
+To stop a check during a long-running DD operation, use
+`verify_with_hard_timeout` with circuit file paths:
+
+```python
+from mqt import qcec
+
+result = qcec.verify_with_hard_timeout("original.qasm", "optimized.qasm", deadline=5)
+print(result["equivalence"])
+```
+
+This starts a separate process and raises `TimeoutError` if the worker timeout
+expires. The timeout covers worker startup and circuit loading after process
+creation; process creation itself may delay the timeout on some platforms.
+Successful checks return the JSON-style result of `verify`, including checker
+statistics but not DD counterexamples. Process startup adds overhead to short
+checks; use `verify` when a hard deadline is unnecessary.

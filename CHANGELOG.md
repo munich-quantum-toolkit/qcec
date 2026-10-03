@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- ⏱️ Add a file-based verification API that terminates checks after a worker
+  timeout ([#818]) ([**@burgholzer**])
+
 ### Fixed
 
 - 🐛 Stop DD checkers at stage and gate boundaries after cancellation ([#1095])
@@ -310,6 +315,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#818]: https://github.com/munich-quantum-toolkit/qcec/pull/818
 [#1095]: https://github.com/munich-quantum-toolkit/qcec/pull/1095
 [#1093]: https://github.com/munich-quantum-toolkit/qcec/pull/1093
 [#1088]: https://github.com/munich-quantum-toolkit/qcec/pull/1088

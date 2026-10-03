@@ -6,6 +6,11 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+For checks started from circuit files that may stall in a long DD operation,
+call `verify_with_hard_timeout(path1, path2, deadline=seconds)`. It returns a
+JSON-style dictionary and raises `TimeoutError` when the worker is terminated.
+The existing `verify` API and its result type are unchanged.
+
 ## [3.10.1]
 
 This release updates the minimum required `mqt-core` version to 3.10.1.
