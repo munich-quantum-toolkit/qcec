@@ -11,7 +11,6 @@
 from __future__ import annotations
 
 import os
-import sys
 from importlib import resources
 from typing import TYPE_CHECKING
 
@@ -83,10 +82,3 @@ def test_generated_profiles_are_still_valid(optimization_level: int, tmp_path: P
             f"The generated profile {profile_name} differs from the reference profile {ref}. "
             f"This might be due to a change in Qiskit. If this is the case, the reference profile should be updated."
         )
-
-
-def test_compilation_flow_profile_generation_fails_without_qiskit(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Test that profile generation fails if Qiskit is not available."""
-    monkeypatch.setitem(sys.modules, "qiskit", None)
-    with pytest.raises(ImportError, match=r"The 'qiskit' library is required to .*"):
-        generate_profile()

@@ -106,9 +106,6 @@ def _decode_circuit(encoded: list[str]) -> str | QuantumCircuit:
     kind, data = encoded
     if kind == "source":
         return data
-    if kind != "qpy":
-        msg = f"unknown circuit format: {kind}"
-        raise ValueError(msg)
     from qiskit import qpy  # ruff: ignore[import-outside-top-level] optional dependency
 
     return qpy.load(io.BytesIO(base64.b64decode(data)))[0]

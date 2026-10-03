@@ -217,5 +217,4 @@ creation. Qiskit circuits use QPY; serialization in the caller occurs before the
 deadline starts. Process creation itself may delay the timeout on some
 platforms. `QuantumComputation` objects are not supported. Successful checks
 return the JSON-style result of `verify`, including checker statistics but not
-DD counterexamples. Process startup adds overhead to short checks; use `verify`
-when a hard deadline is unnecessary.
+DD counterexamples.

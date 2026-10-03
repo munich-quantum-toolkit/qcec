@@ -10,7 +10,6 @@
 
 from __future__ import annotations
 
-import importlib
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -312,15 +311,6 @@ def generate_profile(
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
     """
-    try:
-        importlib.import_module("qiskit")
-    except ImportError as exc:
-        msg = (
-            "The 'qiskit' library is required to generate compilation flow profiles. "
-            "Please install the `mqt.qcec[qiskit]` extra or a compatible version of Qiskit."
-        )
-        raise ImportError(msg) from exc
-
     if filepath is None:
         filepath = default_profile_path
 
