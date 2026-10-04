@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+## [3.10.2] - 2026-10-04
+
+_If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3102)._
+
 ### Added
 
 - ⏱️ Add hard-timeout verification for file paths, OpenQASM text, and Qiskit
@@ -297,7 +301,8 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.2...HEAD
+[3.10.2]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.10.2
 [3.10.1]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.10.1
 [3.10.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.10.0
 [3.9.0]: https://github.com/munich-quantum-toolkit/qcec/releases/tag/v3.9.0
