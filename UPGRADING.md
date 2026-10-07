@@ -6,6 +6,16 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+Terminal measurements may use classical destinations outside the qubit range,
+including those created by `measure_all()` after an existing classical register.
+QCEC normalizes these outputs jointly when both circuits measure one-to-one into
+the same set of classical destinations. It preserves the measurement
+instructions and output correspondence.
+
+If such normalization is required, mismatched destination sets, repeated
+measurements, and output mappings inconsistent with the measurements raise
+`ValueError` in Python (`std::invalid_argument` in C++).
+
 ## [3.10.2]
 
 This release adds

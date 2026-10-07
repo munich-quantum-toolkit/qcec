@@ -179,6 +179,7 @@ cache-keys = [
 ]
 
 [tool.uv.sources]
+mqt-core = { git = "https://github.com/munich-quantum-toolkit/core.git", rev = "008bcd5cd47a5f8885b7476e5b16dac8a0204862" }
 mqt-qcec = { workspace = true }
 
 

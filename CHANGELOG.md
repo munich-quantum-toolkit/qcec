@@ -10,6 +10,11 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Fixed
+
+- 🐛 Normalize shared classical measurement destinations outside the qubit range
+  before equivalence checking ([#1102]) ([**@burgholzer**])
+
 ## [3.10.2] - 2026-10-05
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3102)._
@@ -320,6 +325,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
 [#818]: https://github.com/munich-quantum-toolkit/qcec/pull/818
 [#1095]: https://github.com/munich-quantum-toolkit/qcec/pull/1095
 [#1093]: https://github.com/munich-quantum-toolkit/qcec/pull/1093

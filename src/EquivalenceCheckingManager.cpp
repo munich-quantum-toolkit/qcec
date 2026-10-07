@@ -23,6 +23,8 @@
 #include "ir/Definitions.hpp"
 #include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "ir/operations/NonUnitaryOperation.hpp"
+#include "ir/operations/OpType.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
 
 #include <algorithm>
@@ -32,11 +34,13 @@
 #include <cstddef>
 #include <future>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <ranges>
+#include <set>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -45,6 +49,77 @@
 namespace ec {
 
 namespace {
+void normalizeMeasurementOutputs(qc::QuantumComputation& first,
+                                 qc::QuantumComputation& second) {
+  const auto needsNormalization = [](const qc::QuantumComputation& circuit) {
+    return std::ranges::any_of(circuit.outputPermutation,
+                               [&circuit](const auto& entry) {
+                                 return entry.second >= circuit.getNqubits();
+                               });
+  };
+  if (!needsNormalization(first) && !needsNormalization(second)) {
+    return;
+  }
+
+  const auto measurementLabels = [](const qc::QuantumComputation& circuit) {
+    std::set<qc::Qubit> measured;
+    std::set<qc::Bit> labels;
+    for (const auto& op : circuit) {
+      if (op->getType() != qc::Measure) {
+        if (op->getType() != qc::Barrier &&
+            (op->isNonUnitaryOperation() ||
+             std::ranges::any_of(
+                 op->getUsedQubits(),
+                 [&measured](const auto q) { return measured.contains(q); }))) {
+          throw std::invalid_argument(
+              "Output normalization requires terminal measurements.");
+        }
+        continue;
+      }
+      const auto& measurement =
+          dynamic_cast<const qc::NonUnitaryOperation&>(*op);
+      for (size_t i = 0; i < measurement.getTargets().size(); ++i) {
+        const auto qubit = measurement.getTargets()[i];
+        const auto bit = measurement.getClassics()[i];
+        const auto output = circuit.outputPermutation.find(qubit);
+        if (!measured.insert(qubit).second || !labels.insert(bit).second ||
+            output == circuit.outputPermutation.end() ||
+            output->second != bit) {
+          throw std::invalid_argument(
+              "Output normalization requires one-to-one terminal measurements "
+              "consistent with the output permutation.");
+        }
+      }
+    }
+    if (measured.empty() ||
+        measured.size() != circuit.outputPermutation.size()) {
+      throw std::invalid_argument(
+          "Output normalization requires measurements for every output.");
+    }
+    return labels;
+  };
+
+  const auto labels = measurementLabels(first);
+  if (labels != measurementLabels(second)) {
+    throw std::invalid_argument(
+        "Cannot normalize output permutations with different classical "
+        "measurement destinations.");
+  }
+  std::map<qc::Bit, qc::Qubit> logicalOutputs;
+  for (const auto bit : labels) {
+    logicalOutputs.emplace(bit, static_cast<qc::Qubit>(logicalOutputs.size()));
+  }
+  /// Relabel both outputs together without changing classical instructions.
+  for (auto* circuit : {&first, &second}) {
+    auto& garbage = circuit->getGarbage();
+    garbage.assign(circuit->getNqubits(), true);
+    for (auto& [physical, logical] : circuit->outputPermutation) {
+      logical = logicalOutputs.at(logical);
+      garbage.at(logical) = false;
+    }
+  }
+}
+
 // Decrement logical qubit indices in the layout that exceed logicalQubitIndex
 void decrementLogicalQubitsInLayoutAboveIndex(
     qc::Permutation& layout, const qc::Qubit logicalQubitIndex) {
@@ -331,6 +406,8 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
     }
   }
 
+  normalizeMeasurementOutputs(qc1, qc2);
+
   // first, make sure any potential SWAPs are reconstructed
   if (configuration.optimizations.reconstructSWAPs) {
     detail::swapReconstruction(qc1);
@@ -561,6 +638,8 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
   if (qc1.isVariableFree() && qc2.isVariableFree()) {
     // run all configured optimization passes
     runOptimizationPasses();
+  } else {
+    normalizeMeasurementOutputs(qc1, qc2);
   }
 
   // strip away qubits that are not acted upon

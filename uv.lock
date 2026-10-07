@@ -1531,23 +1531,10 @@ wheels = [
 
 [[package]]
 name = "mqt-core"
-version = "3.10.1"
-source = { registry = "https://pypi.org/simple" }
+version = "3.10.2.dev3+g008bcd5cd"
+source = { git = "https://github.com/munich-quantum-toolkit/core.git?rev=008bcd5cd47a5f8885b7476e5b16dac8a0204862#008bcd5cd47a5f8885b7476e5b16dac8a0204862" }
 dependencies = [
     { name = "nanobind-backend" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/94/ebbf4c0195bfc0ea11114c3ac0221b37d037b97566821884a53fefdee87c/mqt_core-3.10.1.tar.gz", hash = "sha256:3a510bad81465f331aa704ab1bf05e07d1fc682a25464c5c654b43e9918e8c33", size = 646912, upload-time = "2026-09-26T18:20:06.481Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b8/ec/0d3a8ca38cd5e23d6f1d3226f4cdf97d87c7dcad365198fd7e2baec15429/mqt_core-3.10.1-cp311-abi3-macosx_13_0_arm64.whl", hash = "sha256:c462ec5a7b584c2996b90a995dd8c00b0562560c43b8c8728f3b9b524e889f00", size = 3065687, upload-time = "2026-09-26T18:19:47.946Z" },
-    { url = "https://files.pythonhosted.org/packages/43/8a/e6eb7aa07de3e7b8939f1f46f52fad78deeeb7750f6363336140ba816eb2/mqt_core-3.10.1-cp311-abi3-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:f3a9ae376c94b7663dd1f2d434aba9077913dc30b70f1b799094f72ac79ce2e4", size = 4559298, upload-time = "2026-09-26T18:19:50.344Z" },
-    { url = "https://files.pythonhosted.org/packages/4d/b1/4ebe8f49b626bdf418720b5134c65125998c261c44105d14ef6cafb38222/mqt_core-3.10.1-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:51a98e1f45e4d915b5e775ae984f1c29bf3af9ce8ba73935fc671c60d986cb14", size = 4913104, upload-time = "2026-09-26T18:19:52.692Z" },
-    { url = "https://files.pythonhosted.org/packages/ce/96/14048d8ac7edbbccdb7ab31acb3d30811193c25a8536bb17e6e6d7dddbc5/mqt_core-3.10.1-cp311-abi3-win_amd64.whl", hash = "sha256:ac1f80be97f1a38c9578bc4558d4831602648a26236760d4fad6f61047c82e26", size = 5634722, upload-time = "2026-09-26T18:19:54.513Z" },
-    { url = "https://files.pythonhosted.org/packages/33/3d/47a68196442a4174dc8c719f1d78c20f2e89d5de29b0729dfd08e9321478/mqt_core-3.10.1-cp311-abi3-win_arm64.whl", hash = "sha256:20c21135676c3d0f48ee7c14adb14d2c42772fd7a18bf1516f256598873c89ad", size = 5734981, upload-time = "2026-09-26T18:19:56.073Z" },
-    { url = "https://files.pythonhosted.org/packages/dd/6d/a1d592bf8a34626bbe64c2d706a584152900cc0149ecd2e70f4531a1d5fe/mqt_core-3.10.1-cp315-abi3t-macosx_13_0_arm64.whl", hash = "sha256:35611847241e05f7e5b1129a071e2f0320ca506bb0d45c185652f5505d97f09e", size = 3067154, upload-time = "2026-09-26T18:19:57.617Z" },
-    { url = "https://files.pythonhosted.org/packages/6b/fd/e2e1f1c9cab5dddbe02b994e0bc730fa771e06deb054cab509f701d2ee54/mqt_core-3.10.1-cp315-abi3t-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:1a7abb5e13e9803aea939b635e471b31dca60ee7b83bf46bbd58f857a34173c4", size = 4560297, upload-time = "2026-09-26T18:19:59.49Z" },
-    { url = "https://files.pythonhosted.org/packages/8b/cd/d88cfb458cb83f4cf8dc7f3111ef23a120a0808575edf6c0abfaf449590f/mqt_core-3.10.1-cp315-abi3t-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:ce5c13fde18fde07ab80dc33c25f138529f0cd1c0863d16436df017af67b7b52", size = 4913828, upload-time = "2026-09-26T18:20:01.035Z" },
-    { url = "https://files.pythonhosted.org/packages/fa/a5/084cd2ac54038ea3502828a2eb7529e6db852904010455786f7700c10066/mqt_core-3.10.1-cp315-abi3t-win_amd64.whl", hash = "sha256:0e98eeed8a262af7ec96d1325f7b8f2a6adb3e9fc065128d14ecc15beea1d866", size = 5687320, upload-time = "2026-09-26T18:20:03.023Z" },
-    { url = "https://files.pythonhosted.org/packages/4c/e7/3c68199c97f522d1dc393da00034455d6a08f9053e0346e482250c363b7d/mqt_core-3.10.1-cp315-abi3t-win_arm64.whl", hash = "sha256:34734a04b0e728c2f2ac1f2b47c448d655fe1abea2679434297fecd4c8e2506e", size = 5788162, upload-time = "2026-09-26T18:20:04.671Z" },
 ]
 
 [[package]]
@@ -1609,7 +1596,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "mqt-core", specifier = "~=3.10.1" },
+    { name = "mqt-core", git = "https://github.com/munich-quantum-toolkit/core.git?rev=008bcd5cd47a5f8885b7476e5b16dac8a0204862" },
     { name = "nanobind-backend", specifier = ">=1" },
     { name = "numpy", specifier = ">=1.24" },
     { name = "numpy", marker = "python_full_version >= '3.12'", specifier = ">=1.26" },
@@ -1623,14 +1610,14 @@ provides-extras = ["qiskit"]
 [package.metadata.requires-dev]
 build = [
     { name = "cmake", specifier = ">=4.4.1" },
-    { name = "mqt-core", specifier = "~=3.10.1" },
+    { name = "mqt-core", git = "https://github.com/munich-quantum-toolkit/core.git?rev=008bcd5cd47a5f8885b7476e5b16dac8a0204862" },
     { name = "nanobind", specifier = "~=3.1.0" },
     { name = "scikit-build-core", specifier = ">=1.1" },
     { name = "vcs-versioning", specifier = ">=2.3" },
 ]
 dev = [
     { name = "cmake", specifier = ">=4.4.1" },
-    { name = "mqt-core", specifier = "~=3.10.1" },
+    { name = "mqt-core", git = "https://github.com/munich-quantum-toolkit/core.git?rev=008bcd5cd47a5f8885b7476e5b16dac8a0204862" },
     { name = "nanobind", specifier = "~=3.1.0" },
     { name = "nox", specifier = ">=2025.11.12" },
     { name = "pytest", specifier = ">=9.0.3" },
