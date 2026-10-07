@@ -25,6 +25,11 @@ QCEC provides several complementary methods for efficiently tackling this
 challenging problem---each with their respective use cases, capabilities, and
 drawbacks.
 
+If numerical error collapses a decision diagram to zero, its checker returns
+`no_information`. A zero diagram cannot prove equivalence or non-equivalence of
+unitary circuits. Other enabled checkers can still provide a result; if none
+does, the overall result remains inconclusive.
+
 ## Construction Equivalence Checker (using Decision Diagrams)
 
 While the underlying matrices are exponentially large with respect to the number

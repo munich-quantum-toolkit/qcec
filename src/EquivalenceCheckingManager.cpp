@@ -729,18 +729,13 @@ void EquivalenceCheckingManager::checkSequential() {
         // run the simulation
         ++results.startedSimulations;
         const auto result = simulationChecker->run();
-        ++results.performedSimulations;
 
-        // if the run completed but has not yielded any information this
-        // indicates a timeout
+        /// An inconclusive simulation must not prevent other checkers from
+        /// running, for example after numerical collapse.
         if (result == EquivalenceCriterion::NoInformation) {
-          if (!done.load()) {
-            std::clog << "Simulation run returned without any information. "
-                         "Something probably went wrong. Exiting!\n";
-          }
-          markDone();
-          return;
+          break;
         }
+        ++results.performedSimulations;
 
         // break if non-equivalence has been shown
         if (result == EquivalenceCriterion::NotEquivalent) {
@@ -841,12 +836,9 @@ void EquivalenceCheckingManager::checkSequential() {
           } else {
             assert(result == EquivalenceCriterion::NoInformation);
             if (results.equivalence == EquivalenceCriterion::NoInformation) {
-              // this can only happen if the ZX checker is the only checker
-              assert(configuration.onlyZXCheckerConfigured());
               std::clog
-                  << "Only ZX checker specified, but it was not able to "
-                     "conclude "
-                     "anything about the equivalence of the circuits!\n"
+                  << "No checker was able to conclude anything about the "
+                     "equivalence of the circuits!\n"
                   << "This can happen since the ZX checker is not complete in "
                      "general.\n"
                   << "Consider enabling other checkers to get more "
@@ -868,6 +860,9 @@ void EquivalenceCheckingManager::checkSequential() {
     markDone();
     throw;
   }
+
+  /// All configured checks have finished, including inconclusive checks.
+  markDone();
 
   const auto end = std::chrono::steady_clock::now();
   results.checkTime = std::chrono::duration<double>(end - start).count();
@@ -961,7 +956,9 @@ void EquivalenceCheckingManager::checkParallel() {
   }
 
   // wait in a loop while no definitive result has been obtained
-  while (!done.load()) {
+  while (!done.load() && std::ranges::any_of(futures, [](const auto& future) {
+    return future.valid();
+  })) {
     std::shared_ptr<std::size_t> completedID{};
     if (configuration.execution.timeout > 0.) {
       completedID = queue.waitAndPopUntil(deadline);
@@ -986,25 +983,7 @@ void EquivalenceCheckingManager::checkParallel() {
     const auto result = checker->getEquivalence();
 
     if (result == EquivalenceCriterion::NoInformation) {
-      if (dynamic_cast<const ZXEquivalenceChecker*>(checker) != nullptr) {
-        if (configuration.onlyZXCheckerConfigured()) {
-          std::clog
-              << "Only ZX checker specified, but it was not able to conclude "
-                 "anything about the equivalence of the circuits!\n"
-              << "This can happen since the ZX checker is not complete in "
-                 "general.\n"
-              << "Consider enabling other checkers to get more "
-                 "information.\n";
-          setAndSignalDone();
-          break;
-        }
-        continue;
-      }
-      std::clog << "Finished equivalence check provides no information. "
-                   "Something probably went wrong. Exiting.\n";
-      setAndSignalDone();
-      results.equivalence = result;
-      break;
+      continue;
     }
 
     if (result == EquivalenceCriterion::NotEquivalent) {
