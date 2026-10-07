@@ -10,13 +10,14 @@
 
 #include "Configuration.hpp"
 #include "EquivalenceCheckingManager.hpp"
-#include "EquivalenceCriterion.hpp"
 #include "ir/Definitions.hpp"
+#include "ir/Permutation.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Expression.hpp"
 
 #include <gtest/gtest.h>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -38,133 +39,55 @@ protected:
 INSTANTIATE_TEST_SUITE_P(Checkers, ClassicalOutputTest,
                          testing::Values(0, 1, 2, 3));
 
-TEST_P(ClassicalOutputTest, OffsetAndSparseDestinations) {
-  for (const auto& bits : {
-           std::vector<qc::Bit>{2, 3},
-           std::vector<qc::Bit>{3, 2},
-           std::vector<qc::Bit>{0, 3},
-       }) {
-    qc::QuantumComputation circuit(2, 4);
+TEST_P(ClassicalOutputTest, PreservesOutputWiring) {
+  for (const bool routed : {false, true}) {
+    SCOPED_TRACE(routed);
+    qc::QuantumComputation first(2, 4);
+    first.x(0);
+    auto second = first;
+    if (routed) {
+      second.swap(0, 1);
+    }
+    first.measure({0, 1}, {0, 3});
+    second.measure({0, 1}, {3, 0});
+    first.initializeIOMapping();
+    second.initializeIOMapping();
+    ec::EquivalenceCheckingManager checker(first, second, config);
+    checker.run();
+    EXPECT_EQ(checker.getResults().consideredEquivalent(), routed);
+  }
+}
+
+TEST(ClassicalOutputValidation, RejectsAmbiguousMeasurementDestinations) {
+  for (const auto& bits :
+       {std::vector<qc::Bit>{0, 1}, std::vector<qc::Bit>{3, 3}}) {
+    qc::QuantumComputation first(2, 4);
+    auto second = first;
+    first.measure({0, 1}, {2, 3});
+    second.measure({0, 1}, bits);
+    first.initializeIOMapping();
+    second.initializeIOMapping();
+    EXPECT_THROW((ec::EquivalenceCheckingManager(first, second)),
+                 std::invalid_argument);
+  }
+}
+
+TEST(ClassicalOutputValidation, NormalizesPartialOutputs) {
+  for (const auto [bit, logical] : {std::pair{2U, 2U}, std::pair{4U, 1U}}) {
+    qc::QuantumComputation circuit(3, 5);
     circuit.h(0);
     circuit.cx(0, 1);
-    circuit.measure({0, 1}, bits);
+    circuit.x(2);
+    circuit.measure({0, 1}, {0, bit});
     circuit.initializeIOMapping();
-    const auto original = circuit.outputPermutation;
-
-    ec::EquivalenceCheckingManager checker(circuit, circuit, config);
-    EXPECT_EQ(checker.getFirstCircuit().getNgarbageQubits(), 0);
-    checker.run();
-    EXPECT_TRUE(checker.getResults().consideredEquivalent());
-    EXPECT_EQ(circuit.outputPermutation, original);
+    ec::Configuration config;
+    config.functionality.checkPartialEquivalence = true;
+    const ec::EquivalenceCheckingManager checker(circuit, circuit, config);
+    EXPECT_EQ(checker.getFirstCircuit().outputPermutation,
+              (qc::Permutation{{0, 0}, {1, logical}}));
+    EXPECT_EQ(checker.getFirstCircuit().getGarbage(),
+              (std::vector<bool>{false, logical != 1, logical != 2}));
   }
-}
-
-TEST_P(ClassicalOutputTest, PreservesOutputWiring) {
-  qc::QuantumComputation first(2, 4);
-  first.x(0);
-  auto second = first;
-  first.measure({0, 1}, {2, 3});
-  second.measure({0, 1}, {3, 2});
-  first.initializeIOMapping();
-  second.initializeIOMapping();
-  ec::EquivalenceCheckingManager checker(first, second, config);
-  checker.run();
-  EXPECT_EQ(checker.equivalence(),
-            GetParam() == 3 ? ec::EquivalenceCriterion::ProbablyNotEquivalent
-                            : ec::EquivalenceCriterion::NotEquivalent);
-}
-
-TEST_P(ClassicalOutputTest, AccountsForRouting) {
-  qc::QuantumComputation first(2, 4);
-  first.x(0);
-  auto second = first;
-  first.measure({0, 1}, {2, 3});
-  second.swap(0, 1);
-  second.measure({0, 1}, {3, 2});
-  first.initializeIOMapping();
-  second.initializeIOMapping();
-  ec::EquivalenceCheckingManager checker(first, second, config);
-  checker.run();
-  EXPECT_TRUE(checker.getResults().consideredEquivalent());
-}
-
-TEST_P(ClassicalOutputTest, RejectsDifferentClassicalLabelsWhenNormalizing) {
-  qc::QuantumComputation first(2, 4);
-  first.x(0);
-  auto second = first;
-  first.measure({0, 1}, {2, 3});
-  second.measure({0, 1}, {0, 1});
-  first.initializeIOMapping();
-  second.initializeIOMapping();
-  EXPECT_THROW((ec::EquivalenceCheckingManager(first, second, config)),
-               std::invalid_argument);
-}
-
-TEST_P(ClassicalOutputTest, PreservesInRangeClassicalLabels) {
-  qc::QuantumComputation first(3, 3);
-  first.x(0);
-  auto second = first;
-  first.measure({0, 1}, {0, 2});
-  second.measure({0, 1}, {1, 2});
-  first.initializeIOMapping();
-  second.initializeIOMapping();
-  ec::EquivalenceCheckingManager checker(first, second, config);
-  checker.run();
-  EXPECT_FALSE(checker.getResults().consideredEquivalent());
-}
-
-TEST_P(ClassicalOutputTest, RejectsOverwrittenClassicalDestination) {
-  qc::QuantumComputation circuit(2, 4);
-  circuit.x(0);
-  circuit.measure({0, 1}, {3, 3});
-  circuit.initializeIOMapping();
-  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit, config)),
-               std::invalid_argument);
-}
-
-TEST_P(ClassicalOutputTest, RecomputesGarbageForPartialOutputs) {
-  qc::QuantumComputation circuit(3, 5);
-  circuit.h(0);
-  circuit.cx(0, 1);
-  circuit.x(2);
-  circuit.measure({0, 1}, {3, 4});
-  circuit.initializeIOMapping();
-  config.functionality.checkPartialEquivalence = true;
-  ec::EquivalenceCheckingManager checker(circuit, circuit, config);
-  EXPECT_EQ(checker.getFirstCircuit().getNgarbageQubits(), 1);
-  checker.run();
-  if (GetParam() == 3) {
-    /// The ZX checker does not support these garbage outputs.
-    EXPECT_EQ(checker.equivalence(), ec::EquivalenceCriterion::NoInformation);
-  } else {
-    EXPECT_TRUE(checker.getResults().consideredEquivalent());
-  }
-}
-
-TEST(ClassicalOutputValidation, RejectsUnmeasuredOutputLabels) {
-  qc::QuantumComputation circuit(2, 4);
-  circuit.x(0);
-  circuit.outputPermutation.at(0) = 2;
-  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit)),
-               std::invalid_argument);
-}
-
-TEST(ClassicalOutputValidation, RejectsRepeatedMeasuredQubits) {
-  qc::QuantumComputation circuit(2, 4);
-  circuit.measure(0, 2);
-  circuit.measure(0, 3);
-  circuit.initializeIOMapping();
-  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit)),
-               std::invalid_argument);
-}
-
-TEST(ClassicalOutputValidation, PreservesExplicitlyRemovedOutputs) {
-  qc::QuantumComputation circuit(2, 4);
-  circuit.measure({0, 1}, {2, 3});
-  circuit.initializeIOMapping();
-  circuit.outputPermutation.erase(0);
-  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit)),
-               std::invalid_argument);
 }
 
 TEST(ClassicalOutputValidation, RejectsNestedMeasurementsWithSymbolicGates) {

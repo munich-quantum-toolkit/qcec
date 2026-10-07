@@ -61,16 +61,16 @@ void normalizeMeasurementOutputs(qc::QuantumComputation& first,
     return;
   }
 
+  /// Require one-to-one terminal measurements matching the declared outputs.
   const auto measurementLabels = [](const qc::QuantumComputation& circuit) {
     std::set<qc::Qubit> measured;
-    std::set<qc::Bit> labels;
+    std::map<qc::Bit, qc::Qubit> labels;
     for (const auto& op : circuit) {
       if (op->getType() != qc::Measure) {
         if (op->getType() != qc::Barrier &&
             (op->isNonUnitaryOperation() ||
              std::ranges::any_of(
-                 op->getUsedQubits(),
-                 [&measured](const auto q) { return measured.contains(q); }))) {
+                 measured, [&op](const auto q) { return op->actsOn(q); }))) {
           throw std::invalid_argument(
               "Output normalization requires terminal measurements.");
         }
@@ -82,7 +82,7 @@ void normalizeMeasurementOutputs(qc::QuantumComputation& first,
         const auto qubit = measurement.getTargets()[i];
         const auto bit = measurement.getClassics()[i];
         const auto output = circuit.outputPermutation.find(qubit);
-        if (!measured.insert(qubit).second || !labels.insert(bit).second ||
+        if (!measured.insert(qubit).second || !labels.emplace(bit, 0).second ||
             output == circuit.outputPermutation.end() ||
             output->second != bit) {
           throw std::invalid_argument(
@@ -91,23 +91,22 @@ void normalizeMeasurementOutputs(qc::QuantumComputation& first,
         }
       }
     }
-    if (measured.empty() ||
-        measured.size() != circuit.outputPermutation.size()) {
+    if (measured.size() != circuit.outputPermutation.size()) {
       throw std::invalid_argument(
           "Output normalization requires measurements for every output.");
     }
     return labels;
   };
 
-  const auto labels = measurementLabels(first);
-  if (labels != measurementLabels(second)) {
+  auto logicalOutputs = measurementLabels(first);
+  if (logicalOutputs != measurementLabels(second)) {
     throw std::invalid_argument(
         "Cannot normalize output permutations with different classical "
         "measurement destinations.");
   }
-  std::map<qc::Bit, qc::Qubit> logicalOutputs;
-  for (const auto bit : labels) {
-    logicalOutputs.emplace(bit, static_cast<qc::Qubit>(logicalOutputs.size()));
+  qc::Qubit next = 0;
+  for (auto& [bit, logical] : logicalOutputs) {
+    logical = next++;
   }
   /// Relabel both outputs together without changing classical instructions.
   for (auto* circuit : {&first, &second}) {

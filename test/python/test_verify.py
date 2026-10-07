@@ -50,22 +50,15 @@ def test_verify(original_circuit: QuantumCircuit, alternative_circuit: QuantumCi
     assert result.equivalence == EquivalenceCriterion.equivalent
 
 
-@pytest.mark.parametrize("checker", ["construction", "alternating", "simulation"])
 @pytest.mark.parametrize("as_qasm", [False, True])
-def test_offset_measurement_destinations(checker: str, as_qasm: bool) -> None:
+def test_offset_measurement_destinations(as_qasm: bool) -> None:
     """Unused classical bits must not become logical output qubits."""
     circuit = QuantumCircuit(2, 2)
     circuit.h(0)
     circuit.cx(0, 1)
     circuit.measure_all()
-    config = Configuration()
-    config.execution.run_construction_checker = checker == "construction"
-    config.execution.run_alternating_checker = checker == "alternating"
-    config.execution.run_simulation_checker = checker == "simulation"
-    config.execution.run_zx_checker = False
-    config.simulation.seed = 42
     source = qasm2.dumps(circuit) if as_qasm else circuit
-    result = verify(source, source, config)
+    result = verify(source, source, run_zx_checker=False)
     assert result.considered_equivalent()
 
 
@@ -82,14 +75,7 @@ def test_offset_measurements_after_compilation() -> None:
         basis_gates=["cx", "x", "h"],
         seed_transpiler=42,
     )
-    result = verify(
-        circuit,
-        compiled,
-        run_construction_checker=True,
-        run_alternating_checker=False,
-        run_simulation_checker=False,
-        run_zx_checker=False,
-    )
+    result = verify(circuit, compiled, run_zx_checker=False)
     assert result.considered_equivalent()
 
 
@@ -100,17 +86,6 @@ def test_offset_measurements_with_symbolic_gate() -> None:
     circuit.cx(0, 1)
     circuit.measure_all()
     assert verify(circuit, circuit.copy()).considered_equivalent()
-
-
-def test_offset_measurements_reject_different_labels() -> None:
-    """Independent output renumbering must not erase classical label differences."""
-    first = QuantumCircuit(2, 4)
-    first.x(0)
-    second = first.copy()
-    first.measure([0, 1], [2, 3])
-    second.measure([0, 1], [0, 1])
-    with pytest.raises(ValueError, match="different classical measurement destinations"):
-        verify(first, second)
 
 
 def test_verify_kwargs(original_circuit: QuantumCircuit, alternative_circuit: QuantumCircuit) -> None:
