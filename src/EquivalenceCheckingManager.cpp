@@ -384,16 +384,28 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
     return;
   }
 
+  // Expose routing before validating measurement deferral.
+  if (configuration.optimizations.reconstructSWAPs) {
+    detail::swapReconstruction(qc1);
+    detail::swapReconstruction(qc2);
+  }
+
   const auto isDynamicCircuit1 = qc1.isDynamic();
   const auto isDynamicCircuit2 = qc2.isDynamic();
   if (isDynamicCircuit1 || isDynamicCircuit2) {
     if (configuration.optimizations.transformDynamicCircuit) {
       if (isDynamicCircuit1) {
         detail::eliminateResets(qc1);
+        if (configuration.optimizations.elidePermutations) {
+          detail::elidePermutations(qc1);
+        }
         detail::deferMeasurements(qc1);
       }
       if (isDynamicCircuit2) {
         detail::eliminateResets(qc2);
+        if (configuration.optimizations.elidePermutations) {
+          detail::elidePermutations(qc2);
+        }
         detail::deferMeasurements(qc2);
       }
     } else {
@@ -407,23 +419,23 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 
   normalizeMeasurementOutputs(qc1, qc2);
 
-  // first, make sure any potential SWAPs are reconstructed
-  if (configuration.optimizations.reconstructSWAPs) {
-    detail::swapReconstruction(qc1);
-    detail::swapReconstruction(qc2);
-  }
-
   // then, optionally backpropagate the output permutation
   if (configuration.optimizations.backpropagateOutputPermutation) {
     detail::backpropagateOutputPermutation(qc1);
     detail::backpropagateOutputPermutation(qc2);
   }
 
-  // based on the above, all SWAPs should be reconstructed and accounted for,
-  // so we can elide them.
+  // Dynamic circuits are already normalized unless backpropagation changed
+  // their input layout.
   if (configuration.optimizations.elidePermutations) {
-    detail::elidePermutations(qc1);
-    detail::elidePermutations(qc2);
+    if (!isDynamicCircuit1 ||
+        configuration.optimizations.backpropagateOutputPermutation) {
+      detail::elidePermutations(qc1);
+    }
+    if (!isDynamicCircuit2 ||
+        configuration.optimizations.backpropagateOutputPermutation) {
+      detail::elidePermutations(qc2);
+    }
   }
 
   // fuse consecutive single qubit gates into compound operations (includes some
@@ -633,6 +645,9 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
 
   // set numeric tolerance used throughout the check
   dd::ComplexNumbers::setTolerance(configuration.execution.numericalTolerance);
+
+  detail::removeBarriers(qc1);
+  detail::removeBarriers(qc2);
 
   if (qc1.isVariableFree() && qc2.isVariableFree()) {
     // run all configured optimization passes

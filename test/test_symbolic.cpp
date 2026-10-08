@@ -40,7 +40,9 @@ TEST_F(SymbolicTest, SymbolicEqu) {
   symQc1.rx(xMonom, 0);
 
   symQc2.h(0);
+  symQc2.barrier(0);
   symQc2.rz(xMonom, 0);
+  symQc2.barrier(0);
   symQc2.h(0);
 
   auto ecm = ec::EquivalenceCheckingManager(symQc1, symQc2);

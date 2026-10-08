@@ -17,6 +17,19 @@ DD checkers now return `no_information` when numerical error collapses a
 decision diagram to zero. Treat this result as inconclusive. Other enabled
 checkers can still provide a result.
 
+Routing distinct logical states through one measurement qubit is supported with
+`transform_dynamic_circuit=True` and the default routing optimizations. After
+reset elimination and routing, each measured logical state must map to one
+classical bit. Reusing that state as a gate target without a reset remains
+unsupported. Unconditional barriers do not affect these checks. Dynamic
+transformation derives observed outputs and garbage flags from measurements,
+replacing manual garbage annotations.
+
+For circuits that measure only some outputs, use
+`check_partial_equivalence=True` to compare those measured outputs. Preserve a
+compiler-provided input layout by leaving `backpropagate_output_permutation`
+disabled.
+
 ## [3.10.2]
 
 This release adds

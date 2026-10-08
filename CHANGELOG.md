@@ -16,6 +16,10 @@ releases may include breaking changes.
 
 ### Fixed
 
+- 🐛 Ignore unconditional barriers when analyzing measurements, including those
+  in compound operations ([#1106]) ([**@burgholzer**])
+- 🐛 Support routing distinct logical outputs through one physical measurement
+  qubit when transforming dynamic circuits ([#1106]) ([**@burgholzer**])
 - 🐛 Normalize shared classical measurement destinations outside the qubit range
   before equivalence checking ([#1102]) ([**@burgholzer**])
 - 🐛 Return `no_information` when a DD collapses to zero, avoiding incorrect
@@ -333,6 +337,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1106]: https://github.com/munich-quantum-toolkit/qcec/pull/1106
 [#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
 [#1101]: https://github.com/munich-quantum-toolkit/qcec/pull/1101
 [#1095]: https://github.com/munich-quantum-toolkit/qcec/pull/1095

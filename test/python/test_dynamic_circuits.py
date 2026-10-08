@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import pytest
 from qiskit.circuit import QuantumCircuit
 
 from mqt.qcec import verify
@@ -105,3 +106,30 @@ def test_regression2() -> None:
 
     result = verify(qc, qc_dyn, transform_dynamic_circuit=True, backpropagate_output_permutation=True)
     assert result.equivalence == EquivalenceCriterion.equivalent
+
+
+@pytest.mark.parametrize("target_measured_state", [False, True])
+def test_routed_readout_with_offset_classical_bits(target_measured_state: bool) -> None:
+    """Routing may reuse a measurement site, but may not change a measured state."""
+    reference = QuantumCircuit(3, 5)
+    reference.h(0)
+    reference.cx(0, 1)
+    reference.cx(1, 2)
+    routed = reference.copy()
+    reference.measure([0, 1, 2], [2, 3, 4])
+    routed.measure(0, 2)
+    routed.barrier()
+    if target_measured_state:
+        routed.x(0)
+    routed.swap(0, 1)
+    routed.measure(0, 3)
+    routed.swap(0, 2)
+    routed.measure(0, 4)
+    if target_measured_state:
+        with pytest.raises(RuntimeError, match="targeting the measured qubit"):
+            verify(reference, routed, transform_dynamic_circuit=True)
+    else:
+        result = verify(
+            reference, routed, transform_dynamic_circuit=True, run_simulation_checker=False, run_zx_checker=False
+        )
+        assert result.considered_equivalent()
