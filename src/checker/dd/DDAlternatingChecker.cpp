@@ -113,6 +113,10 @@ void DDAlternatingChecker::postprocess() {
 }
 
 EquivalenceCriterion DDAlternatingChecker::checkEquivalence() {
+  if (functionality.w.exactlyZero()) {
+    return EquivalenceCriterion::NoInformation;
+  }
+
   std::vector<bool> garbage(nqubits);
   for (qc::Qubit q = 0U; q < nqubits; ++q) {
     garbage[static_cast<std::size_t>(q)] =

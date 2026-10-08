@@ -33,6 +33,12 @@ namespace ec {
 template <class DDType>
 EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
                                                           const DDType& f) {
+  // A unitary circuit or its action on a normalized state cannot be zero.
+  // Numerical collapse cannot establish equivalence or non-equivalence.
+  if (e.w.exactlyZero() || f.w.exactlyZero()) {
+    return EquivalenceCriterion::NoInformation;
+  }
+
   // both node pointers being equivalent is the strongest indication that the
   // two decision diagrams are equivalent
   if (e.p == f.p) {
@@ -71,6 +77,9 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
       // together and checking whether the resulting DD is close enough to the
       // identity.
       functionality = dd->multiply(e, dd->conjugateTranspose(f));
+      if (functionality->w.exactlyZero()) {
+        return EquivalenceCriterion::NoInformation;
+      }
       isClose = dd->isCloseToIdentity(
           *functionality, configuration.functionality.traceThreshold);
     }
@@ -86,6 +95,9 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
     if (configuration.functionality.checkApproximateEquivalence) {
       if (!functionality.has_value()) {
         functionality = dd->multiply(e, dd->conjugateTranspose(f));
+        if (functionality->w.exactlyZero()) {
+          return EquivalenceCriterion::NoInformation;
+        }
       }
       if (projectiveHilbertSchmidtDistanceWithinThreshold(*functionality)) {
         return EquivalenceCriterion::Equivalent;

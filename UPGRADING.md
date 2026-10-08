@@ -13,6 +13,10 @@ extensions against Core's `3.11` shared-library ABI.
 negative, subnormal, and non-finite values raise `ValueError` in Python or
 `std::invalid_argument` in C++ when constructing the equivalence checker.
 
+DD checkers now return `no_information` when numerical error collapses a
+decision diagram to zero. Treat this result as inconclusive. Other enabled
+checkers can still provide a result.
+
 ## [3.10.2]
 
 This release adds

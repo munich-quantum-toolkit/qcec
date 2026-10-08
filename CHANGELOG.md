@@ -18,6 +18,10 @@ releases may include breaking changes.
 
 - 🐛 Normalize shared classical measurement destinations outside the qubit range
   before equivalence checking ([#1102]) ([**@burgholzer**])
+- 🐛 Return `no_information` when a DD collapses to zero, avoiding incorrect
+  equivalence verdicts. Continue with other enabled checkers after an
+  inconclusive result, including checks waiting for a worker ([#1101])
+  ([**@burgholzer**])
 
 ## [3.10.2] - 2026-10-05
 
@@ -330,6 +334,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 <!-- PR links -->
 
 [#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
+[#1101]: https://github.com/munich-quantum-toolkit/qcec/pull/1101
 [#1095]: https://github.com/munich-quantum-toolkit/qcec/pull/1095
 [#1093]: https://github.com/munich-quantum-toolkit/qcec/pull/1093
 [#1088]: https://github.com/munich-quantum-toolkit/qcec/pull/1088
