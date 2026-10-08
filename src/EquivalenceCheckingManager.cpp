@@ -730,8 +730,8 @@ void EquivalenceCheckingManager::checkSequential() {
         ++results.startedSimulations;
         const auto result = simulationChecker->run();
 
-        /// An inconclusive simulation must not prevent other checkers from
-        /// running, for example after numerical collapse.
+        // An inconclusive simulation must not prevent other checkers from
+        // running, for example after numerical collapse.
         if (result == EquivalenceCriterion::NoInformation) {
           break;
         }
@@ -861,7 +861,7 @@ void EquivalenceCheckingManager::checkSequential() {
     throw;
   }
 
-  /// All configured checks have finished, including inconclusive checks.
+  // All configured checks have finished, including inconclusive checks.
   markDone();
 
   const auto end = std::chrono::steady_clock::now();
@@ -919,40 +919,46 @@ void EquivalenceCheckingManager::checkParallel() {
 
   // create a thread safe queue which is used to check for available results
   ThreadSafeQueue<std::size_t> queue{};
-  std::size_t id = 0U;
+  std::vector<std::future<void>> futures(effectiveThreads);
+  auto alternatingPending = configuration.execution.runAlternatingChecker;
+  auto constructionPending = configuration.execution.runConstructionChecker;
+  auto zxPending = configuration.execution.runZXChecker;
 
-  // reserve space for the futures received from the async calls
-  std::vector<std::future<void>> futures{};
-  futures.reserve(effectiveThreads);
+  const auto launchNextChecker = [&](const std::size_t id) {
+    if (done.load() ||
+        (!alternatingPending && !constructionPending && !zxPending &&
+         (!configuration.execution.runSimulationChecker ||
+          results.startedSimulations >= configuration.simulation.maxSims))) {
+      return;
+    }
 
-  if (configuration.execution.runAlternatingChecker) {
-    // start a new thread that constructs and runs the alternating check
-    futures.emplace_back(asyncRunChecker<DDAlternatingChecker>(id, queue));
-    ++id;
-  }
+    {
+      const std::scoped_lock lock(checkersMutex);
+      // Preserve completed checker results before reusing a worker slot.
+      // Simulation checkers can reuse their DD package for further stimuli.
+      if (checkers[id] &&
+          dynamic_cast<DDSimulationChecker*>(checkers[id].get()) == nullptr) {
+        nlohmann::basic_json<> result{};
+        checkers[id]->json(result);
+        results.checkerResults.emplace_back(std::move(result));
+        checkers[id].reset();
+      }
+    }
 
-  if (configuration.execution.runConstructionChecker && !done.load()) {
-    // start a new thread that constructs and runs the construction check
-    futures.emplace_back(asyncRunChecker<DDConstructionChecker>(id, queue));
-    ++id;
-  }
-
-  if (configuration.execution.runZXChecker && !done.load()) {
-    // start a new thread that constructs and runs the ZX checker
-    futures.emplace_back(asyncRunChecker<ZXEquivalenceChecker>(id, queue));
-    ++id;
-  }
-
-  if (configuration.execution.runSimulationChecker) {
-    const auto effectiveThreadsLeft = effectiveThreads - futures.size();
-    const auto simulationsToStart =
-        std::min(effectiveThreadsLeft, configuration.simulation.maxSims);
-    // launch as many simulations as possible
-    for (std::size_t i = 0; i < simulationsToStart && !done.load(); ++i) {
-      futures.emplace_back(asyncRunChecker<DDSimulationChecker>(id, queue));
-      ++id;
+    if (std::exchange(alternatingPending, false)) {
+      futures[id] = asyncRunChecker<DDAlternatingChecker>(id, queue);
+    } else if (std::exchange(constructionPending, false)) {
+      futures[id] = asyncRunChecker<DDConstructionChecker>(id, queue);
+    } else if (std::exchange(zxPending, false)) {
+      futures[id] = asyncRunChecker<ZXEquivalenceChecker>(id, queue);
+    } else {
+      futures[id] = asyncRunChecker<DDSimulationChecker>(id, queue);
       ++results.startedSimulations;
     }
+  };
+
+  for (std::size_t id = 0U; id < effectiveThreads; ++id) {
+    launchNextChecker(id);
   }
 
   // wait in a loop while no definitive result has been obtained
@@ -983,6 +989,9 @@ void EquivalenceCheckingManager::checkParallel() {
     const auto result = checker->getEquivalence();
 
     if (result == EquivalenceCriterion::NoInformation) {
+      if (dynamic_cast<const DDSimulationChecker*>(checker) == nullptr) {
+        launchNextChecker(*completedID);
+      }
       continue;
     }
 
@@ -1031,6 +1040,7 @@ void EquivalenceCheckingManager::checkParallel() {
             break;
           }
           results.equivalence = result;
+          launchNextChecker(*completedID);
           continue;
         }
 
@@ -1044,6 +1054,7 @@ void EquivalenceCheckingManager::checkParallel() {
           // Since the ZX checker is not complete, it cannot conclude
           // non-equivalence, but only suggest it. If the ZX checker is not the
           // only checker configured to run, the run continues uninterrupted.
+          launchNextChecker(*completedID);
           continue;
         }
       }
@@ -1081,16 +1092,17 @@ void EquivalenceCheckingManager::checkParallel() {
         // the run continues uninterrupted.
         continue;
       }
-
-      // it has to be checked, whether further simulations shall be
-      // conducted
-      if (results.startedSimulations < configuration.simulation.maxSims) {
-        futures[*completedID] =
-            asyncRunChecker<DDSimulationChecker>(*completedID, queue);
-        ++results.startedSimulations;
-      }
     }
+    launchNextChecker(*completedID);
   }
+
+  // Inconclusive simulations can exhaust the workers before maxSims is reached.
+  // Keep conflicting simulation and ZX evidence inconclusive in that case too.
+  if (results.equivalence == EquivalenceCriterion::ProbablyNotEquivalent &&
+      results.performedSimulations > 0U) {
+    results.equivalence = EquivalenceCriterion::NoInformation;
+  }
+  markDone();
 
   const auto end = std::chrono::steady_clock::now();
   results.checkTime = std::chrono::duration<double>(end - start).count();

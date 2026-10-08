@@ -19,8 +19,10 @@
 #include "dd/Package.hpp"
 #include "dd/RealNumber.hpp"
 #include "dd/StateGeneration.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 
+#include <chrono>
 #include <gtest/gtest.h>
 #include <type_traits>
 
@@ -93,6 +95,37 @@ TYPED_TEST(NumericalFailureTest, ZeroStateIsInconclusive) {
   }
 }
 
+TEST_F(NumericalFailureFlowTest, ZeroComparisonProductIsInconclusive) {
+  auto first = qc::QuantumComputation(1);
+  first.t(0);
+  first.t(0);
+  auto second = qc::QuantumComputation(1);
+  second.x(0);
+  second.t(0);
+  auto config = ec::Configuration{};
+  config.execution.numericalTolerance = 0.5;
+  config.execution.runConstructionChecker = true;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runSimulationChecker = false;
+  config.execution.runZXChecker = false;
+  config.optimizations.fuseSingleQubitGates = false;
+  config.optimizations.reorderOperations = false;
+  config.functionality.approximateCheckingThreshold = 1.;
+  for (const auto approximate : {false, true}) {
+    config.functionality.checkApproximateEquivalence = approximate;
+    // Each operand retains enough information to compare equal to itself.
+    for (const auto* circuit : {&first, &second}) {
+      auto selfCheck =
+          ec::EquivalenceCheckingManager(*circuit, *circuit, config);
+      selfCheck.run();
+      EXPECT_EQ(selfCheck.equivalence(), ec::EquivalenceCriterion::Equivalent);
+    }
+    auto manager = ec::EquivalenceCheckingManager(first, second, config);
+    manager.run();
+    EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NoInformation);
+  }
+}
+
 TEST_F(NumericalFailureFlowTest, InconclusiveCheckersFinish) {
   auto first = qc::QuantumComputation(1);
   first.h(0);
@@ -102,14 +135,72 @@ TEST_F(NumericalFailureFlowTest, InconclusiveCheckersFinish) {
     auto config = ec::Configuration{};
     config.execution.parallel = parallel;
     config.execution.nthreads = 2;
+    config.execution.timeout = 10.;
     config.execution.numericalTolerance = 0.75;
     config.execution.runConstructionChecker = true;
     config.execution.runSimulationChecker = false;
     config.execution.runZXChecker = false;
     auto manager = ec::EquivalenceCheckingManager(first, second, config);
+    const auto start = std::chrono::steady_clock::now();
     manager.run();
+    EXPECT_LT(std::chrono::steady_clock::now() - start,
+              std::chrono::seconds(5));
     EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NoInformation);
   }
+}
+
+TEST_F(NumericalFailureFlowTest, InconclusiveCheckersAllowQueuedSimulation) {
+  auto first = qc::QuantumComputation(1);
+  first.h(0);
+  auto second = qc::QuantumComputation(1);
+  second.x(0);
+  auto config = ec::Configuration{};
+  config.execution.nthreads = 2;
+  config.execution.numericalTolerance = 0.75;
+  config.execution.runConstructionChecker = true;
+  config.execution.runZXChecker = false;
+  config.simulation.maxSims = 1;
+  auto manager = ec::EquivalenceCheckingManager(first, second, config);
+  manager.run();
+  EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NoInformation);
+  EXPECT_EQ(manager.getResults().startedSimulations, 1);
+  EXPECT_EQ(manager.getResults().performedSimulations, 0);
+  EXPECT_EQ(manager.getResults().checkerResults.size(), 3);
+}
+
+TEST_F(NumericalFailureFlowTest, InconclusiveCheckersAllowQueuedZX) {
+  auto first = qc::QuantumComputation(1);
+  first.h(0);
+  auto second = qc::QuantumComputation(1);
+  second.x(0);
+  second.h(0);
+  second.z(0);
+  auto config = ec::Configuration{};
+  config.execution.nthreads = 2;
+  config.optimizations.fuseSingleQubitGates = false;
+  config.execution.numericalTolerance = 0.75;
+  config.execution.runConstructionChecker = true;
+  config.execution.runSimulationChecker = false;
+  auto manager = ec::EquivalenceCheckingManager(first, second, config);
+  manager.run();
+  EXPECT_TRUE(manager.getResults().consideredEquivalent());
+  EXPECT_EQ(manager.getResults().checkerResults.size(), 3);
+}
+
+TEST_F(NumericalFailureFlowTest, InconclusiveSimulationPreservesZXConflict) {
+  auto first = qc::QuantumComputation(2);
+  first.crx(qc::PI_2, 1, 0);
+  auto second = first;
+  second.z(1);
+  auto config = ec::Configuration{};
+  config.execution.nthreads = 5;
+  config.execution.numericalTolerance = 0.75;
+  config.execution.runAlternatingChecker = false;
+  config.simulation.maxSims = 4;
+  auto manager = ec::EquivalenceCheckingManager(first, second, config);
+  manager.run();
+  EXPECT_EQ(manager.getResults().performedSimulations, 2);
+  EXPECT_EQ(manager.equivalence(), ec::EquivalenceCriterion::NoInformation);
 }
 
 TEST_F(NumericalFailureFlowTest, InconclusiveSimulationAllowsZX) {

@@ -33,8 +33,8 @@ namespace ec {
 template <class DDType>
 EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
                                                           const DDType& f) {
-  /// A unitary circuit or its action on a normalized state cannot be zero.
-  /// Numerical collapse cannot establish equivalence or non-equivalence.
+  // A unitary circuit or its action on a normalized state cannot be zero.
+  // Numerical collapse cannot establish equivalence or non-equivalence.
   if (e.w.exactlyZero() || f.w.exactlyZero()) {
     return EquivalenceCriterion::NoInformation;
   }
@@ -239,7 +239,7 @@ void DDEquivalenceChecker<DDType>::postprocessTask(TaskManager<DDType>& task) {
   // eliminate the superfluous contributions of ancillary qubits (this only has
   // an effect on matrices)
   task.reduceAncillae();
-  if (isDone() || task.getInternalState().w.exactlyZero()) {
+  if (isDone()) {
     return;
   }
   // sum up the contributions of garbage qubits if we want to check for partial
@@ -250,12 +250,6 @@ void DDEquivalenceChecker<DDType>::postprocessTask(TaskManager<DDType>& task) {
 }
 
 template <class DDType> void DDEquivalenceChecker<DDType>::postprocess() {
-  /// In particular, do not normalize a numerically collapsed DD when reducing
-  /// garbage. Keep both states for the inconclusive comparison and cleanup.
-  if (taskManager1.getInternalState().w.exactlyZero() ||
-      taskManager2.getInternalState().w.exactlyZero()) {
-    return;
-  }
   if (!isDone()) {
     postprocessTask(taskManager1);
   }

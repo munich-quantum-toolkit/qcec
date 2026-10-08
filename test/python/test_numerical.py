@@ -6,7 +6,7 @@
 #
 # Licensed under the MIT License
 
-"""Numerical failure must not establish equivalence or non-equivalence."""
+"""Regression tests for GHZ circuits affected by DD rounding in issue #1100."""
 
 from __future__ import annotations
 
@@ -37,13 +37,13 @@ def ghz_circuits(request: pytest.FixtureRequest) -> tuple[QuantumCircuit, Quantu
 
 @pytest.mark.parametrize(("partial", "ancillary"), [(False, False), (False, True), (True, True)])
 @pytest.mark.parametrize("pair", [(1, 2), (0, 1), (1, 0)])
-def test_construction_numerical_failure(
+def test_construction_ghz_translation(
     ghz_circuits: tuple[QuantumCircuit, QuantumCircuit, QuantumCircuit],
     ancillary: bool,
     partial: bool,
     pair: tuple[int, int],
 ) -> None:
-    """A collapsed DD gives no information, including before garbage reduction."""
+    """Construction preserves the GHZ functionality, including partial equivalence."""
     circuits = [load(ghz_circuits[index]) for index in pair]
     if ancillary:
         for circuit in circuits:
@@ -59,16 +59,16 @@ def test_construction_numerical_failure(
     manager.run()
     result = manager.results.equivalence
     if pair == (1, 2):
-        assert result in {EquivalenceCriterion.not_equivalent, EquivalenceCriterion.no_information}
+        assert result == EquivalenceCriterion.not_equivalent
     else:
-        assert result == EquivalenceCriterion.no_information or manager.results.considered_equivalent()
+        assert manager.results.considered_equivalent()
 
 
 @pytest.mark.parametrize("parallel", [False, True])
-def test_numerical_failure_allows_simulation(
+def test_ghz_non_equivalence_with_simulation(
     ghz_circuits: tuple[QuantumCircuit, QuantumCircuit, QuantumCircuit], parallel: bool
 ) -> None:
-    """An independent simulation can reject circuits after construction fails."""
+    """Construction and simulation reject the modified GHZ circuit."""
     circuits = [load(circuit) for circuit in ghz_circuits[1:]]
     for circuit in circuits:
         for qubit in range(circuit.num_qubits):
