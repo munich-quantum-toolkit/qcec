@@ -6,6 +6,13 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+This release requires `mqt-core` 3.11.0. Rebuild C++ libraries and Python
+extensions against Core's `3.11` shared-library ABI.
+
+`numerical_tolerance` must be a positive normal floating-point value. Zero,
+negative, subnormal, and non-finite values raise `ValueError` in Python or
+`std::invalid_argument` in C++ when constructing the equivalence checker.
+
 ## [3.10.2]
 
 This release adds

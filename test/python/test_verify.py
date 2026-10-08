@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import pytest
 from mqt.core.ir import QuantumComputation
-from qiskit import transpile
-from qiskit.circuit import AncillaRegister, QuantumCircuit
+from qiskit import qasm2, transpile
+from qiskit.circuit import AncillaRegister, Parameter, QuantumCircuit
 
 from mqt.qcec import verify
 from mqt.qcec.pyqcec import ApplicationScheme, Configuration, EquivalenceCriterion
@@ -48,6 +48,44 @@ def test_verify(original_circuit: QuantumCircuit, alternative_circuit: QuantumCi
     """Test the verification of two equivalent circuits."""
     result = verify(original_circuit, alternative_circuit)
     assert result.equivalence == EquivalenceCriterion.equivalent
+
+
+@pytest.mark.parametrize("as_qasm", [False, True])
+def test_offset_measurement_destinations(as_qasm: bool) -> None:
+    """Unused classical bits must not become logical output qubits."""
+    circuit = QuantumCircuit(2, 2)
+    circuit.h(0)
+    circuit.cx(0, 1)
+    circuit.measure_all()
+    source = qasm2.dumps(circuit) if as_qasm else circuit
+    result = verify(source, source, run_zx_checker=False)
+    assert result.considered_equivalent()
+
+
+def test_offset_measurements_after_compilation() -> None:
+    """Normalize shared outputs across different physical circuit sizes."""
+    circuit = QuantumCircuit(2, 4)
+    circuit.x(0)
+    circuit.cx(0, 1)
+    circuit.measure([0, 1], [2, 3])
+    compiled = transpile(
+        circuit,
+        coupling_map=[[0, 1], [1, 0], [1, 2], [2, 1]],
+        initial_layout=[2, 0],
+        basis_gates=["cx", "x", "h"],
+        seed_transpiler=42,
+    )
+    result = verify(circuit, compiled, run_zx_checker=False)
+    assert result.considered_equivalent()
+
+
+def test_offset_measurements_with_symbolic_gate() -> None:
+    """Normalize outputs on the symbolic ZX path before parameter binding."""
+    circuit = QuantumCircuit(2, 2)
+    circuit.rx(Parameter("theta"), 0)
+    circuit.cx(0, 1)
+    circuit.measure_all()
+    assert verify(circuit, circuit.copy()).considered_equivalent()
 
 
 def test_verify_kwargs(original_circuit: QuantumCircuit, alternative_circuit: QuantumCircuit) -> None:
