@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- ⬆️ Update `mqt-core` to version 3.11.0 ([#1102]) ([**@burgholzer**])
+
 ### Fixed
 
 - 🐛 Normalize shared classical measurement destinations outside the qubit range
