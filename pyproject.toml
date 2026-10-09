@@ -215,7 +215,6 @@ repair-wheel-command = """\
 
 [[tool.cibuildwheel.overrides]]
 select = [ "cp*-win_arm64", "cp3??t-*" ]
-before-test = ""
 test-command = 'python -c "import mqt.qcec"'
 test-groups = []
 

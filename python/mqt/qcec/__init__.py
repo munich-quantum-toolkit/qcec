@@ -23,7 +23,6 @@ if sys.platform == "win32":  # ruff:ignore[non-empty-init-module] This is actual
     from pathlib import Path
 
     def _dll_patch() -> None:
-        """Add the DLL directory to the search path."""
         bin_dir = Path(sysconfig.get_paths()["purelib"]) / "mqt" / "core" / "bin"
         os.add_dll_directory(str(bin_dir))
 
