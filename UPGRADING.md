@@ -39,8 +39,8 @@ disabled.
 
 ### Numerical tolerance
 
-QCEC now rejects invalid `numerical_tolerance` settings when constructing the
-equivalence checker. If you override the default, replace zero, negative,
+The equivalence checker now rejects invalid `numerical_tolerance` settings
+during construction. If you override the default, replace zero, negative,
 subnormal, or non-finite values with a positive normal floating-point value.
 Invalid settings raise `ValueError` in Python or `std::invalid_argument` in C++.
 
