@@ -418,7 +418,7 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
       throw std::runtime_error(
           "One of the circuits contains mid-circuit non-unitary primitives. "
           "To verify such circuits, the checker must be configured with "
-          "`transformDynamicCircuit=true` (`transform_dynamic_circuits=True` "
+          "`transformDynamicCircuit=true` (`transform_dynamic_circuit=True` "
           "in Python).");
     }
   }
