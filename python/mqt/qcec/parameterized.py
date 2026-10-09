@@ -120,6 +120,11 @@ def check_parameterized(
     circ1: QuantumComputation, circ2: QuantumComputation, configuration: Configuration
 ) -> EquivalenceCheckingManager.Results:
     """Equivalence checking flow for parameterized circuit."""
+    if configuration.execution.method != "auto":
+        manager = EquivalenceCheckingManager(circ1, circ2, configuration)
+        manager.run()
+        return manager.results
+
     total_preprocessing_time = 0.0
     total_runtime = 0.0
     total_simulations_started = 0

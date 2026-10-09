@@ -21,6 +21,7 @@
 #include <iosfwd>
 #include <nlohmann/json_fwd.hpp>
 #include <string>
+#include <string_view>
 #include <thread>
 
 namespace ec {
@@ -34,6 +35,9 @@ public:
     bool parallel = true;
     std::size_t nthreads = std::max(2U, std::thread::hardware_concurrency());
     double timeout = 0.; // in seconds
+
+    /// Select one checker, or use the run*Checker flags and fallbacks in auto.
+    std::string method = "auto";
 
     bool runConstructionChecker = false;
     bool runSimulationChecker = true;
@@ -111,6 +115,9 @@ public:
   Functionality functionality{};
   Simulation simulation{};
   Parameterized parameterized{};
+
+  /// Whether a checker is selected by method or by the legacy flags in auto.
+  [[nodiscard]] bool shouldRunChecker(std::string_view checker) const noexcept;
 
   [[nodiscard]] bool anythingToExecute() const noexcept;
 

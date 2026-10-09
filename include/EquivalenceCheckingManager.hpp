@@ -114,6 +114,7 @@ public:
 
   /// Disable all previously enabled checkers
   void disableAllCheckers() {
+    configuration.execution.method = "auto";
     configuration.execution.runConstructionChecker = false;
     configuration.execution.runZXChecker = false;
     configuration.execution.runSimulationChecker = false;

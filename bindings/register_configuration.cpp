@@ -83,6 +83,13 @@ There, they are incorporated into the :class:`.Configuration` using the :func:`~
   // execution options
   execution.def(nb::init<>())
       .def_rw(
+          "method", &Configuration::Execution::method,
+          R"pb(Select :code:`auto` (default), :code:`alternating`, :code:`construction`, :code:`simulation`, :code:`zx`, or :code:`hsf`.
+
+An explicit method runs only that checker and overrides the :code:`run_*_checker` flags.
+Unsupported circuits or configurations raise an error.
+Only :code:`auto` uses checker fallbacks and parameter instantiation.)pb")
+      .def_rw(
           "parallel", &Configuration::Execution::parallel,
           R"pb(Set whether execution should happen in parallel. Defaults to :code:`True`.)pb")
 

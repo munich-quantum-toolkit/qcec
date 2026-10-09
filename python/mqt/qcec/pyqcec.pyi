@@ -88,6 +88,17 @@ class Configuration:
 
         def __init__(self) -> None: ...
         @property
+        def method(self) -> str:
+            """Select :code:`auto` (default), :code:`alternating`, :code:`construction`, :code:`simulation`, :code:`zx`, or :code:`hsf`.
+
+            An explicit method runs only that checker and overrides the :code:`run_*_checker` flags.
+            Unsupported circuits or configurations raise an error.
+            Only :code:`auto` uses checker fallbacks and parameter instantiation.
+            """
+
+        @method.setter
+        def method(self, arg: str, /) -> None: ...
+        @property
         def parallel(self) -> bool:
             """Set whether execution should happen in parallel. Defaults to :code:`True`."""
 
