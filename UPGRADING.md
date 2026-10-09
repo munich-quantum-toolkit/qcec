@@ -12,6 +12,12 @@ This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.11 shared-library
 ABI.
 
+MQT Core 3.11 also reduces memory overhead in the DD package. In a controlled
+comparison using unchanged QCEC 3.10.2, updating Core reduced peak process
+memory for the `add6_196` compilation-verification example by approximately 21%,
+from 120 MiB to 95 MiB. This used the alternating checker on an Apple M4 Pro.
+The effect on runtime depends on the circuit and checker settings.
+
 ### Checker selection
 
 This release adds the `method` option to select a single equivalence checker.
