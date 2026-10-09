@@ -114,9 +114,9 @@ information.
 
 ## Other Target Gate Sets
 
-The bundled profiles target `id, rz, sx, x, cx`. To use a different basis,
-generate a profile once for the Qiskit version and optimization level used to
-compile the circuit, then pass its path to `verify_compilation`:
+The bundled profiles target `["id", "rz", "sx", "x", "cx"]`. To use a different
+basis, generate a profile once for the Qiskit version and optimization level
+used to compile the circuit, then pass its path to `verify_compilation`:
 
 ```python
 from pathlib import Path
