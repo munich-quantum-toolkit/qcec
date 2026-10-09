@@ -31,6 +31,8 @@ def __dir__() -> list[str]:
     return __all__
 
 
+_DEFAULT_BASIS_GATES = ["id", "rz", "sx", "x", "cx"]
+
 single_qubit_gates_no_params = {
     "qubits": 1,
     "params": 0,
@@ -180,7 +182,7 @@ def __create_gate_profile_data(
 ) -> dict[tuple[str, int], int]:
     """Create a dictionary of gate profile data."""
     if basis_gates is None:
-        basis_gates = ["id", "rz", "sx", "x", "cx"]
+        basis_gates = _DEFAULT_BASIS_GATES
 
     profile_data = {}
     for gate_set in gate_collection:
@@ -291,14 +293,35 @@ def __find_continuation(
 default_profile_path = Path(__file__).resolve().parent.joinpath("profiles")
 
 
-def generate_profile_name(optimization_level: int = 1) -> str:
-    """Generate a profile name based on the given optimization level."""
-    return f"qiskit_O{optimization_level}.profile"
+def generate_profile_name(optimization_level: int = 1, *, basis_gates: list[str] | None = None) -> str:
+    """Generate a profile name for the optimization level and target basis.
+
+    Gate order and duplicates do not affect the name. The default basis uses
+    the bundled profile name.
+
+    Args:
+        optimization_level: The Qiskit optimization level (0, 1, 2, or 3).
+        basis_gates: Target gate names, or None for ``id, rz, sx, x, cx``.
+
+    Returns:
+        The profile filename.
+
+    Raises:
+        ValueError: If the basis is empty or contains an invalid gate identifier.
+    """
+    basis = sorted(set(_DEFAULT_BASIS_GATES if basis_gates is None else basis_gates))
+    if not basis or any(not gate.isidentifier() for gate in basis):
+        msg = "basis_gates must be a nonempty list of gate identifiers."
+        raise ValueError(msg)
+    suffix = "" if basis == sorted(_DEFAULT_BASIS_GATES) else "_" + "-".join(basis)
+    return f"qiskit_O{optimization_level}{suffix}.profile"
 
 
 def generate_profile(
     optimization_level: int = 1,
     filepath: Path | None = None,
+    *,
+    basis_gates: list[str] | None = None,
 ) -> None:
     """Generate a compilation flow profile for the given optimization level.
 
@@ -310,18 +333,27 @@ def generate_profile(
         filepath:
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
+        basis_gates:
+            Target gate names accepted by Qiskit's ``transpile`` function.
+            Defaults to ``id, rz, sx, x, cx``.
     """
+    filename = generate_profile_name(optimization_level, basis_gates=basis_gates)
+    if basis_gates is not None:
+        basis_gates = sorted(set(basis_gates))
     if filepath is None:
         filepath = default_profile_path
 
     # generate general profile data
-    profile = __create_gate_profile_data(general_gates, __create_general_gate, optimization_level=optimization_level)
+    profile = __create_gate_profile_data(
+        general_gates, __create_general_gate, basis_gates=basis_gates, optimization_level=optimization_level
+    )
 
     # add multi-controlled gates
     profile.update(
         __create_gate_profile_data(
             multi_controlled_gates,
             __create_multi_controlled_gate,
+            basis_gates=basis_gates,
             optimization_level=optimization_level,
         )
     )
@@ -332,6 +364,5 @@ def generate_profile(
     __add_special_case_data(profile)
 
     # write profile data to file
-    filename = generate_profile_name(optimization_level=optimization_level)
     filepath = filepath.joinpath(filename)
     __write_profile_data_to_file(profile, filepath)

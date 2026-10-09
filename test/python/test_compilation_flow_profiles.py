@@ -18,6 +18,7 @@ import pytest
 from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 
+from mqt.qcec import verify_compilation
 from mqt.qcec.compilation_flow_profiles import generate_profile, generate_profile_name
 
 if TYPE_CHECKING:
@@ -82,3 +83,44 @@ def test_generated_profiles_are_still_valid(optimization_level: int, tmp_path: P
             f"The generated profile {profile_name} differs from the reference profile {ref}. "
             f"This might be due to a change in Qiskit. If this is the case, the reference profile should be updated."
         )
+
+
+@pytest.mark.parametrize("basis_gates", [["rx", "rz", "cz"], ["rz", "sx", "x", "ecr"]])
+def test_custom_basis_profile(tmp_path: Path, basis_gates: list[str]) -> None:
+    """Different bases coexist and include their native and multi-controlled costs."""
+    generate_profile(filepath=tmp_path)
+    default_profile = tmp_path / generate_profile_name()
+    default_data = default_profile.read_bytes()
+    generate_profile(filepath=tmp_path, basis_gates=basis_gates)
+    name = generate_profile_name(basis_gates=basis_gates)
+    assert name != default_profile.name
+    assert name == generate_profile_name(basis_gates=[*reversed(basis_gates), basis_gates[0]])
+    assert default_profile.read_bytes() == default_data
+    costs = {
+        (gate, int(controls)): int(cost)
+        for gate, controls, cost in (line.split() for line in (tmp_path / name).read_text().splitlines()[1:])
+    }
+    native_gate = ("z", 1) if "cz" in basis_gates else ("ecr", 0)
+    assert costs[native_gate] == 1
+    mcx = QuantumCircuit(6)
+    mcx.mcx(list(range(5)), 5)
+    compiled = transpile(mcx, basis_gates=basis_gates, optimization_level=1, seed_transpiler=12345)
+    assert costs["x", 5] == compiled.size()
+    mcx.measure_all()
+    compiled.measure_all()
+    result = verify_compilation(
+        mcx, compiled, profile=str(tmp_path / name), run_simulation_checker=False, run_zx_checker=False
+    )
+    assert result.considered_equivalent()
+
+
+def test_explicit_default_basis_profile_name() -> None:
+    """The default basis selects the bundled profile regardless of gate order."""
+    assert generate_profile_name(basis_gates=["cx", "sx", "rz", "x", "id"]) == generate_profile_name()
+
+
+@pytest.mark.parametrize("basis_gates", [[], ["../cx"], [""]])
+def test_invalid_basis_profile_name(basis_gates: list[str]) -> None:
+    """Profile names require a nonempty set of gate identifiers."""
+    with pytest.raises(ValueError, match="gate identifiers"):
+        generate_profile_name(basis_gates=basis_gates)

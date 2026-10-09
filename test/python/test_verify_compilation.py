@@ -10,12 +10,21 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from importlib import resources
+from typing import TYPE_CHECKING
+
 import pytest
 from qiskit import transpile
 from qiskit.circuit import QuantumCircuit
 
 from mqt.qcec import verify_compilation
-from mqt.qcec.pyqcec import EquivalenceCriterion
+from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from importlib.resources.abc import Traversable
+    from pathlib import Path
 
 
 @pytest.fixture
@@ -81,3 +90,64 @@ def test_verify_compilation_with_multi_controlled_gates(optimization_level: int)
         EquivalenceCriterion.equivalent,
         EquivalenceCriterion.equivalent_up_to_global_phase,
     }
+
+
+@pytest.mark.parametrize("as_keyword", [False, True])
+def test_custom_compilation_profile(original_circuit: QuantumCircuit, tmp_path: Path, as_keyword: bool) -> None:
+    """An explicit profile remains selected and is read by the checker."""
+    config = Configuration()
+    config.execution.run_construction_checker = True
+    config.execution.run_alternating_checker = False
+    config.execution.run_simulation_checker = False
+    config.execution.run_zx_checker = False
+    profile = tmp_path / "custom.profile"
+    kwargs = {"profile": str(profile)} if as_keyword else {}
+    if not as_keyword:
+        config.application.profile = str(profile)
+    with pytest.raises(ValueError, match="Error opening LUT file"):
+        verify_compilation(original_circuit, original_circuit, configuration=config, **kwargs)
+    profile.write_text("x 1 1\n")
+    result = verify_compilation(original_circuit, original_circuit, configuration=config, **kwargs)
+    assert result.considered_equivalent()
+    assert config.application.profile == str(profile)
+
+
+def test_default_profile_does_not_persist(original_circuit: QuantumCircuit) -> None:
+    """Reusing a configuration must not turn a bundled profile into an explicit one."""
+    config = Configuration()
+    for level in (1, 2):
+        result = verify_compilation(original_circuit, original_circuit, optimization_level=level, configuration=config)
+        assert result.considered_equivalent()
+        assert not config.application.profile
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_extracted_profile_lifetime(
+    original_circuit: QuantumCircuit, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, missing: bool
+) -> None:
+    """Verification consumes temporary resources and restores configuration on failure."""
+    extracted = tmp_path / "extracted.profile"
+
+    @contextmanager
+    def extract_profile(ref: Traversable) -> Iterator[Path]:
+        if not missing:
+            extracted.write_bytes(ref.read_bytes())
+        try:
+            yield extracted
+        finally:
+            extracted.unlink(missing_ok=True)
+
+    monkeypatch.setattr(resources, "as_file", extract_profile)
+    config = Configuration()
+    config.execution.run_construction_checker = True
+    config.execution.run_alternating_checker = False
+    config.execution.run_simulation_checker = False
+    config.execution.run_zx_checker = False
+    if missing:
+        with pytest.raises(ValueError, match="Error opening LUT file"):
+            verify_compilation(original_circuit, original_circuit, configuration=config)
+    else:
+        result = verify_compilation(original_circuit, original_circuit, configuration=config)
+        assert result.considered_equivalent()
+    assert not extracted.exists()
+    assert not config.application.profile

@@ -30,6 +30,12 @@ For circuits that measure only some outputs, use
 compiler-provided input layout by leaving `backpropagate_output_permutation`
 disabled.
 
+`verify_compilation` now honors an explicit `profile` from keyword arguments or
+configuration. Clear that value to use the bundled profile for the selected
+optimization level. Use `basis_gates` in `generate_profile` and
+`generate_profile_name` to generate and locate profiles for other target gate
+sets. Existing default profile names are unchanged.
+
 ## [3.10.2]
 
 This release adds
