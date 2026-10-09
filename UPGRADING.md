@@ -12,8 +12,8 @@ This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.11 shared-library
 ABI.
 
-MQT Core 3.11 also reduces memory overhead in its DD package.
-The effect on runtime depends on the circuit and checker settings.
+MQT Core 3.11 also reduces memory overhead in its DD package. The effect on
+runtime depends on the circuit and checker settings.
 
 ### Checker selection
 
