@@ -22,7 +22,7 @@ from mqt.qcec import verify_compilation
 from mqt.qcec.pyqcec import Configuration, EquivalenceCriterion
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
     from importlib.resources.abc import Traversable
     from pathlib import Path
 
@@ -129,7 +129,7 @@ def test_extracted_profile_lifetime(
     extracted = tmp_path / "extracted.profile"
 
     @contextmanager
-    def extract_profile(ref: Traversable) -> Iterator[Path]:
+    def extract_profile(ref: Traversable) -> Generator[Path, None, None]:
         if not missing:
             extracted.write_bytes(ref.read_bytes())
         try:
