@@ -51,34 +51,22 @@ void addToDag(DAG& dag, std::unique_ptr<Operation>* op) {
   }
 }
 
-void removeIdentities(QuantumComputation& qc) {
-  auto it = qc.begin();
-  while (it != qc.end()) {
-    if ((*it)->getType() == I) {
-      it = qc.erase(it);
-    } else if ((*it)->isCompoundOperation()) {
-      auto& compOp = dynamic_cast<CompoundOperation&>(**it);
-      auto cit = compOp.cbegin();
-      while (cit != compOp.cend()) {
-        if ((*cit)->getType() == I) {
-          cit = compOp.erase(cit);
-        } else {
-          ++cit;
-        }
+template <OpType type, class Container>
+void removeOperations(Container& operations) {
+  for (auto& op : operations) {
+    if (auto* compound = dynamic_cast<CompoundOperation*>(op.get())) {
+      removeOperations<type>(*compound);
+      if (compound->empty()) {
+        op.reset();
+      } else if (compound->isConvertibleToSingleOperation()) {
+        op = compound->collapseToSingleOperation();
       }
-      if (compOp.empty()) {
-        it = qc.erase(it);
-      } else {
-        if (compOp.size() == 1) {
-          // CompoundOperation has degraded to single Operation
-          (*it) = std::move(*compOp.begin());
-        }
-        ++it;
-      }
-    } else {
-      ++it;
     }
   }
+  const auto removed = std::ranges::remove_if(operations, [](const auto& op) {
+    return op == nullptr || op->getType() == type;
+  });
+  operations.erase(removed.begin(), removed.end());
 }
 
 DAG constructDAG(QuantumComputation& qc) {
@@ -91,6 +79,8 @@ DAG constructDAG(QuantumComputation& qc) {
 }
 
 } // namespace
+
+void removeBarriers(QuantumComputation& qc) { removeOperations<Barrier>(qc); }
 
 void singleQubitGateFusion(QuantumComputation& qc) {
   static const std::map<OpType, OpType> INVERSE_MAP = {
@@ -166,7 +156,7 @@ void singleQubitGateFusion(QuantumComputation& qc) {
     dag.at(target).push_back(previous);
   }
 
-  removeIdentities(qc);
+  removeOperations<I>(qc);
 }
 
 void swapReconstruction(QuantumComputation& qc) {
@@ -247,7 +237,7 @@ void swapReconstruction(QuantumComputation& qc) {
     }
   }
 
-  removeIdentities(qc);
+  removeOperations<I>(qc);
 }
 
 namespace {
@@ -413,7 +403,7 @@ void removeDiagonalGatesBeforeMeasure(QuantumComputation& qc) {
   removeDiagonalGatesBeforeMeasureRecursive(dag, dagIterators, 0, nullptr);
 
   // remove resulting identities from circuit
-  removeIdentities(qc);
+  removeOperations<I>(qc);
 }
 
 namespace {

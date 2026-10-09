@@ -20,6 +20,8 @@ class QuantumComputation;
 
 namespace ec::detail {
 
+/// Remove barriers from the circuit and its compound operations.
+void removeBarriers(qc::QuantumComputation& qc);
 void singleQubitGateFusion(qc::QuantumComputation& qc);
 void swapReconstruction(qc::QuantumComputation& qc);
 void removeDiagonalGatesBeforeMeasure(qc::QuantumComputation& qc);

@@ -18,7 +18,10 @@
 #include "dd/Package.hpp"
 #include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "qasm3/Importer.hpp"
 
+#include <algorithm>
+#include <array>
 #include <bitset>
 #include <cstddef>
 #include <cstdlib>
@@ -353,3 +356,130 @@ TEST(GeneralDynamicCircuitTest, DynamicCircuit) {
 }
 
 } // namespace
+
+TEST(DynamicCircuitTest, BarriersDoNotPreventFinalMeasurements) {
+  qc::QuantumComputation reference(2, 1);
+  reference.h(0);
+  reference.x(1);
+  reference.measure(0, 0);
+  reference.initializeIOMapping();
+  for (const auto nested : {false, true}) {
+    qc::QuantumComputation circuit(2, 1);
+    circuit.h(0);
+    circuit.measure(0, 0);
+    if (nested) {
+      qc::QuantumComputation tail(2);
+      qc::QuantumComputation barrier(2);
+      barrier.barrier({0, 1});
+      tail.emplace_back(barrier.asCompoundOperation());
+      tail.x(1);
+      tail.barrier({0, 1});
+      circuit.emplace_back(tail.asCompoundOperation());
+    } else {
+      circuit.barrier({0, 1});
+      circuit.x(1);
+    }
+    circuit.initializeIOMapping();
+    for (const auto transform : {false, true}) {
+      SCOPED_TRACE(testing::Message()
+                   << "nested=" << nested << ", transform=" << transform);
+      ec::Configuration config;
+      config.optimizations.transformDynamicCircuit = transform;
+      config.execution.runSimulationChecker = false;
+      config.execution.runZXChecker = false;
+      ec::EquivalenceCheckingManager ecm(reference, circuit, config);
+      ecm.run();
+      EXPECT_TRUE(ecm.getResults().consideredEquivalent());
+    }
+  }
+}
+
+TEST(DynamicCircuitTest, RouteLogicalOutputsThroughOneReadoutQubit) {
+  ec::Configuration config;
+  config.optimizations.transformDynamicCircuit = true;
+  config.functionality.checkPartialEquivalence = true;
+  config.execution.runSimulationChecker = false;
+  config.execution.runZXChecker = false;
+  config.execution.runAlternatingChecker = false;
+  config.execution.runConstructionChecker = true;
+  std::array<qc::Qubit, 3> layout{0, 1, 2};
+  for (auto moreLayouts = true; moreLayouts;
+       moreLayouts = std::ranges::next_permutation(layout).found) {
+    for (const auto decompose : {false, true}) {
+      for (const qc::Qubit outputs : {2U, 3U}) {
+        qc::QuantumComputation reference(3, outputs);
+        reference.h(0);
+        reference.cx(0, 1);
+        reference.cx(1, 2);
+        for (qc::Qubit q = 0; q < outputs; ++q) {
+          reference.measure(q, q);
+        }
+        reference.initializeIOMapping();
+        for (const auto error : {false, true}) {
+          SCOPED_TRACE(testing::Message()
+                       << "layout=" << layout[0] << layout[1] << layout[2]
+                       << ", decompose=" << decompose << ", outputs=" << outputs
+                       << ", error=" << error);
+          qc::QuantumComputation routed(3, outputs);
+          for (qc::Qubit q = 0; q < 3; ++q) {
+            routed.initialLayout[layout.at(q)] = q;
+          }
+          routed.h(layout[0]);
+          routed.cx(layout[0], layout[1]);
+          routed.cx(layout[1], layout[2]);
+          if (error) {
+            routed.x(layout[1]);
+          }
+          routed.measure(layout[0], 0);
+          for (qc::Qubit q = 1; q < outputs; ++q) {
+            if (decompose) {
+              routed.cx(layout[0], layout.at(q));
+              routed.cx(layout.at(q), layout[0]);
+              routed.cx(layout[0], layout.at(q));
+            } else {
+              routed.swap(layout[0], layout.at(q));
+            }
+            routed.measure(layout[0], q);
+          }
+          routed.initializeIOMapping();
+          ec::EquivalenceCheckingManager ecm(reference, routed, config);
+          ecm.run();
+          if (error) {
+            EXPECT_EQ(ecm.equivalence(),
+                      ec::EquivalenceCriterion::NotEquivalent);
+          } else {
+            EXPECT_TRUE(ecm.getResults().consideredEquivalent());
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST(DynamicCircuitTest, SteaneRoutedReadout) {
+  qc::QuantumComputation reference(10, 3);
+  reference.x(5);
+  for (const qc::Qubit q : {0U, 2U, 4U, 6U}) {
+    reference.cx(q, 7);
+  }
+  for (const qc::Qubit q : {1U, 2U, 5U, 6U}) {
+    reference.cx(q, 8);
+  }
+  for (const qc::Qubit q : {3U, 4U, 5U, 6U}) {
+    reference.cx(q, 9);
+  }
+  reference.measure({7, 8, 9}, {0, 1, 2});
+  reference.initializeIOMapping();
+  const auto routed =
+      qasm3::Importer::importf("circuits/test/steane_routed_readout.qasm");
+  ec::Configuration config;
+  config.optimizations.transformDynamicCircuit = true;
+  config.execution.runSimulationChecker = false;
+  config.execution.runZXChecker = false;
+  for (const auto backpropagate : {false, true}) {
+    config.optimizations.backpropagateOutputPermutation = backpropagate;
+    ec::EquivalenceCheckingManager ecm(reference, routed, config);
+    ecm.run();
+    EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+  }
+}

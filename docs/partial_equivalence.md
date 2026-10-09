@@ -62,6 +62,29 @@ equivalence check. The equivalence checker will return `equivalent` for totally
 equivalent circuits or `equivalent_up_to_global_phase` for circuits which differ
 only in their global phase and `not_equivalent` for other circuits.
 
+For a transpiled Qiskit circuit, keep `backpropagate_output_permutation=False`
+(the default) to preserve the input layout supplied by Qiskit. Enabling partial
+equivalence compares the measured outputs; it does not infer a new input layout.
+For example:
+
+```python
+compiled = transpile(circuit, backend)
+result = verify(circuit, compiled, check_partial_equivalence=True)
+```
+
+A circuit may route distinct logical states through one physical measurement
+qubit using unconditional SWAPs. Enable `transform_dynamic_circuit=True` and
+keep `elide_permutations=True` for this case. Keep `reconstruct_swaps=True` if
+SWAPs are decomposed into CX gates. Expand custom gates before checking so the
+CX gates are visible to SWAP reconstruction.
+
+Each measured logical state must have its own classical destination. Routing a
+measured state is supported; targeting that state with a gate still requires a
+reset first. Unconditional barriers, including those inside compound operations,
+do not affect these restrictions. Dynamic transformation derives observed
+outputs and garbage flags from measurements, replacing manual garbage
+annotations.
+
 The following is a summary of the behaviour of each type of equivalence checker
 when the `check_partial_equivalence` option is set to `True`.
 
