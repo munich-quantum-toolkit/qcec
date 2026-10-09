@@ -20,6 +20,9 @@ class QuantumComputation;
 
 namespace ec::detail {
 
+/// Detect dynamic operations, including gates with symbolic parameters.
+[[nodiscard]] bool isDynamicCircuit(const qc::QuantumComputation& qc);
+
 /// Remove barriers from the circuit and its compound operations.
 void removeBarriers(qc::QuantumComputation& qc);
 void singleQubitGateFusion(qc::QuantumComputation& qc);

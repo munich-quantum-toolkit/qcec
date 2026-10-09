@@ -80,6 +80,35 @@ DAG constructDAG(QuantumComputation& qc) {
 
 } // namespace
 
+bool isDynamicCircuit(const QuantumComputation& qc) {
+  std::vector<bool> measured(qc.getHighestPhysicalQubitIndex() + 1U, false);
+  const auto isDynamic = [&measured](const auto& self,
+                                     const Operation& op) -> bool {
+    if (op.getType() == Reset || op.isIfElseOperation()) {
+      return true;
+    }
+    if (op.isCompoundOperation()) {
+      const auto& compound = dynamic_cast<const CompoundOperation&>(op);
+      return std::ranges::any_of(
+          compound, [&self](const auto& child) { return self(self, *child); });
+    }
+    if (op.getType() == Measure) {
+      for (const auto target : op.getTargets()) {
+        measured.at(target) = true;
+      }
+      return false;
+    }
+    if (op.getType() == Barrier) {
+      return false;
+    }
+    return std::ranges::any_of(op.getUsedQubits(), [&measured](const auto q) {
+      return measured.at(q);
+    });
+  };
+  return std::ranges::any_of(
+      qc, [&isDynamic](const auto& op) { return isDynamic(isDynamic, *op); });
+}
+
 void removeBarriers(QuantumComputation& qc) { removeOperations<Barrier>(qc); }
 
 void singleQubitGateFusion(QuantumComputation& qc) {
@@ -91,8 +120,9 @@ void singleQubitGateFusion(QuantumComputation& qc) {
   auto dag = DAG(qc.getHighestPhysicalQubitIndex() + 1U);
 
   for (auto& operation : qc) {
-    if (!operation->isStandardOperation() || operation->isControlled() ||
-        operation->getTargets().size() != 1U) {
+    if ((!operation->isStandardOperation() &&
+         !operation->isSymbolicOperation()) ||
+        operation->isControlled() || operation->getTargets().size() != 1U) {
       addToDag(dag, &operation);
       continue;
     }
@@ -130,8 +160,7 @@ void singleQubitGateFusion(QuantumComputation& qc) {
           operation->getType() == inverse->second) {
         compound->pop_back();
       } else {
-        compound->emplace_back<StandardOperation>(target, operation->getType(),
-                                                  operation->getParameter());
+        compound->emplace_back(operation->clone());
       }
       operation->setGate(I);
       continue;
@@ -146,11 +175,8 @@ void singleQubitGateFusion(QuantumComputation& qc) {
     }
 
     auto compound = std::make_unique<CompoundOperation>();
-    compound->emplace_back<StandardOperation>((*previous)->getTargets().at(0),
-                                              (*previous)->getType(),
-                                              (*previous)->getParameter());
-    compound->emplace_back<StandardOperation>(target, operation->getType(),
-                                              operation->getParameter());
+    compound->emplace_back((*previous)->clone());
+    compound->emplace_back(operation->clone());
     operation->setGate(I);
     *previous = std::move(compound);
     dag.at(target).push_back(previous);
@@ -267,7 +293,8 @@ void removeDiagonalGatesBeforeMeasureRecursive(
       break;
     }
     auto* op = (*it)->get();
-    if (op->isStandardOperation()) {
+    if (op->isStandardOperation() ||
+        (op->isSymbolicOperation() && !op->isCompoundOperation())) {
       // try removing gate and upon success increase all corresponding iterators
       const auto onlyDiagonalGates =
           removeDiagonalGate(dag, dagIterators, idx, it, op);
@@ -325,7 +352,7 @@ bool removeDiagonalGate(DAG& dag, DAGReverseIterators& dagIterators, Qubit idx,
     return false;
   }
 
-  if (op->getNcontrols() != 0) {
+  if (op->getNcontrols() != 0 || op->getTargets().size() > 1U) {
     // need to check all controls and targets
     bool onlyDiagonalGates = true;
     for (const auto& control : op->getControls()) {
@@ -346,7 +373,8 @@ bool removeDiagonalGate(DAG& dag, DAGReverseIterators& dagIterators, Qubit idx,
       removeDiagonalGatesBeforeMeasureRecursive(dag, dagIterators, controlQubit,
                                                 (*it)->get());
       // check if iteration of control qubit was successful
-      if (*dagIterators.at(controlQubit) != *it) {
+      if (dagIterators.at(controlQubit) == dag.at(controlQubit).rend() ||
+          *dagIterators.at(controlQubit) != *it) {
         onlyDiagonalGates = false;
         break;
       }
@@ -363,7 +391,8 @@ bool removeDiagonalGate(DAG& dag, DAGReverseIterators& dagIterators, Qubit idx,
       removeDiagonalGatesBeforeMeasureRecursive(dag, dagIterators, target,
                                                 (*it)->get());
       // check if iteration of target qubit was successful
-      if (*dagIterators.at(target) != *it) {
+      if (dagIterators.at(target) == dag.at(target).rend() ||
+          *dagIterators.at(target) != *it) {
         onlyDiagonalGates = false;
         break;
       }
@@ -742,6 +771,13 @@ void deferMeasurements(QuantumComputation& qc) {
 
         if (const auto* ifElse = dynamic_cast<IfElseOperation*>(opIt->get());
             ifElse != nullptr) {
+          if (ifElse->getThenOp()->isSymbolicOperation() ||
+              (ifElse->getElseOp() != nullptr &&
+               ifElse->getElseOp()->isSymbolicOperation())) {
+            throw std::invalid_argument(
+                "Transforming symbolic dynamic circuits is not supported. "
+                "Bind their parameters before verification.");
+          }
           // determine control bit
           std::uint64_t expectedValue = 0U;
           Bit cBit = 0;
@@ -902,7 +938,7 @@ void deferMeasurements(QuantumComputation& qc) {
     qc.initializeIOMapping();
   }
 
-  if (!qc.empty() && qc.isDynamic()) {
+  if (!qc.empty() && isDynamicCircuit(qc)) {
     throw std::runtime_error(
         "Measurement deferral left unsupported dynamic operations in the "
         "circuit.");

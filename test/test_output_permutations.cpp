@@ -90,7 +90,7 @@ TEST(ClassicalOutputValidation, NormalizesPartialOutputs) {
   }
 }
 
-TEST(ClassicalOutputValidation, RejectsNestedMeasurementsWithSymbolicGates) {
+TEST(ClassicalOutputValidation, RejectsNestedSymbolicDynamicCircuits) {
   qc::QuantumComputation nested(2, 4);
   nested.h(0);
   nested.measure(0, 0);
@@ -99,6 +99,8 @@ TEST(ClassicalOutputValidation, RejectsNestedMeasurementsWithSymbolicGates) {
   circuit.rx(qc::Symbolic{sym::Term<qc::fp>{sym::Variable{"theta"}}}, 0);
   circuit.measure({0, 1}, {2, 3});
   circuit.initializeIOMapping();
-  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit)),
+  ec::Configuration config{};
+  config.optimizations.transformDynamicCircuit = true;
+  EXPECT_THROW((ec::EquivalenceCheckingManager(circuit, circuit, config)),
                std::invalid_argument);
 }

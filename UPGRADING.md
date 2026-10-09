@@ -6,6 +6,10 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+Configured preprocessing now also applies to static parameterized circuits.
+Symbolic dynamic circuits raise an error; bind their parameters before enabling
+`transform_dynamic_circuit=True`.
+
 This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.11 shared-library
 ABI.
