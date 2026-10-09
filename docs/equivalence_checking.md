@@ -223,3 +223,33 @@ deadline starts. Process creation itself may delay the timeout on some
 platforms. `QuantumComputation` objects are not supported. Successful checks
 return the JSON-style result of `verify`, including checker statistics but not
 DD counterexamples.
+
+## Selecting a Checker
+
+`verify(..., method="auto")` is the default. It uses the configured
+`run_*_checker` flags, automatic fallback between checkers, and the
+parameterized verification flow.
+
+Set `method` to `"alternating"`, `"construction"`, `"simulation"`, `"zx"`, or
+`"hsf"` to run only that checker. This selection overrides the `run_*_checker`
+flags without changing them. In a `Configuration`, set `execution.method`. The
+same option is accepted by `verify_compilation` and `verify_with_hard_timeout`.
+
+Explicit selection raises an error when the selected checker does not support
+the preprocessed circuits or configuration. In particular:
+
+- Unbound parameters require `"auto"` or `"zx"`. Explicit ZX does not
+  instantiate parameters if the symbolic check is inconclusive.
+- Alternating checking cannot handle an ancilla used by both circuits.
+- ZX checking requires supported gates and ancillary outputs. It does not
+  support partial or approximate equivalence checking.
+- Simulation requires `max_sims > 0` and does not support approximate
+  equivalence.
+- HSF requires `check_approximate_equivalence=True` and its documented gate and
+  circuit restrictions.
+
+A supported check can still return `no_information`, for example after a timeout
+or an inconclusive ZX reduction. Explicit selection does not fall back to
+another checker in this case. Setting `method` back to `"auto"` restores
+selection through the flags. `disable_all_checkers()` also resets the method to
+`"auto"`.

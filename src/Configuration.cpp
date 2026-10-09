@@ -15,41 +15,63 @@
 
 #include <nlohmann/json.hpp>
 #include <ostream>
+#include <string_view>
 
 namespace ec {
+bool Configuration::shouldRunChecker(
+    const std::string_view checker) const noexcept {
+  if (execution.method != "auto") {
+    return execution.method == checker;
+  }
+  if (checker == "construction") {
+    return execution.runConstructionChecker;
+  }
+  if (checker == "simulation") {
+    return execution.runSimulationChecker;
+  }
+  if (checker == "alternating") {
+    return execution.runAlternatingChecker;
+  }
+  if (checker == "zx") {
+    return execution.runZXChecker;
+  }
+  return checker == "hsf" && execution.runHSFChecker;
+}
+
 bool Configuration::anythingToExecute() const noexcept {
-  return (execution.runSimulationChecker && simulation.maxSims > 0U) ||
-         execution.runAlternatingChecker || execution.runConstructionChecker ||
-         execution.runZXChecker || execution.runHSFChecker;
+  return (shouldRunChecker("simulation") && simulation.maxSims > 0U) ||
+         shouldRunChecker("alternating") || shouldRunChecker("construction") ||
+         shouldRunChecker("zx") || shouldRunChecker("hsf");
 }
 
 bool Configuration::onlySingleTask() const noexcept {
   const auto nonSimulationTasks =
-      static_cast<unsigned>(execution.runAlternatingChecker) +
-      static_cast<unsigned>(execution.runConstructionChecker) +
-      static_cast<unsigned>(execution.runZXChecker) +
-      static_cast<unsigned>(execution.runHSFChecker);
+      static_cast<unsigned>(shouldRunChecker("alternating")) +
+      static_cast<unsigned>(shouldRunChecker("construction")) +
+      static_cast<unsigned>(shouldRunChecker("zx")) +
+      static_cast<unsigned>(shouldRunChecker("hsf"));
   const auto simulations =
-      execution.runSimulationChecker ? simulation.maxSims : 0U;
+      shouldRunChecker("simulation") ? simulation.maxSims : 0U;
   return (nonSimulationTasks == 1U && simulations == 0U) ||
          (nonSimulationTasks == 0U && simulations == 1U);
 }
 
 bool Configuration::onlyZXCheckerConfigured() const noexcept {
-  return !execution.runConstructionChecker && !execution.runSimulationChecker &&
-         !execution.runAlternatingChecker && execution.runZXChecker &&
-         !execution.runHSFChecker;
+  return !shouldRunChecker("construction") && !shouldRunChecker("simulation") &&
+         !shouldRunChecker("alternating") && shouldRunChecker("zx") &&
+         !shouldRunChecker("hsf");
 }
 
 bool Configuration::onlySimulationCheckerConfigured() const noexcept {
-  return !execution.runConstructionChecker && execution.runSimulationChecker &&
-         !execution.runAlternatingChecker && !execution.runZXChecker &&
-         !execution.runHSFChecker;
+  return !shouldRunChecker("construction") && shouldRunChecker("simulation") &&
+         !shouldRunChecker("alternating") && !shouldRunChecker("zx") &&
+         !shouldRunChecker("hsf");
 }
 
 nlohmann::basic_json<> Configuration::json() const {
   nlohmann::basic_json<> config{};
   auto& exe = config["execution"];
+  exe["method"] = execution.method;
   exe["tolerance"] = execution.numericalTolerance;
   exe["parallel"] = execution.parallel;
   exe["nthreads"] = execution.nthreads;

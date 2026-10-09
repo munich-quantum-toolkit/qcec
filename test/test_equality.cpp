@@ -274,27 +274,21 @@ TEST_F(EqualityTest, AutomaticSwitchToConstructionChecker) {
   // NOLINTNEXTLINE(misc-const-correctness)
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
 
-  // this should notice that the alternating checker is not capable of running
-  // the circuit and should switch to the construction checker
+  // Automatic selection falls back when execution starts.
+  ecm.run();
   const auto runConfig = ecm.getConfiguration();
   EXPECT_TRUE(runConfig.execution.runConstructionChecker);
   EXPECT_FALSE(runConfig.execution.runAlternatingChecker);
-
-  // run the equivalence checker
-  ecm.run();
 
   // both circuits should be partially equivalent since their action only
   // differs on an ancillary and garbage qubit
   const auto result = ecm.equivalence();
   EXPECT_EQ(result, ec::EquivalenceCriterion::Equivalent);
 
-  // Check an exception is raised for a checker configured after initialization.
-  // Note: this exception can only be caught in sequential mode since it is
-  // raised in a different thread otherwise.
+  // An explicit selection rejects unsupported circuits before scheduling.
   ecm.reset();
   auto& conf = ecm.getConfiguration();
-  conf.execution.runAlternatingChecker = true;
-  conf.execution.parallel = false;
+  conf.execution.method = "alternating";
   EXPECT_THROW(ecm.run(), std::invalid_argument);
 }
 
@@ -762,4 +756,25 @@ TEST_F(EqualityTest, RemoveDiagonalGatesBeforeMeasure) {
   ecm2.run();
   EXPECT_TRUE(ecm2.getResults().consideredEquivalent());
   std::cout << ecm2.getResults() << "\n";
+}
+
+TEST(MethodSelection, RestoreAutomaticSelection) {
+  qc::QuantumComputation circuit(1);
+  circuit.h(0);
+  ec::Configuration config{};
+  config.execution.method = "construction";
+  config.execution.runSimulationChecker = false;
+  config.execution.runZXChecker = false;
+  ec::EquivalenceCheckingManager manager(circuit, circuit, config);
+  manager.run();
+  ASSERT_EQ(manager.getResults().checkerResults.size(), 1U);
+  EXPECT_EQ(manager.getResults().checkerResults.at(0).at("checker"),
+            "decision_diagram_construction");
+
+  manager.reset();
+  manager.getConfiguration().execution.method = "auto";
+  manager.run();
+  ASSERT_EQ(manager.getResults().checkerResults.size(), 1U);
+  EXPECT_EQ(manager.getResults().checkerResults.at(0).at("checker"),
+            "decision_diagram_alternating");
 }

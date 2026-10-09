@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict, Unpack
+from typing import TYPE_CHECKING, Literal, TypedDict, Unpack
 
 if TYPE_CHECKING:
     from .pyqcec import ApplicationScheme, Configuration, StateType
@@ -36,6 +36,7 @@ class ConfigurationOptions(TypedDict, total=False):
     simulation_scheme: ApplicationScheme
     profile: str
     # Execution
+    method: Literal["auto", "alternating", "construction", "simulation", "zx", "hsf"]
     nthreads: int
     numerical_tolerance: float
     parallel: bool

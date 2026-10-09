@@ -88,6 +88,18 @@ class Configuration:
 
         def __init__(self) -> None: ...
         @property
+        def method(self) -> str:
+            """Select the equivalence checker to run.
+
+            Defaults to :code:`auto`, which uses the :code:`run_*_checker` flags, checker fallbacks, and parameter instantiation.
+
+            Set :code:`alternating`, :code:`construction`, :code:`simulation`, :code:`zx`, or :code:`hsf` to run only that checker.
+            An explicit method overrides the :code:`run_*_checker` flags without changing them and raises an error for unsupported circuits or configurations.
+            """
+
+        @method.setter
+        def method(self, arg: str, /) -> None: ...
+        @property
         def parallel(self) -> bool:
             """Set whether execution should happen in parallel. Defaults to :code:`True`."""
 

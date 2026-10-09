@@ -10,14 +10,17 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Added
+
+- ✨ Select a single equivalence checker with `method`; explicit selections
+  reject unsupported configurations, while the default `auto` retains automatic
+  fallback ([#1109]) ([**@burgholzer**])
+- ✨ Generate compilation-flow profiles for custom target gate sets and use
+  explicit profiles in `verify_compilation` ([#1107]) ([**@burgholzer**])
+
 ### Changed
 
 - ⬆️ Update `mqt-core` to version 3.11.0 ([#1102]) ([**@burgholzer**])
-
-### Added
-
-- ✨ Generate compilation-flow profiles for custom target gate sets and use
-  explicit profiles in `verify_compilation` ([#1107]) ([**@burgholzer**])
 
 ### Fixed
 
@@ -347,6 +350,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1109]: https://github.com/munich-quantum-toolkit/qcec/pull/1109
 [#1108]: https://github.com/munich-quantum-toolkit/qcec/pull/1108
 [#1107]: https://github.com/munich-quantum-toolkit/qcec/pull/1107
 [#1106]: https://github.com/munich-quantum-toolkit/qcec/pull/1106

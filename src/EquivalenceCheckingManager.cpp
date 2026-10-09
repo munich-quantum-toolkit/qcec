@@ -49,6 +49,19 @@
 namespace ec {
 
 namespace {
+EquivalenceCriterion compareGlobalPhases(const qc::QuantumComputation& qc1,
+                                         const qc::QuantumComputation& qc2,
+                                         const double threshold) {
+  const auto phaseDifference = qc1.getGlobalPhase() - qc2.getGlobalPhase();
+  const auto realDifference = std::cos(phaseDifference) - 1.;
+  const auto imaginaryDifference = std::sin(phaseDifference);
+  return (realDifference * realDifference) +
+                     (imaginaryDifference * imaginaryDifference) <=
+                 threshold * threshold
+             ? EquivalenceCriterion::Equivalent
+             : EquivalenceCriterion::EquivalentUpToGlobalPhase;
+}
+
 void normalizeMeasurementOutputs(qc::QuantumComputation& first,
                                  qc::QuantumComputation& second) {
   const auto needsNormalization = [](const qc::QuantumComputation& circuit) {
@@ -469,7 +482,62 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
 }
 
 void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
-  if (configuration.execution.runHSFChecker &&
+  const auto& method = configuration.execution.method;
+  if (method != "auto" && method != "alternating" && method != "construction" &&
+      method != "simulation" && method != "zx" && method != "hsf") {
+    throw std::invalid_argument("Unknown equivalence checking method: " +
+                                method);
+  }
+  if (method != "auto") {
+    if (method != "zx" && (!qc1.isVariableFree() || !qc2.isVariableFree())) {
+      throw std::invalid_argument(
+          "The selected method does not support symbolic circuits. "
+          "Use method='auto' or 'zx', or bind the parameters.");
+    }
+    if (method == "zx") {
+      if (configuration.functionality.checkPartialEquivalence) {
+        throw std::invalid_argument(
+            "The ZX method does not support partial equivalence.");
+      }
+      if (!ZXEquivalenceChecker::canHandle(qc1, qc2)) {
+        throw std::invalid_argument(
+            "The ZX method does not support these circuits.");
+      }
+    }
+    if ((method == "zx" || method == "simulation") &&
+        configuration.functionality.checkApproximateEquivalence) {
+      throw std::invalid_argument(
+          "Approximate equivalence requires method='alternating', "
+          "'construction', or 'hsf'.");
+    }
+    if (method == "simulation" && configuration.simulation.maxSims == 0U) {
+      throw std::invalid_argument(
+          "The simulation method requires max_sims > 0.");
+    }
+  }
+
+  if (configuration.shouldRunChecker("alternating") &&
+      !DDAlternatingChecker::canHandle(qc1, qc2)) {
+    if (method != "auto") {
+      throw std::invalid_argument(
+          "The alternating method does not support these ancillary qubits.");
+    }
+    std::clog << "[QCEC] Warning: alternating checker cannot handle the "
+                 "circuits. Falling back to construction checker.\n";
+    configuration.execution.runAlternatingChecker = false;
+    configuration.execution.runConstructionChecker = true;
+  }
+
+  if (configuration.shouldRunChecker("simulation") &&
+      configuration.simulation.stateType == StateType::ComputationalBasis) {
+    const auto nq = qc1.getNqubitsWithoutAncillae();
+    if (nq < 64U) {
+      configuration.simulation.maxSims =
+          std::min(configuration.simulation.maxSims, std::size_t{1} << nq);
+    }
+  }
+
+  if (configuration.shouldRunChecker("hsf") &&
       !configuration.functionality.checkApproximateEquivalence) {
     throw std::invalid_argument(
         "The HSF checker requires approximate equivalence checking.");
@@ -509,15 +577,15 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
         "garbage qubits that remain after preprocessing.");
   }
 
-  if (!configuration.execution.runAlternatingChecker &&
-      !configuration.execution.runConstructionChecker &&
-      !configuration.execution.runHSFChecker) {
+  if (!configuration.shouldRunChecker("alternating") &&
+      !configuration.shouldRunChecker("construction") &&
+      !configuration.shouldRunChecker("hsf")) {
     throw std::invalid_argument(
         "Approximate equivalence checking requires the alternating, "
         "construction, or HSF decision diagram checker.");
   }
 
-  if (configuration.execution.runHSFChecker) {
+  if (configuration.shouldRunChecker("hsf")) {
     if (!std::isfinite(configuration.functionality.traceThreshold) ||
         configuration.functionality.traceThreshold < 0.) {
       throw std::invalid_argument(
@@ -542,7 +610,7 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
     qc2 = std::move(normalizedQc2);
   }
 
-  if (configuration.execution.runSimulationChecker) {
+  if (configuration.shouldRunChecker("simulation")) {
     std::clog
         << "[QCEC] Warning: the simulation checker does not implement the "
            "unitary process distance used for approximate equivalence "
@@ -550,23 +618,23 @@ void EquivalenceCheckingManager::validateAndNormalizeConfiguration() {
     configuration.execution.runSimulationChecker = false;
   }
 
-  if (configuration.execution.runZXChecker) {
+  if (configuration.shouldRunChecker("zx")) {
     std::clog << "[QCEC] Warning: the ZX checker cannot establish approximate "
                  "non-equivalence and will be disabled.\n";
     configuration.execution.runZXChecker = false;
   }
 
-  if (!configuration.execution.runHSFChecker) {
+  if (!configuration.shouldRunChecker("hsf")) {
     return;
   }
 
-  if (configuration.execution.runAlternatingChecker) {
+  if (configuration.shouldRunChecker("alternating")) {
     std::clog << "[QCEC] Warning: the HSF checker is an exclusive approximate "
                  "checker; the alternating checker will be disabled.\n";
     configuration.execution.runAlternatingChecker = false;
   }
 
-  if (configuration.execution.runConstructionChecker) {
+  if (configuration.shouldRunChecker("construction")) {
     std::clog << "[QCEC] Warning: the HSF checker is an exclusive approximate "
                  "checker; the construction checker will be disabled.\n";
     configuration.execution.runConstructionChecker = false;
@@ -578,7 +646,7 @@ void EquivalenceCheckingManager::run() {
 
   results.equivalence = EquivalenceCriterion::NoInformation;
 
-  if (configuration.execution.runHSFChecker) {
+  if (configuration.shouldRunChecker("hsf")) {
     const auto start = std::chrono::steady_clock::now();
     validateAndNormalizeConfiguration();
     const auto end = std::chrono::steady_clock::now();
@@ -596,17 +664,10 @@ void EquivalenceCheckingManager::run() {
     return;
   }
 
-  if (qc1.getNqubits() == 0U && qc2.getNqubits() == 0U) {
-    const auto phaseDifference = qc1.getGlobalPhase() - qc2.getGlobalPhase();
-    const auto realDifference = std::cos(phaseDifference) - 1.;
-    const auto imaginaryDifference = std::sin(phaseDifference);
-    const auto threshold = configuration.functionality.traceThreshold;
-    results.equivalence =
-        (realDifference * realDifference) +
-                    (imaginaryDifference * imaginaryDifference) <=
-                threshold * threshold
-            ? EquivalenceCriterion::Equivalent
-            : EquivalenceCriterion::EquivalentUpToGlobalPhase;
+  if (configuration.execution.method == "auto" && qc1.getNqubits() == 0U &&
+      qc2.getNqubits() == 0U) {
+    results.equivalence = compareGlobalPhases(
+        qc1, qc2, configuration.functionality.traceThreshold);
     markDone();
     return;
   }
@@ -621,6 +682,12 @@ void EquivalenceCheckingManager::run() {
     }
   } else {
     checkSymbolic();
+  }
+
+  if (qc1.empty() && qc2.empty() &&
+      results.equivalence == EquivalenceCriterion::Equivalent) {
+    results.equivalence = compareGlobalPhases(
+        qc1, qc2, configuration.functionality.traceThreshold);
   }
 
   for (const auto& checker : checkers) {
@@ -685,29 +752,8 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
     }
   }
 
-  // check whether the alternating checker is configured and can handle the
-  // circuits
-  if (configuration.execution.runAlternatingChecker &&
-      !DDAlternatingChecker::canHandle(this->qc1, this->qc2)) {
-    std::clog << "[QCEC] Warning: alternating checker cannot handle the "
-                 "circuits. Falling back to construction checker.\n";
-    this->configuration.execution.runAlternatingChecker = false;
-    this->configuration.execution.runConstructionChecker = true;
-  }
-
   // initialize the stimuli generator
   stateGenerator = StateGenerator(configuration.simulation.seed);
-
-  // check whether the number of selected stimuli does exceed the maximum
-  // number of unique computational basis states
-  if (configuration.execution.runSimulationChecker &&
-      configuration.simulation.stateType == StateType::ComputationalBasis) {
-    const auto nq = this->qc1.getNqubitsWithoutAncillae();
-    const std::size_t uniqueStates = 1ULL << nq;
-    if (nq <= 63U && configuration.simulation.maxSims > uniqueStates) {
-      this->configuration.simulation.maxSims = uniqueStates;
-    }
-  }
 
   const auto end = std::chrono::steady_clock::now();
   results.preprocessingTime =
@@ -738,7 +784,7 @@ void EquivalenceCheckingManager::checkSequential() {
   }
 
   try {
-    if (configuration.execution.runSimulationChecker) {
+    if (configuration.shouldRunChecker("simulation")) {
       auto* const simulationChecker = addChecker<DDSimulationChecker>();
       while (!simulationsFinished() && !done.load()) {
         // configure simulation based checker
@@ -782,7 +828,7 @@ void EquivalenceCheckingManager::checkSequential() {
       }
     }
 
-    if (configuration.execution.runAlternatingChecker && !done.load()) {
+    if (configuration.shouldRunChecker("alternating") && !done.load()) {
       auto* const alternatingChecker = addChecker<DDAlternatingChecker>();
       if (!done.load()) {
         const auto result = alternatingChecker->run();
@@ -797,7 +843,7 @@ void EquivalenceCheckingManager::checkSequential() {
       }
     }
 
-    if (configuration.execution.runConstructionChecker && !done.load()) {
+    if (configuration.shouldRunChecker("construction") && !done.load()) {
       auto* const constructionChecker = addChecker<DDConstructionChecker>();
       if (!done.load()) {
         const auto result = constructionChecker->run();
@@ -812,7 +858,7 @@ void EquivalenceCheckingManager::checkSequential() {
       }
     }
 
-    if (configuration.execution.runHSFChecker && !done.load()) {
+    if (configuration.shouldRunChecker("hsf") && !done.load()) {
       auto* const hsfChecker = addChecker<DDHybridSchrodingerFeynmanChecker>();
       if (!done.load()) {
         const auto result = hsfChecker->run();
@@ -827,7 +873,7 @@ void EquivalenceCheckingManager::checkSequential() {
       }
     }
 
-    if (configuration.execution.runZXChecker && !done.load()) {
+    if (configuration.shouldRunChecker("zx") && !done.load()) {
       if (ZXEquivalenceChecker::canHandle(qc1, qc2)) {
         auto* const zxChecker = addChecker<ZXEquivalenceChecker>();
         if (!done.load()) {
@@ -911,16 +957,16 @@ void EquivalenceCheckingManager::checkParallel() {
   const auto maxThreads = configuration.execution.nthreads;
 
   std::size_t tasksToExecute = 0U;
-  if (configuration.execution.runAlternatingChecker) {
+  if (configuration.shouldRunChecker("alternating")) {
     ++tasksToExecute;
   }
-  if (configuration.execution.runConstructionChecker) {
+  if (configuration.shouldRunChecker("construction")) {
     ++tasksToExecute;
   }
-  if (configuration.execution.runSimulationChecker) {
+  if (configuration.shouldRunChecker("simulation")) {
     tasksToExecute += configuration.simulation.maxSims;
   }
-  if (configuration.execution.runZXChecker) {
+  if (configuration.shouldRunChecker("zx")) {
     if (::ec::zx::FunctionalityConstruction::transformableToZX(&qc1) &&
         ::ec::zx::FunctionalityConstruction::transformableToZX(&qc2)) {
       ++tasksToExecute;
@@ -938,14 +984,14 @@ void EquivalenceCheckingManager::checkParallel() {
   // create a thread safe queue which is used to check for available results
   ThreadSafeQueue<std::size_t> queue{};
   std::vector<std::future<void>> futures(effectiveThreads);
-  auto alternatingPending = configuration.execution.runAlternatingChecker;
-  auto constructionPending = configuration.execution.runConstructionChecker;
-  auto zxPending = configuration.execution.runZXChecker;
+  auto alternatingPending = configuration.shouldRunChecker("alternating");
+  auto constructionPending = configuration.shouldRunChecker("construction");
+  auto zxPending = configuration.shouldRunChecker("zx");
 
   const auto launchNextChecker = [&](const std::size_t id) {
     if (done.load() ||
         (!alternatingPending && !constructionPending && !zxPending &&
-         (!configuration.execution.runSimulationChecker ||
+         (!configuration.shouldRunChecker("simulation") ||
           results.startedSimulations >= configuration.simulation.maxSims))) {
       return;
     }
