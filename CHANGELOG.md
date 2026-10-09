@@ -14,6 +14,11 @@ releases may include breaking changes.
 
 - ⬆️ Update `mqt-core` to version 3.11.0 ([#1102]) ([**@burgholzer**])
 
+### Added
+
+- ✨ Generate compilation-flow profiles for custom target gate sets and use
+  explicit profiles in `verify_compilation` ([#1107]) ([**@burgholzer**])
+
 ### Fixed
 
 - 🐛 Ignore unconditional barriers when analyzing measurements, including those
@@ -337,6 +342,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1107]: https://github.com/munich-quantum-toolkit/qcec/pull/1107
 [#1106]: https://github.com/munich-quantum-toolkit/qcec/pull/1106
 [#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
 [#1101]: https://github.com/munich-quantum-toolkit/qcec/pull/1101

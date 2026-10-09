@@ -68,7 +68,7 @@ def verify_compilation(
     """Verify compilation flow results.
 
     Similar to :func:`verify <.verify>`, but uses a dedicated compilation flow profile to guide the equivalence checking process.
-    The compilation flow profile is determined by the ``optimization_level`` argument.
+    An explicit ``profile`` takes precedence over the bundled profile selected by ``optimization_level``.
 
     There are two (non-exclusive) ways of configuring the equivalence checking process:
 
@@ -104,10 +104,15 @@ def verify_compilation(
     configuration.application.simulation_scheme = ApplicationScheme.gate_cost
     configuration.application.alternating_scheme = ApplicationScheme.gate_cost
 
-    # get the pre-defined profile for the gate_cost scheme
+    if configuration.application.profile:
+        return verify(qc1, qc2, configuration=configuration)
+
+    # Keep extracted package resources available until verification finishes.
     profile_name = generate_profile_name(optimization_level=optimization_level)
     ref = resources.files("mqt.qcec") / "profiles" / profile_name
     with resources.as_file(ref) as path:
         configuration.application.profile = str(path)
-
-    return verify(qc1, qc2, configuration=configuration)
+        try:
+            return verify(qc1, qc2, configuration=configuration)
+        finally:
+            configuration.application.profile = ""

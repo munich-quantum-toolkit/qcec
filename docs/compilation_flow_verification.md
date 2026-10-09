@@ -111,3 +111,29 @@ results.equivalence
 
 Check out the {py:func}`reference documentation <.verify_compilation>` for more
 information.
+
+## Other Target Gate Sets
+
+The bundled profiles target `id, rz, sx, x, cx`. To use a different basis,
+generate a profile once for the Qiskit version and optimization level used to
+compile the circuit, then pass its path to `verify_compilation`:
+
+```python
+from pathlib import Path
+from mqt.qcec.compilation_flow_profiles import generate_profile, generate_profile_name
+
+basis_gates = ["rx", "rz", "cz"]
+profile_dir = Path("profiles")
+profile_dir.mkdir(exist_ok=True)
+generate_profile(optimization_level=1, filepath=profile_dir, basis_gates=basis_gates)
+profile = profile_dir / generate_profile_name(1, basis_gates=basis_gates)
+compiled = transpile(circ, basis_gates=basis_gates, optimization_level=1)
+results = qcec.verify_compilation(circ, compiled, profile=str(profile))
+```
+
+Different bases use different filenames; gate order and duplicates do not change
+the filename. An explicit `profile` takes precedence over the bundled profile
+selected by `optimization_level`. Profiles guide gate scheduling and do not
+change the definition of equivalence. Regenerate custom profiles after changing
+the Qiskit version or compilation settings. Profile generation runs only when
+explicitly requested.
