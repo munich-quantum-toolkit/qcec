@@ -6,9 +6,14 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+## [3.11.0]
+
 This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.11 shared-library
 ABI.
+
+MQT Core 3.11 also reduces memory overhead in its DD package. The effect on
+runtime depends on the circuit and checker settings.
 
 ### Checker selection
 
@@ -333,7 +338,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.2...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.11.0...HEAD
+[3.11.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.2...v3.11.0
 [3.10.2]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...v3.10.2
 [3.10.1]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...v3.10.1
 [3.10.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.9.0...v3.10.0
