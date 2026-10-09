@@ -302,7 +302,7 @@ def generate_profile_name(optimization_level: int = 1, *, basis_gates: list[str]
         optimization_level:
             The IBM Qiskit optimization level to use for the profile (0, 1, 2, or 3). Defaults to 1.
         basis_gates:
-            Target gate names, or ``None`` for ``id, rz, sx, x, cx``.
+            Target gate names, or ``None`` for ``["id", "rz", "sx", "x", "cx"]``.
 
     Returns:
         The profile filename.
@@ -335,7 +335,7 @@ def generate_profile(
             The path to the directory where the profile should be stored.
             Defaults to the ``profiles`` directory in the ``mqt.qcec`` package.
         basis_gates:
-            Target gate names accepted by Qiskit's ``transpile`` function. Defaults to ``id, rz, sx, x, cx``.
+            Target gate names accepted by Qiskit's ``transpile`` function. Defaults to ``["id", "rz", "sx", "x", "cx"]``.
     """
     filename = generate_profile_name(optimization_level, basis_gates=basis_gates)
     if basis_gates is not None:
