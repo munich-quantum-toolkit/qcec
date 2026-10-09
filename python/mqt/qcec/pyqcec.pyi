@@ -89,11 +89,12 @@ class Configuration:
         def __init__(self) -> None: ...
         @property
         def method(self) -> str:
-            """Select :code:`auto` (default), :code:`alternating`, :code:`construction`, :code:`simulation`, :code:`zx`, or :code:`hsf`.
+            """Select the equivalence checker to run.
 
-            An explicit method runs only that checker and overrides the :code:`run_*_checker` flags.
-            Unsupported circuits or configurations raise an error.
-            Only :code:`auto` uses checker fallbacks and parameter instantiation.
+            Defaults to :code:`auto`, which uses the :code:`run_*_checker` flags, checker fallbacks, and parameter instantiation.
+
+            Set :code:`alternating`, :code:`construction`, :code:`simulation`, :code:`zx`, or :code:`hsf` to run only that checker.
+            An explicit method overrides the :code:`run_*_checker` flags without changing them and raises an error for unsupported circuits or configurations.
             """
 
         @method.setter

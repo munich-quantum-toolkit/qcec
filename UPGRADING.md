@@ -6,16 +6,19 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
+C++ libraries and Python extensions against the MQT Core 3.11 shared-library
+ABI.
+
+### Checker selection
+
+This release adds the `method` option to select a single equivalence checker.
 Use `method="alternating"`, `"construction"`, `"simulation"`, `"zx"`, or `"hsf"`
 to select one checker. Explicit methods override the `run_*_checker` flags and
 raise an error for unsupported circuits or configurations. The default
 `method="auto"` preserves automatic selection and fallback. Set
 `configuration.execution.method` for the equivalent configuration option.
 Symbolic explicit ZX checks do not fall back to parameter instantiation.
-
-This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
-C++ libraries and Python extensions against the MQT Core 3.11 shared-library
-ABI.
 
 ### Compilation flow profiles
 

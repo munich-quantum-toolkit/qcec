@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("method", ["alternating", "construction", "simulation", "zx", "hsf"])
 @pytest.mark.parametrize("parallel", [False, True])
 def test_explicit_method(method: str, parallel: bool) -> None:
-    """An explicit method overrides conflicting legacy checker flags."""
+    """Test that an explicit method overrides conflicting checker flags."""
     circuit = QuantumCircuit(2)
     circuit.h(0)
     circuit.cx(0, 1)
@@ -57,7 +57,7 @@ def test_explicit_method(method: str, parallel: bool) -> None:
 
 @pytest.mark.parametrize("method", ["alternating", "construction", "simulation", "hsf"])
 def test_symbolic_dd_method_rejected(method: str) -> None:
-    """Explicit DD methods do not instantiate parameters or invoke ZX."""
+    """Test rejection of symbolic circuits by explicit DD methods."""
     circuit = QuantumCircuit(1)
     circuit.rx(Parameter("theta"), 0)
     config = Configuration()
@@ -67,7 +67,7 @@ def test_symbolic_dd_method_rejected(method: str) -> None:
 
 
 def test_symbolic_zx_does_not_instantiate() -> None:
-    """An inconclusive explicit symbolic ZX check stays inconclusive."""
+    """Test that inconclusive explicit symbolic ZX checks do not instantiate parameters."""
     left = QuantumCircuit(1)
     left.rx(Parameter("theta"), 0)
     right = left.copy()
@@ -79,7 +79,7 @@ def test_symbolic_zx_does_not_instantiate() -> None:
 
 @pytest.mark.parametrize("method", ["zx", "simulation"])
 def test_unsupported_approximate_method(method: str) -> None:
-    """Explicit methods must implement the requested equivalence criterion."""
+    """Test rejection of approximate equivalence by unsupported methods."""
     circuit = QuantumCircuit(1)
     circuit.h(0)
     config = Configuration()
@@ -89,7 +89,7 @@ def test_unsupported_approximate_method(method: str) -> None:
 
 
 def test_unsupported_zx_gate() -> None:
-    """Unsupported ZX input raises instead of silently skipping the checker."""
+    """Test rejection of unsupported gates by explicit ZX checks."""
     circuit = QuantumComputation(4)
     circuit.mcy({0, 1, 2}, 3)
     with pytest.raises(ValueError, match="ZX"):
@@ -97,7 +97,7 @@ def test_unsupported_zx_gate() -> None:
 
 
 def test_explicit_alternating_ancilla_rejected() -> None:
-    """Only auto may substitute construction for alternating."""
+    """Test that only automatic selection falls back to construction checking."""
     circuit = QuantumCircuit(1)
     circuit.add_register(AncillaRegister(1))
     circuit.h(1)
@@ -118,7 +118,7 @@ def test_explicit_alternating_ancilla_rejected() -> None:
     ],
 )
 def test_unsupported_configuration(method: str, options: ConfigurationOptions, message: str) -> None:
-    """Validate explicit selections even for empty circuits."""
+    """Test validation of explicit selections for empty circuits."""
     circuit = QuantumCircuit(1)
     config = Configuration()
     config.execution.method = method
@@ -127,7 +127,7 @@ def test_unsupported_configuration(method: str, options: ConfigurationOptions, m
 
 
 def test_mutable_method() -> None:
-    """Changing method before run applies selection and simulation limits."""
+    """Test method changes and simulation limits before execution."""
     circuit = QuantumCircuit(1)
     circuit.h(0)
     config = Configuration()
@@ -148,7 +148,7 @@ def test_mutable_method() -> None:
 
 
 def test_hard_timeout_method() -> None:
-    """The child process honors explicit method selection."""
+    """Test explicit method selection with hard-timeout verification."""
     circuit = QuantumCircuit(1)
     circuit.h(0)
     result = verify_with_hard_timeout(circuit, circuit, deadline=30, method="construction")
@@ -158,7 +158,7 @@ def test_hard_timeout_method() -> None:
 
 
 def test_unsupported_zx_ancilla() -> None:
-    """Explicit ZX rejects non-garbage ancillary outputs."""
+    """Test rejection of non-garbage ancillary outputs by explicit ZX checks."""
     circuit = QuantumCircuit(1)
     circuit.add_register(AncillaRegister(1))
     circuit.h(1)
@@ -168,7 +168,7 @@ def test_unsupported_zx_ancilla() -> None:
 
 @pytest.mark.parametrize("method", ["alternating", "construction", "simulation", "zx"])
 def test_empty_circuit_uses_explicit_checker(method: str) -> None:
-    """Even an empty circuit uses the selected checker and its validation."""
+    """Test explicit checker selection for empty circuits."""
     circuit = QuantumCircuit(1)
     config = Configuration()
     config.execution.method = method
@@ -179,7 +179,7 @@ def test_empty_circuit_uses_explicit_checker(method: str) -> None:
 
 @pytest.mark.parametrize("method", ["construction", "simulation"])
 def test_empty_circuit_rejects_unsupported_scheme(method: str) -> None:
-    """Preprocessing must not bypass validation of the selected checker."""
+    """Test application-scheme validation after preprocessing removes all gates."""
     circuit = QuantumCircuit(1)
     config = Configuration()
     config.execution.method = method
@@ -190,7 +190,7 @@ def test_empty_circuit_rejects_unsupported_scheme(method: str) -> None:
 
 
 def test_compilation_method() -> None:
-    """Compilation verification forwards the checker selection."""
+    """Test explicit checker selection in compilation verification."""
     circuit = QuantumCircuit(1)
     circuit.h(0)
     circuit.measure_all()
@@ -201,7 +201,7 @@ def test_compilation_method() -> None:
 
 @pytest.mark.parametrize("method", ["alternating", "construction", "zx"])
 def test_empty_global_phase(method: str) -> None:
-    """Explicit checks preserve the phase-only circuit result."""
+    """Test preservation of global-phase results with explicit checkers."""
     circuit = QuantumCircuit(1)
     shifted = circuit.copy()
     shifted.global_phase = 0.5
@@ -212,7 +212,7 @@ def test_empty_global_phase(method: str) -> None:
 
 
 def test_empty_hsf_rejected() -> None:
-    """HSF still requires two qubits after preprocessing."""
+    """Test that HSF requires two qubits after preprocessing."""
     circuit = QuantumCircuit(2)
     with pytest.raises(ValueError, match="at least two qubits"):
         verify(circuit, circuit, method="hsf", check_approximate_equivalence=True)
