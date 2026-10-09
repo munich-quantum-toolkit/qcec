@@ -248,7 +248,7 @@ def test_with_config(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: Q
 
 @pytest.mark.parametrize("fuse", [False, True])
 def test_remove_symbolic_diagonal_gates(fuse: bool) -> None:
-    """Preprocessing removes symbolic phases before terminal measurements."""
+    """Test removal of symbolic phases before terminal measurements."""
     circuit = QuantumCircuit(1, 1)
     circuit.h(0)
     reference = circuit.copy()
@@ -266,7 +266,7 @@ def test_remove_symbolic_diagonal_gates(fuse: bool) -> None:
 
 
 def test_reject_symbolic_measurement_deferral() -> None:
-    """Dynamic transformation requires bound parameters."""
+    """Test rejection of dynamic transformation with unbound parameters."""
     circuit = QuantumCircuit(2, 1)
     circuit.measure(0, 0)
     with circuit.if_test((0, True)):
@@ -276,7 +276,7 @@ def test_reject_symbolic_measurement_deferral() -> None:
 
 
 def test_symbolic_phase_removal_preserves_output_permutation() -> None:
-    """Removing all gates must still compare the routed measurement outputs."""
+    """Test that removing all gates preserves output-permutation checks."""
     circuit = QuantumCircuit(2, 2)
     circuit.rz(alpha, 0)
     circuit.swap(0, 1)

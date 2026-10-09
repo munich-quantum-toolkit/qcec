@@ -347,6 +347,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1108]: https://github.com/munich-quantum-toolkit/qcec/pull/1108
 [#1107]: https://github.com/munich-quantum-toolkit/qcec/pull/1107
 [#1106]: https://github.com/munich-quantum-toolkit/qcec/pull/1106
 [#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
@@ -416,5 +417,3 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 [munich-quantum-toolkit]: https://github.com/munich-quantum-toolkit
 [CMake presets]: https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html
 [munich-quantum-toolkit/workflows]: https://github.com/munich-quantum-toolkit/workflows
-
-[#1108]: https://github.com/munich-quantum-toolkit/qcec/pull/1108
