@@ -68,8 +68,7 @@ def verify_compilation(
     """Verify compilation flow results.
 
     Similar to :func:`verify <.verify>`, but uses a dedicated compilation flow profile to guide the equivalence checking process.
-    An explicit ``profile`` takes precedence over the bundled profile selected
-    by ``optimization_level``.
+    An explicit ``profile`` takes precedence over the bundled profile selected by ``optimization_level``.
 
     There are two (non-exclusive) ways of configuring the equivalence checking process:
 

@@ -87,7 +87,7 @@ def test_generated_profiles_are_still_valid(optimization_level: int, tmp_path: P
 
 @pytest.mark.parametrize("basis_gates", [["rx", "rz", "cz"], ["rz", "sx", "x", "ecr"]])
 def test_custom_basis_profile(tmp_path: Path, basis_gates: list[str]) -> None:
-    """Different bases coexist and include their native and multi-controlled costs."""
+    """Test coexistence, gate costs, and verification of custom basis profiles."""
     generate_profile(filepath=tmp_path)
     default_profile = tmp_path / generate_profile_name()
     default_data = default_profile.read_bytes()
@@ -115,12 +115,12 @@ def test_custom_basis_profile(tmp_path: Path, basis_gates: list[str]) -> None:
 
 
 def test_explicit_default_basis_profile_name() -> None:
-    """The default basis selects the bundled profile regardless of gate order."""
+    """Test that gate order does not affect the default profile name."""
     assert generate_profile_name(basis_gates=["cx", "sx", "rz", "x", "id"]) == generate_profile_name()
 
 
 @pytest.mark.parametrize("basis_gates", [[], ["../cx"], [""]])
 def test_invalid_basis_profile_name(basis_gates: list[str]) -> None:
-    """Profile names require a nonempty set of gate identifiers."""
+    """Test rejection of empty bases and invalid gate identifiers."""
     with pytest.raises(ValueError, match="gate identifiers"):
         generate_profile_name(basis_gates=basis_gates)

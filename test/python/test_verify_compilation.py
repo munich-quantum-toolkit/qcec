@@ -94,7 +94,7 @@ def test_verify_compilation_with_multi_controlled_gates(optimization_level: int)
 
 @pytest.mark.parametrize("as_keyword", [False, True])
 def test_custom_compilation_profile(original_circuit: QuantumCircuit, tmp_path: Path, as_keyword: bool) -> None:
-    """An explicit profile remains selected and is read by the checker."""
+    """Test that explicit profiles remain selected and are read by the checker."""
     config = Configuration()
     config.execution.run_construction_checker = True
     config.execution.run_alternating_checker = False
@@ -113,7 +113,7 @@ def test_custom_compilation_profile(original_circuit: QuantumCircuit, tmp_path: 
 
 
 def test_default_profile_does_not_persist(original_circuit: QuantumCircuit) -> None:
-    """Reusing a configuration must not turn a bundled profile into an explicit one."""
+    """Test that bundled profiles do not persist when reusing a configuration."""
     config = Configuration()
     for level in (1, 2):
         result = verify_compilation(original_circuit, original_circuit, optimization_level=level, configuration=config)
@@ -125,7 +125,7 @@ def test_default_profile_does_not_persist(original_circuit: QuantumCircuit) -> N
 def test_extracted_profile_lifetime(
     original_circuit: QuantumCircuit, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, missing: bool
 ) -> None:
-    """Verification consumes temporary resources and restores configuration on failure."""
+    """Test temporary profile lifetime and configuration restoration on failure."""
     extracted = tmp_path / "extracted.profile"
 
     @contextmanager

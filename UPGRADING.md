@@ -6,23 +6,30 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
-This release requires `mqt-core` 3.11.0. Rebuild C++ libraries and Python
-extensions against Core's `3.11` shared-library ABI.
+This release updates the minimum required `mqt-core` version to 3.11.0. Rebuild
+C++ libraries and Python extensions against the MQT Core 3.11 shared-library
+ABI.
 
-`numerical_tolerance` must be a positive normal floating-point value. Zero,
-negative, subnormal, and non-finite values raise `ValueError` in Python or
-`std::invalid_argument` in C++ when constructing the equivalence checker.
+### Compilation flow profiles
 
-DD checkers now return `no_information` when numerical error collapses a
-decision diagram to zero. Treat this result as inconclusive. Other enabled
-checkers can still provide a result.
+Compilation-flow profiles now support custom target gate sets. Use `basis_gates`
+in `generate_profile` and `generate_profile_name` to generate and locate
+profiles for other target gate sets. Existing default profile names are
+unchanged.
 
-Routing distinct logical states through one measurement qubit is supported with
+`verify_compilation` now honors an explicit `profile` from keyword arguments or
+configuration. Clear that value to use the bundled profile for the selected
+optimization level.
+
+### Dynamic circuits and output permutations
+
+Dynamic circuit transformation now supports routing distinct logical states
+through one physical measurement qubit. Enable it with
 `transform_dynamic_circuit=True` and the default routing optimizations. After
 reset elimination and routing, each measured logical state must map to one
 classical bit. Reusing that state as a gate target without a reset remains
 unsupported. Unconditional barriers do not affect these checks. Dynamic
-transformation derives observed outputs and garbage flags from measurements,
+transformation now derives observed outputs and garbage flags from measurements,
 replacing manual garbage annotations.
 
 For circuits that measure only some outputs, use
@@ -30,11 +37,18 @@ For circuits that measure only some outputs, use
 compiler-provided input layout by leaving `backpropagate_output_permutation`
 disabled.
 
-`verify_compilation` now honors an explicit `profile` from keyword arguments or
-configuration. Clear that value to use the bundled profile for the selected
-optimization level. Use `basis_gates` in `generate_profile` and
-`generate_profile_name` to generate and locate profiles for other target gate
-sets. Existing default profile names are unchanged.
+### Numerical tolerance
+
+QCEC now rejects invalid `numerical_tolerance` settings when constructing the
+equivalence checker. If you override the default, replace zero, negative,
+subnormal, or non-finite values with a positive normal floating-point value.
+Invalid settings raise `ValueError` in Python or `std::invalid_argument` in C++.
+
+### Inconclusive results
+
+DD checkers now return `no_information` when numerical error collapses a
+decision diagram to zero. Treat this result as inconclusive. Other enabled
+checkers can still provide a result.
 
 ## [3.10.2]
 
