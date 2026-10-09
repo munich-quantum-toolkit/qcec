@@ -10,7 +10,9 @@
 
 #include "dd/FunctionalityConstruction.hpp"
 #include "dd/Package.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "ir/operations/Expression.hpp"
 #include "ir/operations/OpType.hpp"
 #include "ir/operations/StandardOperation.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
@@ -176,3 +178,29 @@ TEST(SingleQubitGateFusion, FuseAcrossIndependentGates) {
 }
 
 } // namespace ec::detail
+
+TEST(SingleQubitGateFusion, PreserveSymbolicParameters) {
+  const auto theta = sym::Variable("theta");
+  const auto angle = qc::Symbolic{sym::Term<qc::fp>{theta}};
+  qc::QuantumComputation circuit(1);
+  circuit.rz(angle, 0);
+  circuit.h(0);
+  circuit.ry(angle, 0);
+  circuit.s(0);
+  circuit.rx(angle, 0);
+  const qc::VariableAssignment assignment{{theta, 0.37}};
+  const auto original = circuit.instantiate(assignment);
+
+  ec::detail::singleQubitGateFusion(circuit);
+
+  EXPECT_EQ(circuit.getNops(), 1U);
+  EXPECT_FALSE(circuit.isVariableFree());
+  circuit.flattenOperations();
+  const auto package = std::make_unique<dd::Package>(1);
+  const auto before = dd::buildFunctionality(original, *package);
+  const auto after =
+      dd::buildFunctionality(circuit.instantiate(assignment), *package);
+  EXPECT_EQ(before, after);
+  package->decRef(before);
+  package->decRef(after);
+}

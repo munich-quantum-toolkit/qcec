@@ -50,6 +50,12 @@ DD checkers now return `no_information` when numerical error collapses a
 decision diagram to zero. Treat this result as inconclusive. Other enabled
 checkers can still provide a result.
 
+### Parameterized circuits
+
+Configured preprocessing now also applies to static parameterized circuits.
+Symbolic dynamic circuits raise an error; bind their parameters before enabling
+`transform_dynamic_circuit=True`.
+
 ## [3.10.2]
 
 This release adds

@@ -8,7 +8,9 @@
  * Licensed under the MIT License
  */
 
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
+#include "ir/operations/Expression.hpp"
 #include "ir/operations/OpType.hpp"
 #include "optimizer/EquivalenceCheckingOptimizer.hpp"
 
@@ -127,3 +129,32 @@ TEST(RemoveDiagonalGateBeforeMeasure, preserveGateOnUnmeasuredQubit) {
   EXPECT_EQ(qc.at(1)->getType(), Measure);
 }
 } // namespace qc
+
+TEST(RemoveDiagonalGateBeforeMeasure, SymbolicDiagonalGate) {
+  qc::QuantumComputation circuit(1, 1);
+  circuit.rz(qc::Symbolic{sym::Term<qc::fp>{sym::Variable("theta")}}, 0);
+  circuit.measure(0, 0);
+  ec::detail::removeDiagonalGatesBeforeMeasure(circuit);
+  ASSERT_EQ(circuit.getNops(), 1U);
+  EXPECT_EQ(circuit.front()->getType(), qc::Measure);
+}
+
+TEST(RemoveDiagonalGateBeforeMeasure, SymbolicTwoQubitPhase) {
+  const auto angle = qc::Symbolic{sym::Term<qc::fp>{sym::Variable("theta")}};
+  for (const bool measureBoth : {false, true}) {
+    for (const bool mixTarget : {false, true}) {
+      qc::QuantumComputation circuit(2, 2);
+      circuit.rzz(angle, 0, 1);
+      if (mixTarget) {
+        circuit.h(1);
+      }
+      circuit.measure(0, 0);
+      if (measureBoth) {
+        circuit.measure(1, 1);
+      }
+      ec::detail::removeDiagonalGatesBeforeMeasure(circuit);
+      EXPECT_EQ(circuit.front()->getType(),
+                measureBoth && !mixTarget ? qc::Measure : qc::RZZ);
+    }
+  }
+}

@@ -244,3 +244,44 @@ def test_with_config(rz_commute_lhs: QuantumCircuit, rz_commute_rhs_incorrect: Q
     min_instantiations = 1
     max_instantiations = 10
     assert min_instantiations < result.performed_instantiations < max_instantiations
+
+
+@pytest.mark.parametrize("fuse", [False, True])
+def test_remove_symbolic_diagonal_gates(fuse: bool) -> None:
+    """Test removal of symbolic phases before terminal measurements."""
+    circuit = QuantumCircuit(1, 1)
+    circuit.h(0)
+    reference = circuit.copy()
+    circuit.rz(alpha, 0)
+    circuit.p(beta, 0)
+    circuit.measure(0, 0)
+    reference.measure(0, 0)
+    result = verify(
+        circuit,
+        reference,
+        remove_diagonal_gates_before_measure=True,
+        fuse_single_qubit_gates=fuse,
+    )
+    assert result.considered_equivalent()
+
+
+def test_reject_symbolic_measurement_deferral() -> None:
+    """Test rejection of dynamic transformation with unbound parameters."""
+    circuit = QuantumCircuit(2, 1)
+    circuit.measure(0, 0)
+    with circuit.if_test((0, True)):
+        circuit.rx(alpha, 1)
+    with pytest.raises(ValueError, match="symbolic dynamic circuits"):
+        verify(circuit, circuit, transform_dynamic_circuit=True)
+
+
+def test_symbolic_phase_removal_preserves_output_permutation() -> None:
+    """Test that removing all gates preserves output-permutation checks."""
+    circuit = QuantumCircuit(2, 2)
+    circuit.rz(alpha, 0)
+    circuit.swap(0, 1)
+    circuit.measure([0, 1], [0, 1])
+    reference = QuantumCircuit(2, 2)
+    reference.measure([0, 1], [0, 1])
+    result = verify(circuit, reference, remove_diagonal_gates_before_measure=True)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent

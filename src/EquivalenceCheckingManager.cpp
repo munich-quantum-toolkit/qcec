@@ -390,10 +390,16 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
     detail::swapReconstruction(qc2);
   }
 
-  const auto isDynamicCircuit1 = qc1.isDynamic();
-  const auto isDynamicCircuit2 = qc2.isDynamic();
+  const auto isDynamicCircuit1 = detail::isDynamicCircuit(qc1);
+  const auto isDynamicCircuit2 = detail::isDynamicCircuit(qc2);
   if (isDynamicCircuit1 || isDynamicCircuit2) {
     if (configuration.optimizations.transformDynamicCircuit) {
+      if ((isDynamicCircuit1 && !qc1.isVariableFree()) ||
+          (isDynamicCircuit2 && !qc2.isVariableFree())) {
+        throw std::invalid_argument(
+            "Transforming symbolic dynamic circuits is not supported. "
+            "Bind their parameters before verification.");
+      }
       if (isDynamicCircuit1) {
         detail::eliminateResets(qc1);
         if (configuration.optimizations.elidePermutations) {
@@ -412,7 +418,7 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
       throw std::runtime_error(
           "One of the circuits contains mid-circuit non-unitary primitives. "
           "To verify such circuits, the checker must be configured with "
-          "`transformDynamicCircuit=true` (`transform_dynamic_circuits=True` "
+          "`transformDynamicCircuit=true` (`transform_dynamic_circuit=True` "
           "in Python).");
     }
   }
@@ -590,7 +596,7 @@ void EquivalenceCheckingManager::run() {
     return;
   }
 
-  if (qc1.empty() && qc2.empty()) {
+  if (qc1.getNqubits() == 0U && qc2.getNqubits() == 0U) {
     const auto phaseDifference = qc1.getGlobalPhase() - qc2.getGlobalPhase();
     const auto realDifference = std::cos(phaseDifference) - 1.;
     const auto imaginaryDifference = std::sin(phaseDifference);
@@ -646,15 +652,12 @@ EquivalenceCheckingManager::EquivalenceCheckingManager(
   // set numeric tolerance used throughout the check
   dd::ComplexNumbers::setTolerance(configuration.execution.numericalTolerance);
 
+  qc1.flattenOperations();
+  qc2.flattenOperations();
   detail::removeBarriers(qc1);
   detail::removeBarriers(qc2);
 
-  if (qc1.isVariableFree() && qc2.isVariableFree()) {
-    // run all configured optimization passes
-    runOptimizationPasses();
-  } else {
-    normalizeMeasurementOutputs(qc1, qc2);
-  }
+  runOptimizationPasses();
 
   // strip away qubits that are not acted upon
   stripIdleQubits();

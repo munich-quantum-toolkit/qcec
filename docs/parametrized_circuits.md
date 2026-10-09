@@ -111,3 +111,13 @@ qcec.verify(qc_lhs, qc_rhs_err)
 ```
 
 Check out the {py:func}`reference documentation <.verify>` for more information.
+
+## Preprocessing
+
+Parameterized circuits use the configured preprocessing passes, including
+routing normalization, single-qubit gate fusion, and optional removal of
+diagonal gates before measurements. Gate fusion preserves symbolic expressions.
+
+Dynamic circuits with unbound parameters are not supported. Bind their
+parameters before enabling `transform_dynamic_circuit=True`. A numeric dynamic
+circuit can still be compared with a static parameterized circuit.

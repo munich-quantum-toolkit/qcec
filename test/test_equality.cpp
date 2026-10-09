@@ -670,7 +670,7 @@ TEST_F(EqualityTest, StripQubitIdleInOneCircuitOnlyOutputPermutationDifferent) {
   config.execution.runConstructionChecker = true;
   ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
   ecm.run();
-  EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::Equivalent);
+  EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
   // Check that no qubits were removed as the initial and output permutation are
   // not equivalent for the idle qubits
   const auto& circ1 = ecm.getFirstCircuit();

@@ -21,6 +21,11 @@ releases may include breaking changes.
 
 ### Fixed
 
+- 🐛 Apply configured preprocessing to static parameterized circuits, preserving
+  symbolic expressions during gate fusion. Reject dynamic transformation with
+  unbound parameters ([#1108]) ([**@burgholzer**])
+- 🐛 Compare remaining output permutations when preprocessing removes all gates
+  ([#1108]) ([**@burgholzer**])
 - 🐛 Ignore unconditional barriers when analyzing measurements, including those
   in compound operations ([#1106]) ([**@burgholzer**])
 - 🐛 Support routing distinct logical outputs through one physical measurement
@@ -342,6 +347,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1108]: https://github.com/munich-quantum-toolkit/qcec/pull/1108
 [#1107]: https://github.com/munich-quantum-toolkit/qcec/pull/1107
 [#1106]: https://github.com/munich-quantum-toolkit/qcec/pull/1106
 [#1102]: https://github.com/munich-quantum-toolkit/qcec/pull/1102
