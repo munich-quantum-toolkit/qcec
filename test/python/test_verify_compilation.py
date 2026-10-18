@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     from importlib.resources.abc import Traversable
     from pathlib import Path
 
+    from mqt.qcec.configuration_options import ConfigurationOptions
+
 
 @pytest.fixture
 def original_circuit() -> QuantumCircuit:
@@ -101,7 +103,7 @@ def test_custom_compilation_profile(original_circuit: QuantumCircuit, tmp_path: 
     config.execution.run_simulation_checker = False
     config.execution.run_zx_checker = False
     profile = tmp_path / "custom.profile"
-    kwargs = {"profile": str(profile)} if as_keyword else {}
+    kwargs: ConfigurationOptions = {"profile": str(profile)} if as_keyword else {}
     if not as_keyword:
         config.application.profile = str(profile)
     with pytest.raises(ValueError, match="Error opening LUT file"):
