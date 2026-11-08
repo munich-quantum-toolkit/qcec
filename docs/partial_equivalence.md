@@ -94,18 +94,18 @@ when the `check_partial_equivalence` option is set to `True`.
    inputs. Ancillary inputs use the structural garbage-reduction path, which
    does not provide the same norm guarantee.
 
-1. **Alternating Equivalence Checker:** The checker applies the circuits from
+2. **Alternating Equivalence Checker:** The checker applies the circuits from
    opposite sides to construct their relative functionality. Without ancillary
    inputs, it uses the same measured-output block comparison as the construction
    checker. Ancillary inputs require each common ancillary qubit to be idle in
    at least one circuit and use structural comparisons.
 
-1. **Simulation Equivalence Checker:** The simulation checker computes a
+3. **Simulation Equivalence Checker:** The simulation checker computes a
    representation of the state vector resulting from simulating the circuit with
    certain initial states. Partial equivalence is enabled by summing up the
    contributions of garbage qubits.
 
-1. **ZX-Calculus Equivalence Checker:** The ZX-calculus checker doesn't directly
+4. **ZX-Calculus Equivalence Checker:** The ZX-calculus checker doesn't directly
    support partial equivalence, which is not a problem for the equivalence
    checking workflow, given that the ZX-calculus checker cannot demonstrate
    non-equivalence of circuits due to its incompleteness. Therefore it will
@@ -114,7 +114,7 @@ when the `check_partial_equivalence` option is set to `True`.
 
 +++
 
-## Using QCEC to Check for Partial Equivalence
+## Using MQT QCEC to Check for Partial Equivalence
 
 Consider the following quantum circuit with three qubits, which are all data
 qubits, but only one of them is measured.

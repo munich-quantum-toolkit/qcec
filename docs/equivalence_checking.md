@@ -41,7 +41,7 @@ exceeds the threshold.
 
 Ancillary checks use structural complex-distance bounds on DD edge weights.
 Their tolerance does not define a matrix norm. Use
-[approximate equivalence checking](approximate_equivalence_checking.md) for a
+{doc}`approximate equivalence checking <approximate_equivalence_checking>` for a
 separate projective Hilbert--Schmidt error threshold.
 
 ## Construction Equivalence Checker (using Decision Diagrams)
