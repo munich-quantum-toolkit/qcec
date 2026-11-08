@@ -14,23 +14,12 @@ ABI.
 
 ### DD equivalence tolerance
 
-For circuits without ancillary inputs, the construction and alternating DD
-checkers now apply `trace_threshold` to a Frobenius distance divided by the
-square root of the matrix dimension. Full equivalence compares the relative
-unitary with identity, allowing one global phase. Partial equivalence measures
-the weight outside measured-output diagonal blocks and preserves interference
-between arbitrary input states.
-
-Reassess custom thresholds: local errors can accumulate, while normalization can
-dilute errors confined to small input subspaces. Partial checks without ancillas
-report `equivalent` when measurement probabilities match, including cases that
-previously reported `equivalent_up_to_global_phase`.
-
-Ancillary checks retain structural edge comparisons with complex-distance
-bounds. These do not provide a matrix-norm guarantee. For deliberate
-approximation, use `check_approximate_equivalence` and
-`approximate_checking_threshold`, whose projective Hilbert--Schmidt contract is
-separate from the numerical tolerance.
+For circuits without ancillary inputs, construction and alternating DD checkers
+now interpret `trace_threshold` as a normalized Frobenius tolerance. If you
+override `trace_threshold`, reassess your chosen value because the new tolerance
+definition can change equivalence verdicts. Successful partial-equivalence
+checks now return `equivalent`, including cases previously reported as
+`equivalent_up_to_global_phase`.
 
 ## [3.11.0]
 
