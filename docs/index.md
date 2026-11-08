@@ -12,8 +12,7 @@ publicly available on GitHub at
 [munich-quantum-toolkit/qcec](https://github.com/munich-quantum-toolkit/qcec),
 while pre-built binaries are available via
 [PyPI](https://pypi.org/project/mqt.qcec/) for all major operating systems and
-all modern Python versions. MQT QCEC is fully compatible with Qiskit 1.0 and
-above.
+all modern Python versions. MQT QCEC supports Qiskit 2.1 and later.
 
 ```{toctree}
 :hidden:
