@@ -6,9 +6,31 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+## [3.12.0]
+
 This release updates the minimum required `mqt-core` version to 3.12.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.12 shared-library
 ABI.
+
+### DD equivalence tolerance
+
+For circuits without ancillary inputs, the construction and alternating DD
+checkers now apply `trace_threshold` to a Frobenius distance divided by the
+square root of the matrix dimension. Full equivalence compares the relative
+unitary with identity, allowing one global phase. Partial equivalence measures
+the weight outside measured-output diagonal blocks and preserves interference
+between arbitrary input states.
+
+Reassess custom thresholds: local errors can accumulate, while normalization can
+dilute errors confined to small input subspaces. Partial checks without ancillas
+report `equivalent` when measurement probabilities match, including cases that
+previously reported `equivalent_up_to_global_phase`.
+
+Ancillary checks retain structural edge comparisons with complex-distance
+bounds. These do not provide a matrix-norm guarantee. For deliberate
+approximation, use `check_approximate_equivalence` and
+`approximate_checking_threshold`, whose projective Hilbert--Schmidt contract is
+separate from the numerical tolerance.
 
 ## [3.11.0]
 
@@ -342,7 +364,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.11.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.12.0...HEAD
+[3.12.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.11.0...v3.12.0
 [3.11.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.2...v3.11.0
 [3.10.2]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...v3.10.2
 [3.10.1]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...v3.10.1
