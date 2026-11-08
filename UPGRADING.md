@@ -6,9 +6,20 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+## [3.12.0]
+
 This release updates the minimum required `mqt-core` version to 3.12.0. Rebuild
 C++ libraries and Python extensions against the MQT Core 3.12 shared-library
 ABI.
+
+### DD equivalence tolerance
+
+For circuits without ancillary inputs, construction and alternating DD checkers
+now interpret `trace_threshold` as a normalized Frobenius tolerance. If you
+override `trace_threshold`, reassess your chosen value because the new tolerance
+definition can change equivalence verdicts. Successful partial-equivalence
+checks now return `equivalent`, including cases previously reported as
+`equivalent_up_to_global_phase`.
 
 ## [3.11.0]
 
@@ -342,7 +353,8 @@ be conveniently installed from PyPI using the
 
 <!-- Version links -->
 
-[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.11.0...HEAD
+[unreleased]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.12.0...HEAD
+[3.12.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.11.0...v3.12.0
 [3.11.0]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.2...v3.11.0
 [3.10.2]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.1...v3.10.2
 [3.10.1]: https://github.com/munich-quantum-toolkit/qcec/compare/v3.10.0...v3.10.1
