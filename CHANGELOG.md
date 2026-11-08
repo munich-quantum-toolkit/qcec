@@ -10,6 +10,10 @@ releases may include breaking changes.
 
 ## [Unreleased]
 
+### Changed
+
+- ⬆️ Update `mqt-core` to version 3.12.0 ([#1135]) ([**@denialhaag**])
+
 ### Fixed
 
 - 🐛 Use normalized Frobenius comparisons for full and partial DD equivalence
