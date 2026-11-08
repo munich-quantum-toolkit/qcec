@@ -19,7 +19,9 @@
 #include "checker/dd/applicationscheme/OneToOneApplicationScheme.hpp"
 #include "checker/dd/applicationscheme/ProportionalApplicationScheme.hpp"
 #include "checker/dd/applicationscheme/SequentialApplicationScheme.hpp"
+#include "dd/MatrixComparison.hpp"
 #include "dd/Node.hpp"
+#include "ir/Definitions.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -27,6 +29,7 @@
 #include <cstddef>
 #include <optional>
 #include <stdexcept>
+#include <vector>
 
 namespace ec {
 
@@ -37,6 +40,15 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
   // Numerical collapse cannot establish equivalence or non-equivalence.
   if (e.w.exactlyZero() || f.w.exactlyZero()) {
     return EquivalenceCriterion::NoInformation;
+  }
+
+  if constexpr (std::is_same_v<DDType, dd::MatrixDD>) {
+    if (!hasAncillaryInputs()) {
+      if (e.p == f.p && e.w.r == f.w.r && e.w.i == f.w.i) {
+        return EquivalenceCriterion::Equivalent;
+      }
+      return compareUnitary(dd->multiply(e, dd->conjugateTranspose(f)));
+    }
   }
 
   // both node pointers being equivalent is the strongest indication that the
@@ -124,6 +136,37 @@ EquivalenceCriterion DDEquivalenceChecker<DDType>::equals(const DDType& e,
     }
   }
 
+  return EquivalenceCriterion::NotEquivalent;
+}
+
+template <class DDType>
+EquivalenceCriterion DDEquivalenceChecker<DDType>::compareUnitary(
+    const dd::MatrixDD& functionality) {
+  if (functionality.w.exactlyZero()) {
+    return EquivalenceCriterion::NoInformation;
+  }
+  const auto tolerance = configuration.functionality.traceThreshold;
+  if (configuration.functionality.checkPartialEquivalence) {
+    std::vector<bool> garbage(nqubits);
+    for (qc::Qubit q = 0; q < nqubits; ++q) {
+      garbage[q] =
+          qc1->logicalQubitIsGarbage(q) && qc2->logicalQubitIsGarbage(q);
+    }
+    return dd::isCloseToDiagonal(functionality, tolerance, garbage)
+               ? EquivalenceCriterion::Equivalent
+               : EquivalenceCriterion::NotEquivalent;
+  }
+  const auto comparison = dd::compareToIdentity(functionality, tolerance);
+  if (comparison.closeToIdentity) {
+    return EquivalenceCriterion::Equivalent;
+  }
+  if (comparison.closeUpToGlobalPhase) {
+    return EquivalenceCriterion::EquivalentUpToGlobalPhase;
+  }
+  if (configuration.functionality.checkApproximateEquivalence &&
+      projectiveHilbertSchmidtDistanceWithinThreshold(functionality)) {
+    return EquivalenceCriterion::Equivalent;
+  }
   return EquivalenceCriterion::NotEquivalent;
 }
 
@@ -245,6 +288,12 @@ void DDEquivalenceChecker<DDType>::postprocessTask(TaskManager<DDType>& task) {
   // sum up the contributions of garbage qubits if we want to check for partial
   // equivalence
   if (configuration.functionality.checkPartialEquivalence) {
+    if constexpr (std::is_same_v<DDType, dd::MatrixDD>) {
+      // Preserve input coherences for the relative-unitary comparison.
+      if (!hasAncillaryInputs()) {
+        return;
+      }
+    }
     task.reduceGarbage();
   }
 }

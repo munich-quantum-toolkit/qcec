@@ -14,6 +14,7 @@
 #include "checker/dd/applicationscheme/ApplicationScheme.hpp"
 #include "dd/DDDefinitions.hpp"
 #include "dd/Node.hpp"
+#include "ir/Definitions.hpp"
 #include "ir/QuantumComputation.hpp"
 #include "ir/operations/Control.hpp"
 
@@ -78,6 +79,109 @@ TEST(CancellationTest, SkipsRemainingStages) {
   EXPECT_EQ(checker.getEquivalence(), ec::EquivalenceCriterion::NoInformation);
   EXPECT_EQ(checker.finishes, 1);
   EXPECT_EQ(checker.postprocesses, 1);
+}
+
+TEST_F(EqualityTest, RotationTolerance) {
+  for (const auto alternating : {false, true}) {
+    SCOPED_TRACE(alternating);
+    config.execution.runAlternatingChecker = alternating;
+    config.execution.runConstructionChecker = !alternating;
+    config.optimizations.fuseSingleQubitGates = false;
+    for (const auto threshold : {1e-6, 1e-8, 1e-10}) {
+      SCOPED_TRACE(threshold);
+      config.functionality.traceThreshold = threshold;
+      for (const auto angle : {0.25 * threshold, 4.0 * threshold}) {
+        SCOPED_TRACE(angle);
+        for (const auto interior : {false, true}) {
+          SCOPED_TRACE(interior);
+          qc1 = qc::QuantumComputation(1);
+          qc2 = qc::QuantumComputation(1);
+          qc1.h(0);
+          qc1.h(0);
+          qc2.h(0);
+          if (interior) {
+            qc2.rz(angle, 0);
+          }
+          qc2.h(0);
+          if (!interior) {
+            qc2.rz(angle, 0);
+          }
+          ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
+          ecm.run();
+          EXPECT_EQ(ecm.getResults().consideredEquivalent(), angle < threshold);
+        }
+      }
+    }
+  }
+}
+
+TEST_F(EqualityTest, PairwiseRotationTolerance) {
+  config.optimizations.fuseSingleQubitGates = false;
+  constexpr auto threshold = 1e-8;
+  config.functionality.traceThreshold = threshold;
+  for (const auto alternating : {false, true}) {
+    config.execution.runAlternatingChecker = alternating;
+    config.execution.runConstructionChecker = !alternating;
+    qc1 = qc::QuantumComputation(1);
+    qc2 = qc::QuantumComputation(1);
+    qc1.rx(1.5 * threshold, 0);
+    qc2.rx(-1.5 * threshold, 0);
+    ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
+    ecm.run();
+    EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+  }
+}
+
+TEST_F(EqualityTest, AccumulatedSmallRotations) {
+  config.optimizations.fuseSingleQubitGates = false;
+  config.functionality.traceThreshold = 1e-8;
+  for (const auto partial : {false, true}) {
+    config.functionality.checkPartialEquivalence = partial;
+    for (const auto alternating : {false, true}) {
+      config.execution.runAlternatingChecker = alternating;
+      config.execution.runConstructionChecker = !alternating;
+      qc1 = qc::QuantumComputation(64);
+      for (qc::Qubit q = 0; q < 64; ++q) {
+        qc1.h(q);
+        qc1.h(q);
+      }
+      qc2 = qc1;
+      for (qc::Qubit q = 0; q < 64; ++q) {
+        qc2.rx(1e-8, q);
+      }
+      ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
+      ecm.run();
+      EXPECT_EQ(ecm.equivalence(), ec::EquivalenceCriterion::NotEquivalent);
+    }
+  }
+}
+
+TEST_F(EqualityTest, AccumulatedRotationRoundoff) {
+  for (const auto alternating : {false, true}) {
+    SCOPED_TRACE(alternating);
+    config.execution.runAlternatingChecker = alternating;
+    config.execution.runConstructionChecker = !alternating;
+    config.optimizations.fuseSingleQubitGates = false;
+    qc1 = qc::QuantumComputation(2);
+    qc2 = qc::QuantumComputation(2);
+    qc1.h(0);
+    qc2.h(0);
+    for (std::size_t i = 0; i < 128; ++i) {
+      const auto angle = 0.01 * static_cast<double>(i + 1);
+      qc1.rx(angle, 0);
+      qc1.cx(0, 1);
+      qc1.rz(-angle, 1);
+      qc2.h(0);
+      qc2.rz(angle, 0);
+      qc2.h(0);
+      qc2.cx(0, 1);
+      qc2.rz(-angle / 2.0, 1);
+      qc2.rz(-angle / 2.0, 1);
+    }
+    ec::EquivalenceCheckingManager ecm(qc1, qc2, config);
+    ecm.run();
+    EXPECT_TRUE(ecm.getResults().consideredEquivalent());
+  }
 }
 
 TEST_F(EqualityTest, NothingToDo) {

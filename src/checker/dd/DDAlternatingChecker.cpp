@@ -117,6 +117,10 @@ EquivalenceCriterion DDAlternatingChecker::checkEquivalence() {
     return EquivalenceCriterion::NoInformation;
   }
 
+  if (!hasAncillaryInputs()) {
+    return compareUnitary(functionality);
+  }
+
   std::vector<bool> garbage(nqubits);
   for (qc::Qubit q = 0U; q < nqubits; ++q) {
     garbage[static_cast<std::size_t>(q)] =

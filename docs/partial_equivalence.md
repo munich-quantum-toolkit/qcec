@@ -88,26 +88,24 @@ annotations.
 The following is a summary of the behaviour of each type of equivalence checker
 when the `check_partial_equivalence` option is set to `True`.
 
-1. **Construction Equivalence Checker:** The construction checker supports
-   partial equivalence checking by using decision diagrams to calculate the
-   normalized phases of the possible outputs and then summing up the
-   contribution of garbage qubits, in order to consider only the measurement
-   probabilities of measured qubits. Then it compares the reduced decision
-   diagrams of the two circuits.
+1. **Construction Equivalence Checker:** Without ancillary inputs, the checker
+   forms the relative unitary and measures its weight outside diagonal blocks
+   defined by the measured outputs. This preserves interference between data
+   inputs. Ancillary inputs use the structural garbage-reduction path, which
+   does not provide the same norm guarantee.
 
-1. **Alternating Equivalence Checker:** The alternating checker can only be used
-   for circuits where at least one of the two does not contain ancillary qubits.
-   It computes the composition of one circuit with the inverse of the other and
-   verifies that the result resembles the identity. When checking for partial
-   equivalence, it suffices to verify that the result resembles the identity
-   modulo garbage qubits.
+2. **Alternating Equivalence Checker:** The checker applies the circuits from
+   opposite sides to construct their relative functionality. Without ancillary
+   inputs, it uses the same measured-output block comparison as the construction
+   checker. Ancillary inputs require each common ancillary qubit to be idle in
+   at least one circuit and use structural comparisons.
 
-1. **Simulation Equivalence Checker:** The simulation checker computes a
+3. **Simulation Equivalence Checker:** The simulation checker computes a
    representation of the state vector resulting from simulating the circuit with
    certain initial states. Partial equivalence is enabled by summing up the
    contributions of garbage qubits.
 
-1. **ZX-Calculus Equivalence Checker:** The ZX-calculus checker doesn't directly
+4. **ZX-Calculus Equivalence Checker:** The ZX-calculus checker doesn't directly
    support partial equivalence, which is not a problem for the equivalence
    checking workflow, given that the ZX-calculus checker cannot demonstrate
    non-equivalence of circuits due to its incompleteness. Therefore it will
@@ -116,7 +114,7 @@ when the `check_partial_equivalence` option is set to `True`.
 
 +++
 
-## Using QCEC to Check for Partial Equivalence
+## Using MQT QCEC to Check for Partial Equivalence
 
 Consider the following quantum circuit with three qubits, which are all data
 qubits, but only one of them is measured.

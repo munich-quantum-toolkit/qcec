@@ -316,13 +316,13 @@ class Configuration:
         def __init__(self) -> None: ...
         @property
         def trace_threshold(self) -> float:
-            """While decision diagrams are canonical in theory, i.e., equivalent circuits produce equivalent decision diagrams, numerical inaccuracies and approximations can harm this property.
+            """Numerical tolerance for decision-diagram equivalence checks.
 
-            This can result in a scenario where two decision diagrams are really close to one another, but cannot be identified as such by standard methods (i.e., comparing their root pointers).
-            Instead, for two decision diagrams :math:`U` and :math:`U^{\\prime}` representing the functionalities of two circuits :math:`G` and :math:`G^{\\prime}`, the trace of the product of one decision diagram with the inverse of the other can be computed and compared to the trace of the identity.
+            Without ancillary inputs, full equivalence bounds the Frobenius distance of the relative unitary from identity, allowing one global phase. Partial equivalence bounds the Frobenius weight outside measured-output diagonal blocks. Both distances are divided by the square root of the matrix dimension.
 
-            Alternatively, it can be checked, whether :math:`UU^{\\prime-1}` is "close enough" to the identity by recursively checking that each decision diagram node is close enough to the identity structure (i.e., the first and last successor have weights close to one, while the second and third successor have weights close to zero).
-            Whenever any decision diagram node differs from this structure by more than the configured threshold, the circuits are concluded to be non-equivalent.
+            Adding idle qubits preserves the distance. Errors confined to a small input subspace can be diluted. Ancillary inputs retain structural complex-distance checks on DD edge weights, which do not bound a matrix norm.
+
+            For deliberate approximation, use :attr:`~.Configuration.Functionality.approximate_checking_threshold` instead.
 
             Defaults to :code:`1e-8`.
             """

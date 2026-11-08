@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 import pytest
 from mqt.core.ir import QuantumComputation
 from qiskit import qasm2, transpile
@@ -269,3 +271,19 @@ def test_controlled_phase_control_target_swap() -> None:
         run_zx_checker=False,
     )
     assert result.equivalence == EquivalenceCriterion.equivalent
+
+
+@pytest.mark.parametrize("method", ["alternating", "construction"])
+@pytest.mark.parametrize("gate", ["rx", "ry", "rz"])
+@pytest.mark.parametrize("angle", [1e-7, 1.9e-4])
+def test_small_rotation_is_not_equivalent(
+    method: Literal["alternating", "construction"], gate: str, angle: float
+) -> None:
+    """DD checkers must reject rotations above the numerical tolerance."""
+    reference = QuantumCircuit(1)
+    reference.h(0)
+    reference.h(0)
+    candidate = reference.copy()
+    getattr(candidate, gate)(angle, 0)
+    result = verify(reference, candidate, method=method, check_approximate_equivalence=False)
+    assert result.equivalence == EquivalenceCriterion.not_equivalent

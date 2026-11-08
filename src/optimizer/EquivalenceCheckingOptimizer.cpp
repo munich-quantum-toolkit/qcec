@@ -80,35 +80,6 @@ DAG constructDAG(QuantumComputation& qc) {
 
 } // namespace
 
-bool isDynamicCircuit(const QuantumComputation& qc) {
-  std::vector<bool> measured(qc.getHighestPhysicalQubitIndex() + 1U, false);
-  const auto isDynamic = [&measured](const auto& self,
-                                     const Operation& op) -> bool {
-    if (op.getType() == Reset || op.isIfElseOperation()) {
-      return true;
-    }
-    if (op.isCompoundOperation()) {
-      const auto& compound = dynamic_cast<const CompoundOperation&>(op);
-      return std::ranges::any_of(
-          compound, [&self](const auto& child) { return self(self, *child); });
-    }
-    if (op.getType() == Measure) {
-      for (const auto target : op.getTargets()) {
-        measured.at(target) = true;
-      }
-      return false;
-    }
-    if (op.getType() == Barrier) {
-      return false;
-    }
-    return std::ranges::any_of(op.getUsedQubits(), [&measured](const auto q) {
-      return measured.at(q);
-    });
-  };
-  return std::ranges::any_of(
-      qc, [&isDynamic](const auto& op) { return isDynamic(isDynamic, *op); });
-}
-
 void removeBarriers(QuantumComputation& qc) { removeOperations<Barrier>(qc); }
 
 void singleQubitGateFusion(QuantumComputation& qc) {
@@ -938,7 +909,7 @@ void deferMeasurements(QuantumComputation& qc) {
     qc.initializeIOMapping();
   }
 
-  if (!qc.empty() && isDynamicCircuit(qc)) {
+  if (!qc.empty() && qc.isDynamic()) {
     throw std::runtime_error(
         "Measurement deferral left unsupported dynamic operations in the "
         "circuit.");

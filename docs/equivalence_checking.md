@@ -30,6 +30,20 @@ If numerical error collapses a decision diagram to zero, its checker returns
 unitary circuits. Other enabled checkers can still provide a result; if none
 does, the overall result remains inconclusive.
 
+The DD checkers use `trace_threshold` (default `1e-8`) to allow numerical
+roundoff. Without ancillary inputs, full equivalence bounds the Frobenius
+distance of the relative unitary from identity, allowing one global phase.
+Partial equivalence bounds the Frobenius weight outside measured-output diagonal
+blocks. Both distances are divided by the square root of the matrix dimension.
+Adding idle qubits preserves the tolerance; errors on small input subspaces can
+be diluted. A bounded traversal rejects when a conservative error sum already
+exceeds the threshold.
+
+Ancillary checks use structural complex-distance bounds on DD edge weights.
+Their tolerance does not define a matrix norm. Use
+{doc}`approximate equivalence checking <approximate_equivalence_checking>` for a
+separate projective Hilbert--Schmidt error threshold.
+
 ## Construction Equivalence Checker (using Decision Diagrams)
 
 While the underlying matrices are exponentially large with respect to the number

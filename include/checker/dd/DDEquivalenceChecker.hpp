@@ -52,6 +52,14 @@ protected:
   // in some form
   EquivalenceCriterion equals(const DDType& e, const DDType& f);
 
+  /// Whether either circuit restricts its input with ancillary qubits.
+  [[nodiscard]] bool hasAncillaryInputs() const {
+    return qc1->getNancillae() != 0 || qc2->getNancillae() != 0;
+  }
+
+  /// Compare a relative unitary without ancillary input projection.
+  EquivalenceCriterion compareUnitary(const dd::MatrixDD& functionality);
+
   /**
    * @brief Determine whether a functionality is within the configured
    * projective Hilbert--Schmidt distance threshold of the identity.

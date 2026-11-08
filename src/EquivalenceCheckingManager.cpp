@@ -403,8 +403,8 @@ void EquivalenceCheckingManager::runOptimizationPasses() {
     detail::swapReconstruction(qc2);
   }
 
-  const auto isDynamicCircuit1 = detail::isDynamicCircuit(qc1);
-  const auto isDynamicCircuit2 = detail::isDynamicCircuit(qc2);
+  const auto isDynamicCircuit1 = qc1.isDynamic();
+  const auto isDynamicCircuit2 = qc2.isDynamic();
   if (isDynamicCircuit1 || isDynamicCircuit2) {
     if (configuration.optimizations.transformDynamicCircuit) {
       if ((isDynamicCircuit1 && !qc1.isVariableFree()) ||
