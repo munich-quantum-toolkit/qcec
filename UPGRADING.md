@@ -6,6 +6,12 @@ of changes including minor and patch releases, please refer to the
 
 ## [Unreleased]
 
+### ZX equivalence checks with ECR gates
+
+If you previously verified circuits containing ECR gates with the ZX checker
+enabled, rerun those checks after upgrading. The ZX checker could treat ECR as
+the identity and incorrectly report equivalence.
+
 ## [3.12.0]
 
 This release updates the minimum required `mqt-core` version to 3.12.0. Rebuild

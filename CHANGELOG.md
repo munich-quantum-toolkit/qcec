@@ -14,6 +14,11 @@ releases may include breaking changes.
 
 - ⬆️ Require Python 3.11.5 or newer ([#1146]) ([**@denialhaag**])
 
+### Fixed
+
+- 🐛 Preserve the Pauli X echo when translating ECR gates to ZX diagrams
+  ([#1155]) ([**@burgholzer**])
+
 ## [3.12.0] - 2026-11-08
 
 _If you are upgrading: please see [`UPGRADING.md`](UPGRADING.md#3120)._
@@ -374,6 +379,7 @@ _📚 Refer to the [GitHub Release Notes] for previous changelogs._
 
 <!-- PR links -->
 
+[#1155]: https://github.com/munich-quantum-toolkit/qcec/pull/1155
 [#1146]: https://github.com/munich-quantum-toolkit/qcec/pull/1146
 [#1135]: https://github.com/munich-quantum-toolkit/qcec/pull/1135
 [#1109]: https://github.com/munich-quantum-toolkit/qcec/pull/1109

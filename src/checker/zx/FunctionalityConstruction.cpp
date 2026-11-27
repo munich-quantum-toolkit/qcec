@@ -786,7 +786,7 @@ FunctionalityConstruction::parseOp(ZXDiagram& diag, op_it it, op_it end,
     case qc::OpType::ECR: {
       const auto target2 = static_cast<Qubit>(p.at(op->getTargets()[1]));
       addRzx(diag, PiExpression(PiRational(1, 4)), target, target2, qubits);
-      addXSpider(diag, target, qubits);
+      addXSpider(diag, target, qubits, PiExpression(PiRational(1, 1)));
       addRzx(diag, PiExpression(-PiRational(1, 4)), target, target2, qubits);
       break;
     }
