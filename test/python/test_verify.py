@@ -146,6 +146,17 @@ def test_cpp_exception_propagation_internal() -> None:
         verify(qc, qc, configuration=config)
 
 
+def test_zx_ecr() -> None:
+    """Check that ZX preserves the ECR decomposition and operand order."""
+    circuit = QuantumCircuit(2)
+    circuit.ecr(0, 1)
+    reversed_ecr = QuantumCircuit(2)
+    reversed_ecr.ecr(1, 0)
+
+    assert verify(circuit, reversed_ecr, method="zx").equivalence == EquivalenceCriterion.probably_not_equivalent
+    assert verify(circuit, circuit.decompose(), method="zx").considered_equivalent()
+
+
 def test_zx_ancilla_support() -> None:
     """This is a regression test for the handling of ancilla registers in the ZX checker."""
     anc = AncillaRegister(1)
